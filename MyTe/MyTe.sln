@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{F5ACED06-425A-4388-997B-B4A4CA574DFF}"
+	ProjectSection(SolutionItems) = preProject
+		MyTe.vsd = MyTe.vsd
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MyTe", "MyTe\MyTe.vcxproj", "{96E0E46E-B8BE-443D-8C3F-56743F2313F0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "find", "..\find\find\find.vcxproj", "{5DCA8BEF-FA47-43E2-B0B0-7BA7EF503578}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TEST", "TEST\TEST.vcxproj", "{AE118A8A-2C32-4EA8-AA2A-FAB31671343F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{96E0E46E-B8BE-443D-8C3F-56743F2313F0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{96E0E46E-B8BE-443D-8C3F-56743F2313F0}.Debug|Win32.Build.0 = Debug|Win32
+		{96E0E46E-B8BE-443D-8C3F-56743F2313F0}.Release|Win32.ActiveCfg = Release|Win32
+		{96E0E46E-B8BE-443D-8C3F-56743F2313F0}.Release|Win32.Build.0 = Release|Win32
+		{5DCA8BEF-FA47-43E2-B0B0-7BA7EF503578}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5DCA8BEF-FA47-43E2-B0B0-7BA7EF503578}.Debug|Win32.Build.0 = Debug|Win32
+		{5DCA8BEF-FA47-43E2-B0B0-7BA7EF503578}.Release|Win32.ActiveCfg = Release|Win32
+		{5DCA8BEF-FA47-43E2-B0B0-7BA7EF503578}.Release|Win32.Build.0 = Release|Win32
+		{AE118A8A-2C32-4EA8-AA2A-FAB31671343F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AE118A8A-2C32-4EA8-AA2A-FAB31671343F}.Debug|Win32.Build.0 = Debug|Win32
+		{AE118A8A-2C32-4EA8-AA2A-FAB31671343F}.Release|Win32.ActiveCfg = Release|Win32
+		{AE118A8A-2C32-4EA8-AA2A-FAB31671343F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

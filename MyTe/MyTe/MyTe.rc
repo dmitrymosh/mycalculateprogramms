@@ -1,0 +1,786 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// русский resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+#ifdef _WIN32
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#include ""res\\MyTe.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#include ""afxprint.rc""       // printing/print preview resources\r\n"
+    "#endif\r\n"
+    "\r\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_OPTION_DIALOG DIALOGEX 0, 0, 307, 287
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Настройки программы"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Диапазон графиков",IDC_STATIC,6,6,295,63
+    EDITTEXT        IDC_GRAPH_BEG,121,17,81,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_GRAPH_END,121,36,81,14,ES_AUTOHSCROLL
+    LTEXT           "Нижняя граница",IDC_STATIC,21,20,79,8
+    LTEXT           "Верхняя граница",IDC_STATIC,21,41,79,8
+END
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 170, 62
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About MyTe"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,21,20
+    LTEXT           "MyTe, Version 1.0",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2009",IDC_STATIC,42,26,114,8
+    DEFPUSHBUTTON   "OK",IDOK,113,41,50,14,WS_GROUP
+END
+
+IDR_MAINFRAME DIALOGEX 0, 0, 330, 16
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "",IDC_STATIC,12,4,300,8
+END
+
+IDD_MULTI_FLUX_DIALOG DIALOGEX 0, 0, 488, 272
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Вычисление величин по спектру"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Посчитать",IDOK,318,251,70,14
+    PUSHBUTTON      "Отмена",IDCANCEL,398,251,70,14
+    LISTBOX         IDC_INPUT_FILES,14,35,374,128,LBS_SORT | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,WS_EX_ACCEPTFILES
+    EDITTEXT        IDC_OUTPUT_FILE,14,215,374,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Обзор",IDC_BROWSE_FILE,398,216,70,14
+    LTEXT           "Исходные файлы",IDC_STATIC,14,18,64,10
+    LTEXT           "Путь результатов",IDC_STATIC,14,202,63,8
+    PUSHBUTTON      "Добавить",IDC_ADD_FILE,398,35,70,14
+    PUSHBUTTON      "Удалить",IDC_REMOVE_FILE,398,55,70,14
+    CONTROL         "Заменить данные в файле",IDC_REWRITE,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,135,235,105,10
+    CONTROL         "Добавить к существующим",IDC_APPEND,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,14,235,110,10
+    PUSHBUTTON      "Добавить папку",IDC_ADD_FOLDER,398,75,70,14
+    EDITTEXT        IDC_VEGA_FILE,14,181,374,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Обзор",IDC_BROWSE_FILE_VEGA,398,181,70,14
+    LTEXT           "Вега",IDC_STATIC,14,167,16,8
+END
+
+IDD_OPTION_PAGE1 DIALOGEX 0, 0, 309, 289
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Магнитуды"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Диапазоны длинн волн",IDC_STATIC,7,7,295,275
+    EDITTEXT        IDC_LAMBDA_MAX,94,255,70,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_LAMBDA_MIN,18,255,70,14,ES_AUTOHSCROLL
+    LTEXT           "Нижняя граница",IDC_STATIC,18,242,70,8
+    LTEXT           "Верхняя граница",IDC_STATIC,94,242,70,8
+    PUSHBUTTON      "Удалить",IDC_REMOVE_BAND,249,47,50,14
+    PUSHBUTTON      "Изменить",IDC_EDIT_BAND,249,68,50,14,WS_DISABLED
+    PUSHBUTTON      "Добавить",IDC_ADD_BAND,249,28,50,14
+    PUSHBUTTON      "Вверх",IDC_UP_BAND,249,89,50,14,WS_DISABLED
+    PUSHBUTTON      "Вниз",IDC_DOWN_BAND,249,108,50,14,WS_DISABLED
+    EDITTEXT        IDC_VEGA_FLUX,168,255,70,14,ES_AUTOHSCROLL
+    LTEXT           "Вега",IDC_STATIC,168,242,70,8
+    LISTBOX         IDC_BAND_LIST,19,27,220,208,LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_OPTION_PAGE2 DIALOGEX 0, 0, 309, 251
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Распределение энергий"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Static",IDC_STATIC,7,7,295,75
+    EDITTEXT        IDC_STEP_LMKM,95,18,70,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_BEG_LMKM,95,39,70,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_END_LMKM,95,58,70,14,ES_AUTOHSCROLL
+    LTEXT           "StepLmkm",IDC_STATIC,19,23,70,10
+    LTEXT           "LmkmBeg",IDC_STATIC,19,45,30,8
+    LTEXT           "LmkmEnd",IDC_STATIC,19,65,30,8
+END
+
+IDD_OPTION_PAGE3 DIALOGEX 0, 0, 307, 287
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Кривые реакций"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LISTBOX         IDC_BAND_FILES,16,20,211,145,LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,WS_EX_ACCEPTFILES
+    PUSHBUTTON      "Добавить",IDC_ADD_BAND,232,20,60,14
+    PUSHBUTTON      "Удалить",IDC_REMOVE_BAND,232,42,60,14
+    GROUPBOX        "",IDC_STATIC,7,7,293,170
+    EDITTEXT        IDC_REDDEN,16,197,211,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Обзор",IDC_ADD_REDDEN,232,197,60,14
+    LTEXT           "Кривая Покраснения",IDC_STATIC,16,184,211,8
+END
+
+IDD_RESP_SELECT_DLG DIALOGEX 0, 0, 300, 130
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Выбрать",IDOK,243,7,50,14
+    PUSHBUTTON      "Отмена",IDCANCEL,243,24,50,14
+    LISTBOX         IDC_RESPONCE_LIST,7,7,230,116,LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+END
+
+IDD_ROW_TO_COL DIALOGEX 0, 0, 387, 126
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Преобразование "
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "ОК",IDOK,254,104,50,14
+    PUSHBUTTON      "Отмена",IDCANCEL,323,104,50,14
+    EDITTEXT        IDC_EDIT_FILE_SOURCE,14,20,278,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Обзор",IDC_BROWSE_FILE_SOURCE,304,20,69,14
+    EDITTEXT        IDC_EDIT_FOLDER_DEST,14,70,278,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Обзор",IDC_BROWSE_FOLDER_DEST,304,70,69,14
+    LTEXT           "Исходный файл с Lambda",IDC_STATIC,14,12,86,8
+    LTEXT           "Папка результатов",IDC_STATIC,14,62,67,8
+    EDITTEXT        IDC_EDIT_FILE_SOURCE2,14,45,278,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Обзор",IDC_BROWSE_FILE_SOURCE2,304,45,69,14
+    LTEXT           "Исходный файл с Flux",IDC_STATIC,14,37,75,8
+END
+
+IDD_VIEW_DATA_DLG DIALOGEX 0, 0, 199, 197
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_DATA_VIEW_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,185,183
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_OPTION_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 301
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 281
+    END
+
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 163
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+
+    IDR_MAINFRAME, DIALOG
+    BEGIN
+        RIGHTMARGIN, 101
+    END
+
+    IDD_MULTI_FLUX_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 481
+        VERTGUIDE, 14
+        VERTGUIDE, 318
+        VERTGUIDE, 388
+        VERTGUIDE, 398
+        VERTGUIDE, 468
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 265
+        HORZGUIDE, 28
+        HORZGUIDE, 35
+        HORZGUIDE, 55
+        HORZGUIDE, 155
+        HORZGUIDE, 195
+        HORZGUIDE, 210
+        HORZGUIDE, 215
+        HORZGUIDE, 230
+        HORZGUIDE, 245
+    END
+
+    IDD_OPTION_PAGE1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 282
+    END
+
+    IDD_OPTION_PAGE2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 244
+    END
+
+    IDD_OPTION_PAGE3, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 300
+        VERTGUIDE, 16
+        VERTGUIDE, 227
+        VERTGUIDE, 232
+        VERTGUIDE, 292
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 280
+        HORZGUIDE, 20
+        HORZGUIDE, 42
+        HORZGUIDE, 62
+        HORZGUIDE, 192
+        HORZGUIDE, 211
+    END
+
+    IDD_RESP_SELECT_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 293
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 123
+    END
+
+    IDD_ROW_TO_COL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 380
+        VERTGUIDE, 14
+        VERTGUIDE, 292
+        VERTGUIDE, 304
+        VERTGUIDE, 373
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 118
+        HORZGUIDE, 20
+        HORZGUIDE, 45
+        HORZGUIDE, 70
+    END
+
+    IDD_VIEW_DATA_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 192
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 190
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\MyTe.ico"
+IDR_MyTeTYPE            ICON                    "res\\MyTeDoc.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR  16, 15
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    SEPARATOR
+    BUTTON      ID_FILE_PRINT
+    BUTTON      ID_APP_ABOUT
+    BUTTON      ID_CONTEXT_HELP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENUEX 
+BEGIN
+    POPUP "&File",                          65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW,MFT_STRING,MFS_ENABLED
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1,MFT_STRING,MFS_GRAYED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "&Close",                      ID_FILE_CLOSE,MFT_STRING,MFS_ENABLED
+        MENUITEM "E&xit",                       ID_APP_EXIT,MFT_STRING,MFS_ENABLED
+    END
+    POPUP "&View",                          65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR,MFT_STRING,MFS_ENABLED
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR,MFT_STRING,MFS_ENABLED
+    END
+    POPUP "Action",                         65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "Распределение Энергий",       ID_ENERGY_DISTR1,MFT_STRING,MFS_ENABLED
+        MENUITEM "Магнитуды",                   ID_MAGNITUDE1,MFT_STRING,MFS_ENABLED
+        MENUITEM "Еще что-нибудь",              ID_ACTION_ANY1,MFT_STRING,MFS_ENABLED
+        MENUITEM "Нормализация 5500",           ID_ACTION_NORM5500,MFT_STRING,MFS_ENABLED
+        MENUITEM "Обработка кривыми",           ID_ACTION_BANDS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Aid",                         ID_ACTION_AID1,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Настройки",                   ID_ACTION_OPTION1,MFT_STRING,MFS_ENABLED
+        MENUITEM "Test",                        ID_ACTION_TEST,MFT_STRING,MFS_ENABLED
+        MENUITEM "Распределение энергии 2",     ID_ACTION_32876,MFT_STRING,MFS_ENABLED
+        MENUITEM "Преобразовать",               ID_CONVERT_M,MFT_STRING,MFS_ENABLED
+        MENUITEM "Удаление минусов много",      ID_ACTION_REMOVE_MINUS_MANY,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Обработка наблюдений-8",      ID_Menu32892,MFT_STRING,MFS_ENABLED
+        MENUITEM "Тестинг",                     ID_ACTION_TESTING,MFT_STRING | MFT_RIGHTORDER,MFS_ENABLED
+    END
+    POPUP "&Help",                          65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "&Help Topics",                ID_HELP_FINDER,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "&About MyTe...",              ID_APP_ABOUT,MFT_STRING,MFS_ENABLED
+    END
+END
+
+IDR_MyTeTYPE MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM "Save Data",                   ID_FILE_SAVEDATA
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
+        MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "ViewData",                    ID_VIEW_VIEWDATA
+        MENUITEM "ViewResult",                  ID_VIEW_VIEWRESULT
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&New Window",                 ID_WINDOW_NEW
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+    END
+    POPUP "Action"
+    BEGIN
+        MENUITEM "Распределение Энергий",       ID_ENERGY_DISTR
+        MENUITEM "Магнитуды",                   ID_MAGNITUDE
+        MENUITEM "Еще что-нибудь",              ID_ACTION_ANY
+        MENUITEM "Нормализация 5500",           ID_ACTION_NORM5500
+        MENUITEM "Обработка кривыми",           ID_ACTION_BANDS
+        MENUITEM "Aid",                         ID_ACTION_AID
+        MENUITEM "Преобразовать",               ID_CONVERT_MT
+        MENUITEM "Удаление минусов",            ID_ACTION_MINUS_REMOVE
+        MENUITEM SEPARATOR
+        MENUITEM "Настройки",                   ID_ACTION_OPTION
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Help Topics",                ID_HELP_FINDER
+        MENUITEM SEPARATOR
+        MENUITEM "&About MyTe...",              ID_APP_ABOUT
+    END
+END
+
+IDR_MENU1 MENU 
+BEGIN
+    POPUP "Pop"
+    BEGIN
+        MENUITEM "1",                           ID_POP_1
+        MENUITEM "2",                           ID_POP_2
+        MENUITEM "3",                           ID_POP_3
+        MENUITEM "4",                           ID_POP_4
+        MENUITEM "5",                           ID_POP_5
+        MENUITEM "6",                           ID_POP_6
+        MENUITEM "7",                           ID_POP_7
+        MENUITEM "8",                           ID_POP_8
+        MENUITEM "9",                           ID_POP_9
+        MENUITEM "0",                           ID_POP_0
+        MENUITEM SEPARATOR
+        MENUITEM "1",                           ID_POP_10
+        MENUITEM "2",                           ID_POP_11
+        MENUITEM "3",                           ID_POP_12
+        MENUITEM SEPARATOR
+        MENUITEM "Усилить",                     ID_POP_MUX
+        POPUP "Функции"
+        BEGIN
+            MENUITEM "Магнитуда",                   ID_FUNC_MAGN
+            MENUITEM "Распределение Энергий",       ID_FUNC_ENERGY
+            MENUITEM "Количество",                  ID_FUNC_COUNT
+            MENUITEM "обработать кривыми реакции",  ID_FUNC_RESPONCE
+            MENUITEM "Нормализовать по 5500",       ID_FUNC_NORM_5500
+        END
+        POPUP "1"
+        BEGIN
+            MENUITEM "1",                           ID_1_1
+            MENUITEM "2",                           ID_1_2
+            MENUITEM "3",                           ID_1_3
+            MENUITEM "4",                           ID_1_4
+            MENUITEM "5",                           ID_1_5
+            MENUITEM "6",                           ID_1_6
+            MENUITEM "7",                           ID_1_7
+            MENUITEM "8",                           ID_1_8
+            MENUITEM "9",                           ID_1_9
+            MENUITEM "10",                          ID_1_0
+            MENUITEM "11",                          ID_1_11
+            MENUITEM "12",                          ID_1_12
+            MENUITEM "13",                          ID_1_13
+            MENUITEM "14",                          ID_1_14
+            MENUITEM "15",                          ID_1_15
+            MENUITEM "16",                          ID_1_16
+            MENUITEM "17",                          ID_1_17
+            MENUITEM "18",                          ID_1_18
+            MENUITEM "19",                          ID_1_19
+            MENUITEM "20",                          ID_1_20
+            MENUITEM "21",                          ID_1_21
+            MENUITEM "22",                          ID_1_22
+            MENUITEM "23",                          ID_1_23
+            MENUITEM "24",                          ID_1_24
+            MENUITEM "25",                          ID_1_25
+            MENUITEM "26",                          ID_1_26
+            MENUITEM "27",                          ID_1_27
+            MENUITEM "28",                          ID_1_28
+            MENUITEM "29",                          ID_1_29
+            MENUITEM "30",                          ID_1_30
+            MENUITEM "31",                          ID_1_31
+            MENUITEM "32",                          ID_1_32
+            MENUITEM "33",                          ID_1_33
+            MENUITEM "34",                          ID_1_34
+            MENUITEM "35",                          ID_1_35
+            MENUITEM "36",                          ID_1_36
+            MENUITEM "37",                          ID_1_37
+            MENUITEM "38",                          ID_1_38
+            MENUITEM "39",                          ID_1_39
+            MENUITEM "40",                          ID_1_40
+        END
+        MENUITEM "Фотоны",                      32854
+        POPUP "Сохранить"
+        BEGIN
+            MENUITEM "Количество энергии",          32856
+        END
+        MENUITEM "кривые реакций",              ID_POP_RESPONCE
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS 
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+    VK_F1,          ID_CONTEXT_HELP,        VIRTKEY, SHIFT
+    VK_F1,          ID_HELP,                VIRTKEY 
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "MOSH"
+            VALUE "FileDescription", "MyTe"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "MyTe.exe"
+            VALUE "LegalCopyright", "(c) MOSH.  All rights reserved."
+            VALUE "OriginalFilename", "MyTe.exe"
+            VALUE "ProductName", "MyTe"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDP_OLE_INIT_FAILED     "OLE initialization failed.  Make sure that the OLE libraries are the correct version."
+    IDP_SOCKETS_INIT_FAILED "Windows sockets initialization failed."
+END
+
+STRINGTABLE 
+BEGIN
+    IDR_MAINFRAME           "MyTe"
+    IDR_MyTeTYPE            "\nMyTe\nMyTe\n\n\nMyTe.Document\nMyTe.Document"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "MyTe"
+    AFX_IDS_IDLEMESSAGE     "For Help, press F1"
+    AFX_IDS_HELPMODEMESSAGE "Select an object on which to get Help"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+    ID_HELP_INDEX           "Opens Help\nHelp Topics"
+    ID_HELP_FINDER          "List Help topics\nHelp Topics"
+    ID_HELP_USING           "Display instructions about how to use help\nHelp"
+    ID_CONTEXT_HELP         "Display help for clicked on buttons, menus and windows\nHelp"
+    ID_HELP                 "Display help for current task or command\nHelp"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+    AFX_IDS_MDICHILD        "Activate this window"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
+END
+
+#endif    // русский resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#include "res\MyTe.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#include "afxprint.rc"       // printing/print preview resources
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

@@ -1,0 +1,18 @@
+// MyTe.idl : IDL source for MyTe
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (MyTe.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	uuid(74EC9DBD-2AF4-42AF-A3AB-4806F45DD3AB),
+	version(1.0),
+	helpstring("MyTe 1.0 Type Library")
+]
+library MyTeLib
+{
+	importlib("stdole2.tlb");
+};
