@@ -39,7 +39,7 @@ void CCalculateDlg::DoDataExchange(CDataExchange* pDX)
 	if(pDX->m_bSaveAndValidate) 
 	{		
 		//получаем список файлов из диалога
-		int nItems =hListBox->SendMessage(LB_GETCOUNT, 0, 0); 	 
+		int nItems = hListBox->SendMessage(LB_GETCOUNT, 0, 0); 	 
 		if(theApp.FileList.Count!=0) delete[] theApp.FileList.Files;
 		theApp.FileList.Files=new CString[nItems];
 		for(int i=0;i<nItems;i++)
