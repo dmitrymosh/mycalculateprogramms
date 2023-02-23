@@ -12,3 +12,5 @@
 /MyTe/x64/Debug
 /MyTe/MyTe/hlp
 /MyTe/extint/Data
+/find/find/find.vcxproj.user
+*.user

@@ -42,15 +42,13 @@ int _tmain(int argc, TCHAR* argv[])
 	VectorArray Out;
 	int rez = 0;
 
-	
-	enum {};
-
 	struct optparse_long longopts[] = {
 		{TEXT("data"), 'd', OPTPARSE_REQUIRED},
 		{TEXT("filter"), 'f', OPTPARSE_REQUIRED},
 		{TEXT("mask"), 'm', OPTPARSE_REQUIRED},
 		{TEXT("out"), 'o', OPTPARSE_REQUIRED},
 		{TEXT("help"), '?', OPTPARSE_NONE},
+		{TEXT("help"), 'h', OPTPARSE_NONE},
 		{0}
 	};
 
@@ -81,15 +79,21 @@ int _tmain(int argc, TCHAR* argv[])
 			OutDir = options.option_arg;
 			o = 1;
 			break;
+		case 'h':
 		case '?':
+			fwprintf(stderr, TEXT("Usage: \n %s --data .\\Data --mask *.* --filter .\\Filters --out .\\ \n"), argv[0]);
+			return(EXIT_FAILURE);
+		default:
 			fwprintf(stderr, TEXT("%s: %s\n"), argv[0], options.errmsg);
 			return(EXIT_FAILURE);
 		}
+		
+
 	}
 
 	if (!(f && d && m && o)) {
 		fwprintf(stderr, TEXT("Usage: \n %s --data .\\Data --mask *.* --filter .\\Filters --out .\\ \n"), argv[0]);
-		return 0;
+		return EXIT_FAILURE;
 	}
 	// Read filters folder
 	if (ReadFolder(FiltersDir, TEXT("*.*"), FilterPaths)) {
