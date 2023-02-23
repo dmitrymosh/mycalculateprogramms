@@ -23,8 +23,8 @@ typedef vector < vector<double>> VectorArray;
 typedef vector <wstring> PathsArray;
 typedef vector <VectorArray> VectorCube;
 
-int ReadData(wstring FileName, VectorArray & Data);
-int WriteData(wstring FileName, VectorArray& Data);
+int ReadData(wstring Folder, wstring FileName, VectorArray & Data);
+int WriteData(wstring Folder, wstring FileName, VectorArray& Data);
 int ReadFolder(wstring Folder, wstring Mask, PathsArray& Paths);
 int ProcessData(VectorArray Data, VectorCube Filters, VectorArray & Out);
 // --data .\Data --mask *.* --filter .\Filters --out .\ 
@@ -35,7 +35,7 @@ int _tmain(int argc, TCHAR* argv[])
 	wstring Mask;
 	wstring FiltersDir;
 	wstring OutDir;
-	PathsArray DataPaths;
+	PathsArray DataFiles;
 	PathsArray FilterPaths;
 	vector <VectorArray> Data;
 	vector <VectorArray> Filters;
@@ -87,8 +87,6 @@ int _tmain(int argc, TCHAR* argv[])
 			fwprintf(stderr, TEXT("%s: %s\n"), argv[0], options.errmsg);
 			return(EXIT_FAILURE);
 		}
-		
-
 	}
 
 	if (!(f && d && m && o)) {
@@ -105,7 +103,7 @@ int _tmain(int argc, TCHAR* argv[])
 		cout << "Read file [";
 		wcout << FilterPaths[i];
 		cout << "] ... ";
-		if (ReadData(FilterPaths[i], Data1)) {
+		if (ReadData(FiltersDir, FilterPaths[i], Data1)) {
 			cout << " OK.\n";
 		}
 		else {
@@ -115,16 +113,16 @@ int _tmain(int argc, TCHAR* argv[])
 	}
 
 	// Read data folder
-	if (ReadFolder(Dir, Mask, DataPaths)) {
+	if (ReadFolder(Dir, Mask, DataFiles)) {
 		return 1; 
 	}
 	
-	for (int i = 0; i < DataPaths.size(); i++) {
+	for (int i = 0; i < DataFiles.size(); i++) {
 		VectorArray Data1;
 		cout << "Read file [";
-		wcout << DataPaths[i];
+		wcout << DataFiles[i];
 		cout << "] ... ";
-		if (ReadData(DataPaths[i], Data1)) {
+		if (ReadData(Dir, DataFiles[i], Data1)) {
 			cout << " OK.\n";
 		}
 		else {
@@ -134,19 +132,22 @@ int _tmain(int argc, TCHAR* argv[])
 	}
 	for (int i = 0; i < Data.size(); i++) {
 		cout << "Processing file [";
-		wcout << DataPaths[i];
+		wcout << DataFiles[i];
 		cout << "] ...";
 		ProcessData( Data[i],  Filters,  Out);
-		wstring outfile = OutDir + TEXT("\\");
 		cout << " OK.\n";
-		//WriteData(outfile, Out);
+		cout << "Saving result file [";
+		wcout << DataFiles[i];
+		cout << ".out] ...";
+		WriteData(OutDir, DataFiles[i], Data[i]);
+		cout << " OK.\n";
 	}
 } 
 
-int ReadData(wstring FileName, VectorArray & Data)
+int ReadData(wstring Folder, wstring FileName, VectorArray & Data)
 {
-	ifstream in(FileName);
-	int idx = 0;
+	wstring path = Folder + TEXT("\\") + FileName;
+	ifstream in(path);
 	if (in.is_open())
 	{
 		string s_row;
@@ -181,7 +182,19 @@ int ReadData(wstring FileName, VectorArray & Data)
 		return 1;
 	}
 }
-int WriteData(wstring FileName, VectorArray& Data) {
+int WriteData(wstring Folder, wstring FileName, VectorArray& Data) {
+	wstring path = Folder + TEXT("\\") + FileName + TEXT(".out");
+	ofstream out(path);
+	if (out.is_open()) {
+		for (int i = 0; i < Data.size();i++) {
+			for (int j = 0; j < Data[i].size(); j++) {
+				out << Data[i][j];
+				out << "  ";
+			}
+			out << "\n";
+		}
+	}
+	out.close();     // закрываем файл
 	return 0;
 }
 // Функция читает папку и помещает файлы, удовлетворяющие маске в массив Paths
@@ -196,22 +209,18 @@ int ReadFolder(wstring Folder, wstring Mask, PathsArray & Paths) {
 
 	hFind = FindFirstFile(&szPath[0], &ffd);
 
-	if (INVALID_HANDLE_VALUE == hFind)
-	{
+	if (INVALID_HANDLE_VALUE == hFind) {
 		return dwError;
 	}
 	
-	do
-	{
+	do {
 		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-			wstring filePath= Folder + TEXT("\\")  + ffd.cFileName;
-			Paths.push_back(filePath);
+			Paths.push_back(ffd.cFileName);
 		}
 	} while (FindNextFile(hFind, &ffd) != 0);
 
 	dwError = GetLastError();
-	if (dwError != ERROR_NO_MORE_FILES)
-	{
+	if (dwError != ERROR_NO_MORE_FILES) {
 		return dwError;
 	}
 
