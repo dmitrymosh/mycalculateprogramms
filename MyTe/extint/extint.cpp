@@ -24,6 +24,7 @@ typedef vector <wstring> PathsArray;
 typedef vector <VectorArray> VectorCube;
 
 int ReadData(wstring FileName, VectorArray & Data);
+int WriteData(wstring FileName, VectorArray& Data);
 int ReadFolder(wstring Folder, wstring Mask, PathsArray& Paths);
 int ProcessData(VectorArray Data, VectorCube Filters, VectorArray & Out);
 // --data .\Data --mask *.* --filter .\Filters --out .\ 
@@ -136,7 +137,7 @@ int _tmain(int argc, TCHAR* argv[])
 		cout << " OK.\n";
 		//WriteData(outfile, Out);
 	}
-}
+} 
 
 int ReadData(wstring FileName, VectorArray & Data)
 {
@@ -175,6 +176,9 @@ int ReadData(wstring FileName, VectorArray & Data)
 	else {
 		return 1;
 	}
+}
+int WriteData(wstring FileName, VectorArray& Data) {
+	return 0;
 }
 // Функция читает папку и помещает файлы, удовлетворяющие маске в массив Paths
 int ReadFolder(wstring Folder, wstring Mask, PathsArray & Paths) {
