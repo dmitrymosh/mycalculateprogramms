@@ -232,11 +232,16 @@ int ReadFolder(wstring Folder, wstring Mask, PathsArray & Paths) {
 }
 
 int ProcessData(VectorArray Data, VectorCube Filters, VectorArray& Out) {
-	for (int i = 0; i < Data.size(); i++) {
+	//Data[0][1] первый строчка, второй столбец в исходном файле данных
+	//Filters[0][0][0] первый номер фильтра второй строчка третий столбец
+	//Out[0][0] первый строчка второй столбец результатов
+	
+	for(int i=0;i<Data.size();i++){
 		vector <double> data1;
+		Data[i][1]/=10.0;
 		data1.push_back(Data[i][1]);
-		data1.push_back(Data[i][6]);
-		Out.push_back(data1);
+		data1.push_back(Data[i][8]);
+		Out.push_back(data1); 
 	}
 	return 0;
 }
