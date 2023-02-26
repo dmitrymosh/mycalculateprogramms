@@ -27,7 +27,8 @@ int ReadData(wstring Folder, wstring FileName, VectorArray & Data);
 int WriteData(wstring Folder, wstring FileName, VectorArray& Data);
 int ReadFolder(wstring Folder, wstring Mask, PathsArray& Paths);
 int ProcessData(VectorArray Data, VectorCube Filters, VectorArray & Out);
-// --data .\Data --mask *.* --filter .\Filters --out .\ 
+// --extint --data .\\Data --mask *.* --out .\ 
+// --Ai --data .\\stelar_data --filter .\\Filters --extint_stellar \\extint --extint_atm \\extint --out .\\Out
 int _tmain(int argc, TCHAR* argv[])
 
 {
@@ -137,9 +138,11 @@ int _tmain(int argc, TCHAR* argv[])
 		ProcessData( Data[i],  Filters,  Out);
 		cout << " OK.\n";
 		cout << "Saving result file [";
-		wcout << DataFiles[i];
-		cout << ".out] ...";
-		WriteData(OutDir, DataFiles[i], Data[i]);
+		wstring fname = DataFiles[i];
+		fname.replace(fname.size() - 3, 3, TEXT("txt"));
+		wcout << fname;
+		cout << "] ...";
+		WriteData(OutDir, fname, Out);
 		cout << " OK.\n";
 	}
 } 
@@ -183,7 +186,7 @@ int ReadData(wstring Folder, wstring FileName, VectorArray & Data)
 	}
 }
 int WriteData(wstring Folder, wstring FileName, VectorArray& Data) {
-	wstring path = Folder + TEXT("\\") + FileName + TEXT(".out");
+	wstring path = Folder + TEXT("\\") + FileName;
 	ofstream out(path);
 	if (out.is_open()) {
 		for (int i = 0; i < Data.size();i++) {
@@ -229,5 +232,11 @@ int ReadFolder(wstring Folder, wstring Mask, PathsArray & Paths) {
 }
 
 int ProcessData(VectorArray Data, VectorCube Filters, VectorArray& Out) {
+	for (int i = 0; i < Data.size(); i++) {
+		vector <double> data1;
+		data1.push_back(Data[i][1]);
+		data1.push_back(Data[i][6]);
+		Out.push_back(data1);
+	}
 	return 0;
 }
