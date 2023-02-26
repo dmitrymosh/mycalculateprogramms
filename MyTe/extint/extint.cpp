@@ -139,7 +139,7 @@ int _tmain(int argc, TCHAR* argv[])
 		cout << "Saving result file [";
 		wcout << DataFiles[i];
 		cout << ".out] ...";
-		WriteData(OutDir, DataFiles[i], Data[i]);
+		WriteData(OutDir, DataFiles[i], Out);
 		cout << " OK.\n";
 	}
 } 
@@ -229,5 +229,16 @@ int ReadFolder(wstring Folder, wstring Mask, PathsArray & Paths) {
 }
 
 int ProcessData(VectorArray Data, VectorCube Filters, VectorArray& Out) {
+	//Data[0][1] первый строчка, второй столбец в исходном файле данных
+	//Filters[0][0][0] первый номер фильтра второй строчка третий столбец
+	//Out[0][0] первый строчка второй столбец результатов
+	
+	for(int i=0;i<Data.size();i++){
+		vector <double> data1;
+		Data[i][1]/=10.0;
+		data1.push_back(Data[i][1]);
+		data1.push_back(Data[i][8]);
+		Out.push_back(data1); 
+	}
 	return 0;
 }
