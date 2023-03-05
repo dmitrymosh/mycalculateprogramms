@@ -18,6 +18,8 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+#define MAX(a,b) a>=b?a:b
+#define MIN(a,b) a<=b?a:b
 
 
 // CMyTeApp
@@ -50,6 +52,7 @@ BEGIN_MESSAGE_MAP(CMyTeApp, CWinApp)
 	//ON_COMMAND(ID_ACTION_TEST, &CMyTeApp::OnActionTest)
 	ON_COMMAND(ID_Menu32892, &CMyTeApp::OnMenuOH_8)
 	ON_COMMAND(ID_ACTION_TESTING, &CMyTeApp::OnActionTesting)
+	//ON_COMMAND(ID_ACTION_TEST, &CMyTeApp::OnActionTest)
 END_MESSAGE_MAP()
 
 
@@ -143,7 +146,7 @@ BOOL CMyTeApp::InitInstance()
 		subKey=pszKey;
 		subKey.Append(_T("\\Band"));
 		b.AppendFormat(_T("%d"),i);
-		theApp.BandArray[i].LoadFromFile(GetProfileString(subKey, b));
+		theApp.BandArray[i].LoadFromFile(GetProfileString(subKey, b).GetBuffer());
 	}
 	for(ULONG32 i=0;i<Options.NumberBand;i++)
 	{
@@ -153,7 +156,8 @@ BOOL CMyTeApp::InitInstance()
 		swscanf_s(GetProfileString(subKey, buf),_T("%lf"),&Options.Lambda_Beg[i]);//добавить массив
 	}
 	Redden.FName=GetProfileString(pszKey, _T("ReddenFile"));
-	if(Redden.FName!="")
+	//Redden.FName=_T("D:\\MOSH\\SOURCE\\STELLAR EXTINCTION\\STELLAR_EXTINCTIONnm.txt");//StEXT_50nm.txt");//D:\\mecalculateprogramm\\MyTe\\EXTINCT_nm.txt");
+	if(Redden.FName.size())
 	{
 		Redden.LoadFromFile(Redden.FName);	
 		//Redden.ConvertLnToFlux();
@@ -239,8 +243,8 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 // Implementation
-protected:
-	DECLARE_MESSAGE_MAP()
+
+
 };
 
 CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
@@ -252,8 +256,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-END_MESSAGE_MAP()
+
 
 // App command to run the dialog
 void CMyTeApp::OnAppAbout()
@@ -383,10 +386,10 @@ int CMyTeApp::ExitInstance()
 		subKey=pszKey;
 		subKey.Append(_T("\\Band"));
 		//swprintf( buf, 100, L"%10.16f", BandArray[i].fname);
-		WriteProfileString(subKey,KeyName, BandArray[i].FName.GetString());	
+		WriteProfileString(subKey,KeyName, BandArray[i].FName.c_str());	
 	}
 	WriteProfileString(pszKey, _T("VegaFile"), Options.VegaFile);	
-	WriteProfileString(pszKey, _T("ReddenFile"), Redden.FName);	
+	WriteProfileString(pszKey, _T("ReddenFile"), Redden.FName.c_str());
 	swprintf( buf, 100, L"%10.16f", Options.StepLmkm);		
 	WriteProfileString(pszKey, _T("StepLmkm"), buf);
 	swprintf( buf, 100, L"%10.16f", Options.LmkmBeg);
@@ -421,11 +424,11 @@ void CMyTeApp::OnActionEnergyDistr()
 		bool b=FileList.Over;
 		for(ULONG32 i=0;i<FileList.Count;i++)
 		{	
-			m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i], TRUE);
+			m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
 			CMyTeDoc* Doc;
-			Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i]);
+			Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i].c_str());
 			ULONG32 pos=0;	
-			OutfName=FileList.Files[i];		
+			OutfName=FileList.Files[i].c_str();
 			for(int j=OutfName.GetLength()-1;j>=0;j--)
 			{
 				if(OutfName.GetBuffer()[j]=='\\') 
@@ -440,7 +443,7 @@ void CMyTeApp::OnActionEnergyDistr()
 				fileName.GetBuffer()[k-pos]=OutfName.GetBuffer()[k];
 			}
 			fileName.Truncate(fileName.GetLength()-pos);
-			CString ResultFName=FileList.OutFile;
+			CString ResultFName=FileList.OutFile.c_str();
 			//ResultFName.Append(_T("\\"));
 			ResultFName.Append(fileName);
 //			CMyTeMath::Energy_Distribution1_1(&Doc->Data,Options);
@@ -461,11 +464,11 @@ void CMyTeApp::OnActionMagn()
 	bool b=FileList.Over;
 	for(ULONG32 i=0;i<FileList.Count;i++)
 	{	
-		m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i], TRUE);
+		m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
 		CMyTeDoc* Doc;
-		Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i]);
+		Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i].c_str());
 		CMyTeMath::MagnK(&Doc->Data,Options);
-		CMyTeMath::WriteResult(FileList.OutFile,FileList.Files[i],&Doc->Data,b);
+		CMyTeMath::WriteResult(FileList.OutFile.c_str(),FileList.Files[i].c_str(),&Doc->Data,b);
 		b=false;
 		//Doc->Data.SummErrFlux;
 		//Doc->Data.SummFlux;
@@ -476,23 +479,129 @@ void CMyTeApp::OnActionMagn()
 }
 void CMyTeApp::OnActionAny()
 {
+FILE *inpf,*outf,*errf;
+#define len 16384
+char InLin[16384];
+char *ptr[16384];
 	//COMMENT Мошкалев к ISO спектрам добавил строку 2.36000==2.36050
+			char FileInput[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\pp_GAIA.txt";//BC_7m_BASE.txt";//BC_7m_BASE_AAA_1_Ss.txt";//BC_7m_BASE_4.txt";////
+		char FileOut[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\BC_7m_BASE_8.txt";//J_Vt_AAA.txt";//BtVtJHK_WBVR
+		//char FileErr[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\JHG.txt";//J_Vt_AAA.txt";//BtVtJHK_WBVR
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+		AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));                                                                   
+ //      return;
+	}
+	//if (fopen_s(&errf, FileErr, "w") !=0 ){
+	//	AfxMessageBox(_T("ERR NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	//	exit(1);//0U);
+	//	//AfxMessageBox(_T("Error Opening data_total File"));
+ ////      return;
+	//}
+	CString ResultString=NULL;
+	//CString InLin=NULL;
+	CMyTeBand AZDK;
+	AZDK.FName=_T("D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\AZDK_GAIA_S.txt");//H_K_GAIA_.txt");//J_H_Vt_J_.txt");//AZDK_GAIA_S.txt");
+	AZDK.LoadFromFile(AZDK.FName);
+	if (fopen_s(&outf, FileOut, "w") !=0 ){
+		AfxMessageBox(_T("OUT FALSE"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	 	// for (UINT i=0; i<AZDK.Count-1; i++){
+			// fprintf(errf,"%7.4lf|%7.4lf|\n",AZDK.Lambda[i],AZDK.Flux[i]);
+			// //fputs("\n",errf);
+		 //}
+		 //fclose(errf);
+		//fputs("\n",errf);
+	 	// for (UINT i=0; i<AZDK.Count; i--){
+			// fprintf(errf,"%7.4lf|%7.4lf|",AZDK.Lambda,AZDK.Flux);
+ 		//	 fputs("\n",outf);
+		 //}
 
-	CCalculateDlg calcdlg;
-	calcdlg.DoModal();	
 
-	bool b=FileList.Over;
-	for(ULONG32 i=0;i<FileList.Count;i++)
-	{	
-		m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i], TRUE);
-		CMyTeDoc* Doc;
-		Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i]);
+	 int Count_str=CMyTeMath::CountDataFile(inpf);
+		double GB_GR=0; 
+		//double AZDK_GI; 
+		//double GI; 
+		int pp; 
+	 	 for (UINT i=0; i<Count_str; ){
+		try {                      // TEST FOR EXCEPTIONS.
+   			if ( fgets(InLin,len,inpf)==0 ) break;
+			if (InLin[0]=='*'){ continue;
+			}else{
+ 
+				CMyTeMath::StrPtr(InLin,'|',ptr);
+//				int pp=strncmp(ptr[6],"      ",5);
+//				int a=strncmp(ptr[91],"M",1);//GI
+				int c=strncmp(ptr[0],"M",1);//Vt_J//GB_GR
+				int data=strncmp(ptr[1],"M",1);//pp
+				//int BVbs=strncmp(ptr[32],"      ",6);
+				//int UBbs=strncmp(ptr[33],"      ",6);
+					if(c==0 || data==0){
+						fprintf(outf,"| | |");
+						//fprintf(outf,"%s |",InLin);
+						fputs("\n",outf);
+						continue;
+					}else{
+						sscanf(ptr[0],"%lf",&GB_GR);
+						//sscanf(ptr[119],"%lf",&AZDK_GI);
+						//sscanf(ptr[91],"%lf",&GI);
+						sscanf(ptr[1],"%d",&pp);
+						if(pp==22201){
+							pp=pp;
+						}
+						if(GB_GR>=-0.5 && GB_GR<3.5){
+							double AZDK_=AZDK.GetFlux(GB_GR);//AZDK->Lambda[i]);
+							//AZDK_+=GI;
+					//if(GB_GR!=0 && AZDK_GI!=0 && ){
+							fprintf(outf,"%5d|%7.4lf|",pp,AZDK_);
+							fputs("\n",outf);
 
-		//Добавить работу с документами сюда!!!!
+						}
+					else {
+						fprintf(outf,"| | |");
+						//fprintf(outf,"%s |",InLin);
+						fputs("\n",outf);
+						continue;
+					}
+				}
+			}
+		}
+			catch (std::bad_alloc) {  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
+			// YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+			//Application->MessageBox("Could not allocate. Bye ...",
+			//"Error...", MB_ICONERROR);
+				AfxMessageBox(_T("Error Reading File"));
+				exit(-1);
+			}
+		}
+ 		 m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
 
-		if(GetOpenDocumentCount()>0) Doc->OnCloseDocument();
-	}	
-	m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
+	fcloseall();
+
+
+
+
+
+
+	//CCalculateDlg calcdlg;
+	//calcdlg.DoModal();	
+
+	//bool b=FileList.Over;
+	//for(ULONG32 i=0;i<FileList.Count;i++)
+	//{	
+	//	m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i], TRUE);
+	//	CMyTeDoc* Doc;
+	//	Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i]);
+
+	//	//Добавить работу с документами сюда!!!!
+
+	//	if(GetOpenDocumentCount()>0) Doc->OnCloseDocument();
+	//}	
+	//m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
 }
 
 void CMyTeApp::OnSaveData()
@@ -588,11 +697,11 @@ void CMyTeApp::OnActionNorm5500()
 	bool b=FileList.Over;
 	for(ULONG32 i=0;i<FileList.Count;i++)
 	{	
-		m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i], TRUE);
+		m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
 		CMyTeDoc* Doc;
-		Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i]);
+		Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i].c_str());
 		ULONG32 pos=0;	
-		OutfName=FileList.Files[i];		
+		OutfName=FileList.Files[i].c_str();
 		for(int j=OutfName.GetLength()-1;j>=0;j--)
 		{
 			if(OutfName.GetBuffer()[j]=='\\') 
@@ -607,7 +716,7 @@ void CMyTeApp::OnActionNorm5500()
 			fileName.GetBuffer()[k-pos]=OutfName.GetBuffer()[k];
 		}
 		fileName.Truncate(fileName.GetLength()-pos);
-		CString ResultFName=FileList.OutFile;
+		CString ResultFName=FileList.OutFile.c_str();
 		//ResultFName.Append(_T("\\"));
 		ResultFName.Append(fileName);
 		CMyTeMath::Norm5500(&Doc->Data,Options);
@@ -618,8 +727,353 @@ void CMyTeApp::OnActionNorm5500()
 	}	
 	m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
 }
+#ifdef QQUY
 void CMyTeApp::OnActionAid()
 {
+	CCalculateDlg calcdlg;
+	if(calcdlg.DoModal()==IDOK)	
+	{
+		double* VegaArray=new double[BandCount];
+		double* VegaXArray=new double[BandCount];
+		for(int i=0;i<BandCount;i++) VegaArray[i]=0.0;
+		for(int i=0;i<BandCount;i++) VegaXArray[i]=0.0;
+		CString RString;
+		CMyTeDoc* VDoc;
+		//CString ResultString=NULL;
+		//CString ResultStringZip=NULL;
+
+		if(FileList.VegaFile!="")
+		{
+			//CMyTeDoc* VDoc;
+			//подсчет Bеги
+			VDoc=(CMyTeDoc*)OpenDocumentFile(FileList.VegaFile);
+			for(int i=0;i<BandCount;i++)
+			{
+				VegaArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,NULL,0);
+				//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
+			}
+			int cou=GetOpenDocumentCount();
+			if(cou>0) VDoc->OnCloseDocument();
+		}	
+			//for(int i=0;i<BandCount;i++)
+			//{
+			//	//VegaXArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,&Redden,X);
+			//	ResultString.AppendFormat(_T(" %10.4lf "),VegaArray[i]);
+			//	//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
+			//}
+			//ResultString.Append(_T("\n"));
+
+		RString.AppendFormat(_T("%-12s"),_T("File_Name"));
+		RString.AppendFormat(_T("%7s "),_T("   RedX"));
+		RString.AppendFormat(_T("%11s "),_T("       Mz"));
+		for(int i=0;i<BandCount;i++)
+		{
+			CString outfname(BandArray[i].FName);
+			outfname.Truncate(outfname.GetLength()-4);
+			int pos=outfname.ReverseFind('\\');		
+			RString.AppendFormat(_T(" %10s "),outfname.Right(outfname.GetLength()-pos-1));	
+//			RString.AppendFormat(_T(" %10s "),_T("Ai"));
+		}	
+		RString.AppendFormat(_T("%s "),_T("          AB          AR          AV          AW          LB          LR          LV           LW"));
+		RString.Append(_T("\n"));
+		
+	double RX=0;
+	bool FlagYes=false;
+	double X=0.0;
+	double Mz=1.0;
+	CMyTeBand EXTIN;
+	EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\ОБРАБОТКА\\EXTATM\\200186\\281185.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\MAR_S.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\JULE_S.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\DEC_S.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\SEP_S.txt");
+	EXTIN.LoadFromFile(EXTIN.FName);
+
+	int Nred=6;//0;//0;//0;//5;//5;	//number of random i.s.ext. amount (thickness, depth) 
+	//CString ResultString=NULL;
+	//CString ResultStringZip=NULL;
+
+		if(CMyTeMath::WriteResult1(FileList.OutFile,RString,true)==0)		
+		{
+
+			bool b=FileList.Over;	
+			for(ULONG32 i=0;i<FileList.Count;i++)//FileList.Count
+			{	
+				m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i], TRUE);
+				CMyTeDoc* Doc;
+				Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i]);
+				CString outfname(FileList.Files[i]);
+
+				int pos=outfname.ReverseFind('.');
+				outfname.Truncate(pos);
+				pos=outfname.ReverseFind('\\');
+				CString ResultString=NULL;
+				CString ResultStringZip=NULL;
+				ResultString.AppendFormat(_T("%-10s"),outfname.Right(outfname.GetLength()-pos-1));	
+				ResultStringZip=ResultString;
+				CString midName=outfname.Right(outfname.GetLength()-pos-1);//-pos-1
+				for(int jj=0;jj<Nred;jj++){
+					if (jj==0) X=0.0;
+					else {
+
+						X=CMyTeMath::RANDisex()*4.0;///**RedMax[i]RANDisex()*///X+=0.1;1;//
+					//	//X*=RedMax[i];//2
+					}
+					ResultString.Empty();//.Append(_T("\n"));
+					ResultString=ResultStringZip;
+					ResultString.AppendFormat(_T(" %10.3lf "),X);
+					//ResultStringZip=ResultString;
+					//if(FileList.VegaFile!="")
+					//{
+						//CMyTeDoc* VDoc;
+						//подсчет Bеги
+						//VDoc=(CMyTeDoc*)OpenDocumentFile(FileList.VegaFile);
+						//for(int i=0;i<BandCount;i++)
+						//{
+						//	VegaXArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,&Redden,X);
+						//	//ResultString.AppendFormat(_T(" %10.4lf "),VegaXArray[i]);
+						//	//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
+						//}
+
+						//}	
+
+
+						for(UINT ij=0;ij<6;ij++){//Mz
+							ResultString.Empty();//.Append(_T("\n"));
+							ResultString=ResultStringZip;
+							ResultString.AppendFormat(_T(" %10.3lf "),X);
+							//ResultString=ResultStringZip;
+							//if(ij==0) Mz=0.0;
+							//	else {
+									if(ij==0) Mz=0.0;
+								else {
+									Mz=1.0+CMyTeMath::RANDisex()*2.2;///**RedMax[i]RANDisex()*///X+=0.1;1;//
+								} 
+							//} 
+							ResultString.AppendFormat(_T(" %10.4lf "),Mz);
+							//for(UINT j=0;j<BandCount;j++){//BandCount
+							//	ResultString.AppendFormat(_T(" %10.4lf "),VegaArray[j]);
+							//}
+							//	ResultString.Append(_T("\n"));
+							for(UINT j=0;j<BandCount;j++){//BandCount
+								ResultString.AppendFormat(_T(" %10.4lf "),
+									CMyTeMath::SBand_4(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN));
+							}
+							for(UINT j=0;j<BandCount;j++){//BandCount
+							ResultString.AppendFormat(_T(" %10.4lf "),
+								CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN));//-VegaXArray[j]);
+								//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
+							}
+							for(UINT j=0;j<BandCount;j++){//BandCount
+							ResultString.AppendFormat(_T(" %10.4lf "),
+								1.086*(CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN)-
+								 CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,0.0,&EXTIN)));//-VegaXArray[j]);
+							}
+							//for(UINT j=0;j<BandCount;j++){//BandCount
+							//ResultString.AppendFormat(_T(" %10.4lf "),
+							//	CMyTeMath::SBand_L2(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN)-CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,0.0,&EXTIN));//-VegaXArray[j]);
+							//	//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
+							//}
+								ResultString.Append(_T("\n"));
+							if(CMyTeMath::WriteResult1(FileList.OutFile,ResultString,false)!=0) break;					
+						}
+					}
+		
+						b=false;
+						int cou=GetOpenDocumentCount();
+						if(cou>0) Doc->OnCloseDocument();
+						//fcloseall();
+						this->PumpMessage();
+			}	
+			m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
+			
+		}else
+		{
+			m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Ошибка записи в файл."), TRUE);
+		}
+		
+	}
+}
+#endif
+void CMyTeApp::OnActionAid()// много прозрачностей
+{
+	CCalculateDlg calcdlg;
+	if(calcdlg.DoModal()==IDOK)	
+	{
+		double* VegaArray=new double[BandCount];
+		double* VegaXArray=new double[BandCount];
+		for(int i=0;i<BandCount;i++) VegaArray[i]=0.0;
+		for(int i=0;i<BandCount;i++) VegaXArray[i]=0.0;
+
+		CString RString;
+		CMyTeDoc* VDoc;
+		//CString ResultString=NULL;
+		//CString ResultStringZip=NULL;
+		
+		if(FileList.VegaFile.size() > 0 )
+		{
+			//CMyTeDoc* VDoc;
+			//подсчет Bеги
+			VDoc = (CMyTeDoc*)OpenDocumentFile(FileList.VegaFile.c_str());
+			for(int i=0;i<BandCount;i++)
+			{
+				VegaArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,NULL,0);
+				//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
+			}
+			int cou=GetOpenDocumentCount();
+			if(cou>0) VDoc->OnCloseDocument();
+		}	
+			//for(int i=0;i<BandCount;i++)
+			//{
+			//	//VegaXArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,&Redden,X);
+			//	ResultString.AppendFormat(_T(" %10.4lf "),VegaArray[i]);
+			//	//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
+			//}
+			//ResultString.Append(_T("\n"));
+
+		RString.AppendFormat(_T("%-12s"),_T("File_Name"));
+		RString.AppendFormat(_T("%7s "),_T("   RedX"));
+		RString.AppendFormat(_T("%11s "),_T("       Mz"));
+		for(int i=0;i<BandCount;i++)
+		{
+			CString outfname(BandArray[i].FName.c_str());
+			outfname.Truncate(outfname.GetLength()-4);
+			int pos=outfname.ReverseFind('\\');		
+			RString.AppendFormat(_T(" %10s "),outfname.Right(outfname.GetLength()-pos-1));	
+//			RString.AppendFormat(_T(" %10s "),_T("Ai"));
+		}	
+		RString.AppendFormat(_T("%s "),_T("          AB          AR          AV          AW          LB          LR          LV           LW"));
+		RString.Append(_T("\n"));
+		
+	double RX=0;
+	bool FlagYes=false;
+	double X=0.0;
+	double Mz=1.0;
+	CMyTeBand EXTIN;
+	EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\ОБРАБОТКА\\EXTATM\\200186\\281185.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\MAR_S.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\JULE_S.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\DEC_S.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\SEP_S.txt");
+	EXTIN.LoadFromFile(EXTIN.FName);
+
+	int Nred=6;//0;//0;//0;//5;//5;	//number of random i.s.ext. amount (thickness, depth) 
+	//CString ResultString=NULL;
+	//CString ResultStringZip=NULL;
+
+		if(CMyTeMath::WriteResult1(FileList.OutFile.c_str(),RString,true)==0)
+		{
+
+			bool b=FileList.Over;	
+			for(ULONG32 i=0;i<FileList.Count;i++)//FileList.Count
+			{	
+				m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
+				CMyTeDoc* Doc;
+				Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i].c_str());
+				CString outfname(FileList.Files[i].c_str());
+
+				int pos=outfname.ReverseFind('.');
+				outfname.Truncate(pos);
+				pos=outfname.ReverseFind('\\');
+				CString ResultString=NULL;
+				CString ResultStringZip=NULL;
+				ResultString.AppendFormat(_T("%-10s"),outfname.Right(outfname.GetLength()-pos-1));	
+				ResultStringZip=ResultString;
+				CString midName=outfname.Right(outfname.GetLength()-pos-1);//-pos-1
+				for(int jj=0;jj<Nred;jj++){
+					if (jj==0) X=0.0;
+					else {
+
+						X=CMyTeMath::RANDisex()*4.0;///**RedMax[i]RANDisex()*///X+=0.1;1;//
+					//	//X*=RedMax[i];//2
+					}
+					ResultString.Empty();//.Append(_T("\n"));
+					ResultString=ResultStringZip;
+					ResultString.AppendFormat(_T(" %10.3lf "),X);
+					//ResultStringZip=ResultString;
+					//if(FileList.VegaFile!="")
+					//{
+						//CMyTeDoc* VDoc;
+						//подсчет Bеги
+						//VDoc=(CMyTeDoc*)OpenDocumentFile(FileList.VegaFile);
+						//for(int i=0;i<BandCount;i++)
+						//{
+						//	VegaXArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,&Redden,X);
+						//	//ResultString.AppendFormat(_T(" %10.4lf "),VegaXArray[i]);
+						//	//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
+						//}
+
+						//}	
+
+
+						for(UINT ij=0;ij<6;ij++){//Mz
+
+							ResultString.Empty();//.Append(_T("\n"));
+							ResultString=ResultStringZip;
+							ResultString.AppendFormat(_T(" %10.3lf "),X);
+							//ResultString=ResultStringZip;
+							//if(ij==0) Mz=0.0;
+							//	else {
+									if(ij==0) Mz=0.0;
+								else {
+									Mz=1.0+CMyTeMath::RANDisex()*2.2;///**RedMax[i]RANDisex()*///X+=0.1;1;//
+								} 
+							//} 
+							ResultString.AppendFormat(_T(" %10.4lf "),Mz);
+							//for(UINT j=0;j<BandCount;j++){//BandCount
+							//	ResultString.AppendFormat(_T(" %10.4lf "),VegaArray[j]);
+							//}
+							//	ResultString.Append(_T("\n"));
+							for(UINT j=0;j<BandCount;j++){//BandCount
+								ResultString.AppendFormat(_T(" %10.4lf "),
+									CMyTeMath::SBand_4(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN));
+							}
+							for(UINT j=0;j<BandCount;j++){//BandCount
+							ResultString.AppendFormat(_T(" %10.4lf "),
+								CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN));//-VegaXArray[j]);
+								//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
+							}
+							for(UINT j=0;j<BandCount;j++){//BandCount
+							ResultString.AppendFormat(_T(" %10.4lf "),
+								1.086*(CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN)-
+								 CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,0.0,&EXTIN)));//-VegaXArray[j]);
+							}
+							//for(UINT j=0;j<BandCount;j++){//BandCount
+							//ResultString.AppendFormat(_T(" %10.4lf "),
+							//	CMyTeMath::SBand_L2(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN)-CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,0.0,&EXTIN));//-VegaXArray[j]);
+							//	//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
+							//}
+								ResultString.Append(_T("\n"));
+							if(CMyTeMath::WriteResult1(FileList.OutFile.c_str(),ResultString,false)!=0) break;
+						}
+					}
+		
+						b=false;
+						int cou=GetOpenDocumentCount();
+						if(cou>0) Doc->OnCloseDocument();
+						//fcloseall();
+						this->PumpMessage();
+			}	
+			m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
+			
+		}else
+		{
+			m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Ошибка записи в файл."), TRUE);
+		}
+		
+	}
+}
+
+
+
+
+
+
+
+
+#ifdef EMOE
+
+
 	CCalculateDlg calcdlg;
 	if(calcdlg.DoModal()==IDOK)
 	{
@@ -699,21 +1153,39 @@ void CMyTeApp::OnActionAid()
 		//}
 
 	}
-}
+#endif
+
+class MyString
+{
+public:
+	MyString(const std::wstring& s2)
+	{
+		s = s2;
+	}
+
+	operator LPCWSTR() const
+	{
+		return s.c_str();
+	}
+private:
+	std::wstring s;
+};
+
 void CMyTeApp::OnActionBands()
 {
 	CCalculateDlg calcdlg;
 	if(calcdlg.DoModal()==IDOK)
+	
 	{
 		double* VegaArray=new double[BandCount];
 		for(int i=0;i<BandCount;i++) VegaArray[i]=0.0;
 		CString RString;
 
-		if(FileList.VegaFile!="")
+		if(FileList.VegaFile.size())
 		{
 			CMyTeDoc* VDoc;
 			//подсчет Bеги
-			VDoc=(CMyTeDoc*)OpenDocumentFile(FileList.VegaFile);
+			VDoc=(CMyTeDoc*)OpenDocumentFile(FileList.VegaFile.c_str());
 			for(int i=0;i<BandCount;i++)
 			{
 				VegaArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,NULL,0);
@@ -725,26 +1197,61 @@ void CMyTeApp::OnActionBands()
 
 		RString.AppendFormat(_T("%-12s"),_T("File_Name"));
 		RString.AppendFormat(_T("%11s "),_T("       RedX"));
+//		RString.AppendFormat(_T("%11s "),_T("         Mz"));
 		for(int i=0;i<BandCount;i++)
 		{
-			CString outfname(BandArray[i].FName);
+			CString outfname(BandArray[i].FName.c_str());
 			outfname.Truncate(outfname.GetLength()-4);
 			int pos=outfname.ReverseFind('\\');		
 			RString.AppendFormat(_T(" %10s "),outfname.Right(outfname.GetLength()-pos-1));	
 			//RString.AppendFormat(_T(" %10s "),_T("Red x2"));
 		}	
 		RString.Append(_T("\n"));
-			
+		
+#ifdef ZAKH
+//ReferenceFile = _T("D:\\MOSH\\ДОГОВОР ГЕОФИЗИКА\\DATASHIT\\LIST_BC_13_W_2E_0.5.txt");
+char REDXfile[]="D:\\MOSH\\SOURCE\\RED_FAQTOR.txt";
+//char NameSp[10];
+double *RedMax=new double[FileList.Count];
+char NaSp[11]={0,0,0,0,0,0,0,0,0,0,0};/*=new MyString[7];*/
+char InLin[1024];
+char** ptr=new char* [5000];
+//for(UINT i=0;i<FileList.Count;i++){
+//	NaSp[i]=new char[7];
+//}
+FILE *inpf;
+	if (fopen_s(&inpf, REDXfile,"r") !=0 ){
+		AfxMessageBox(_T("Error Opening REDX File"));
+		//      return;
+	}
+	fgets(InLin,1024,inpf);
+	CMyTeMath::StrPtrP(InLin,'|',ptr);
+	//int N=strlen(ptr[1]);
+	//memcpy(NaSp,ptr[1],N-1);	//TYC
+	//NaSp[N-1]=0;
+	//CString mdNam=_T(NaSp);
+	for(UINT i=0;i<FileList.Count;i++)
+		sscanf_s(ptr[0],"%lf",&RedMax[i]);
+	fclose(inpf);
+c1
+c2
 
-		if(CMyTeMath::WriteResult1(FileList.OutFile,RString,true)==0)		
+
+#endif
+
+double RX=0;
+	bool FlagYes=false;
+	double X=0.0;
+	int Nred=10;//0;//0;//0;//5;//5;	//number of random i.s.ext. amount (thickness, depth) 
+		if(CMyTeMath::WriteResult1(FileList.OutFile.c_str(),RString,true)==0)
 		{
 			bool b=FileList.Over;	
-			for(ULONG32 i=0;i<FileList.Count;i++)
+			for(ULONG32 i=0;i<FileList.Count;i++)//FileList.Count
 			{	
-				m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i], TRUE);
+				m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
 				CMyTeDoc* Doc;
-				Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i]);
-				CString outfname(FileList.Files[i]);
+				Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i].c_str());
+				CString outfname(FileList.Files[i].c_str());
 
 				int pos=outfname.ReverseFind('.');
 				outfname.Truncate(pos);
@@ -753,31 +1260,62 @@ void CMyTeApp::OnActionBands()
 				CString ResultStringZip=NULL;
 				ResultString.AppendFormat(_T("%-10s"),outfname.Right(outfname.GetLength()-pos-1));	
 				ResultStringZip=ResultString;
-				UINT Nred=10;//0;//5;//5;	//number of random i.s.ext. amount (thickness, depth) 
-				double X=0.0;
-				//ResultString.AppendFormat(_T(" %10.3lf "),Rand);
-				/*for(int j=0;j<BandCount;j++)
-				{*/
-				//		ResultString.AppendFormat(_T(" %10.4e "),//lf ")
-				//			CMyTeMath::SBand_2(&Doc->Data,&BandArray[j],VegaArray[j],NULL,0));
-				//	}
-				//ResultString.Append(_T("\n"));
-				//CMyTeMath::WriteResult1(FileList.OutFile,ResultString,false);   
+				CString midName=outfname.Right(outfname.GetLength()-pos-1);//-pos-1
 
-				for(UINT jj=0;jj<Nred;jj++){
+//c1
+					//strcmp((LPCWSTR )midName,NaSp);
+
+				//CString theString( "This is a test" );
+/*				LPTSTR lpsz = new TCHAR[midName.GetLength()+1];
+				_tcscpy(lpsz, midName);
+	*/			//strcmp(midName.GetBuffer(midName.GetLength(),NaSp);
+				 //lpsz.Compare( _T(NaSp ) ) == -1 ; // Сравниваются с LPTSTR строкой.
+				//for(UINT j=0;j<FileList.Count;j++){
+				//	if(_tcscmp(lpsz,(LPCTSTR) NaSp)==0){
+				//		RX=RedMax[j];
+				//		FlagYes=true;
+				//		break;
+				//	}else {
+				//		FlagYes=false;
+				//		continue;
+				//	}
+				//}
+				//	if(!Flag
+				//Yes)
+				//		RX=1;
+					//else RX=1;
+					//strcmp
+				//CString aCString = "A string";
+				//char myString[256];
+				//strcpy(myString, (LPCTSTR)midName);
+
+//c2
+				for(int jj=0;jj<Nred;jj++){
 					if (jj==0) X=0.0;
-					else X=CMyTeMath::RANDisex();
+					/*if (jj==1) X=1.5;
+					if (jj==2) X=2.0;
+					if (jj==3) X=2.5;
+					
+					//if (jj==1) X=1.25;
+					//if (jj==2) X=1.5;
+					//if (jj==3) X=0.75;
+					*/
+					else {
+						X=CMyTeMath::RANDisex()*3.0;///**RedMax[i]RANDisex()*///X+=0.1;1;//
+					//	//X*=RedMax[i];//2
+					}
+
 
 					ResultString.Empty();//.Append(_T("\n"));
 					ResultString=ResultStringZip;
 					ResultString.AppendFormat(_T(" %10.3lf "),X);
-					for(UINT j=0;j<BandCount;j++)
+					for(UINT j=0;j<BandCount;j++)//BandCount
 					{			 
 						ResultString.AppendFormat(_T(" %10.4lf "),//e ")
 							CMyTeMath::SBand_2(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X));
 					}
 					ResultString.Append(_T("\n"));
-					if(CMyTeMath::WriteResult1(FileList.OutFile,ResultString,false)!=0) break;
+					if(CMyTeMath::WriteResult1(FileList.OutFile.c_str(),ResultString,false)!=0) break;
 				}
 				//ResultString.Append(_T("\n"));
 				//CMyTeMath::WriteResult1(FileList.OutFile,ResultString,false);
@@ -871,12 +1409,164 @@ bool CMyTeApp::LoadRowFile(CString fname,double* &DataBuffer,ULONG& count,ULONG&
 		return true;
 	}
 };
+void CMyTeApp::OnConvert_1()
+{
+#define len 16384
+char InLin[16384];
+char InLinSp[16384];
+FILE *inpf,*outf;
+char *ptr[len];
+char *ptrS[len];
+UINT NC = 0;
+UINT NCS = 0;
+UINT Count_str;
+	if (fopen_s(&inpf,"D:\\MOSH\\SOURCE\\СВИДЕРСКЕНЕ FLUX\\SP_SV_nm_.txt", "r") !=0 )		AfxMessageBox(_T("ListDP NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
+
+	if (fopen_s(&outf,"D:\\MOSH\\SOURCE\\СВИДЕРСКЕНЕ FLUX\\SP_SV_C_.txt", "w") !=0 )			AfxMessageBox(_T("ListDP NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	char* Sfold="D:\\MOSH\\SOURCE\\СВИДЕРСКЕНЕ FLUX\\SP_SV";
+	char* Filename="";
+	//	UINT Count_str;//CMyTeMath::CountDataFile(inpf);
+	Count_str=122;
+//		fgets(InLinSp,len,inpf); //Name Spectra
+//	 NCS=CMyTeMath::StrPtr(InLinSp,' ',ptrS);
+
+	 double** SpSV = new double*[Count_str];        // STEP 1: SET UP THE ROWS.
+	for (UINT i=0;i<Count_str;i++){
+		SpSV[i]=new double [150];
+	}
+//CMyTeMath::InpData(Data0,inpf, Count_str, NULL); 
+		char **NameSp=new char* [NCS];
+		for(UINT i = 0; i < NCS; i++){
+			NameSp[i]=new char [7];
+			memset(NameSp[i],0,7);
+		}
+	fgets(InLinSp,len,inpf); //sp
+		 NCS=CMyTeMath::StrPtr(InLin,'|',ptrS);
+	//char buff[10];
+	for(UINT i=0;i<NCS;i++){
+		memcpy((void*)NameSp[i],(void*)ptrS[i],7);
+		//NameSp[i][3]=0;
+	}
+
+	 for(UINT i=0;i<Count_str;i++){
+		fgets(InLin,len,inpf); //Data
+double b=0.0;
+		 NC=CMyTeMath::StrPtr(InLin,'|',ptr);
+		for(UINT j=0;j<NC;j++){
+			if(sscanf_s(ptr[j],"%lf",&SpSV[i][j])==NULL) {
+			}
+			b=SpSV[i][j];
+		}
+	}
+	fclose(inpf);
+	 for(UINT j=0;j<NC;j++){
+		for(UINT i=0;i<Count_str;i++){
+				 //for(UINT j=0;j<NC;j++){
+			fprintf(outf,"\t%10.1lf",SpSV[i][j]);
+		}
+		fputs("\n",outf);
+
+	}
+		fclose(outf);
+}
 void CMyTeApp::OnConvert()
 {
+#define len 16384
+char InLin[16384];
+char InLinSp[16384];
+FILE *inpf,*outf;
+char *ptr[len];
+char *ptrS[len];
+UINT NC = 0;
+UINT NCS = 0;
+UINT Count_str;
+	if (fopen_s(&inpf,"D:\\MOSH\\SOURCE\\СВИДЕРСКЕНЕ FLUX\\SP_SV_nm_.txt", "r") !=0 )		AfxMessageBox(_T("ListDP NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
+
+	//if (fopen_s(&outf,"D:\\MOSH\\SOURCE\\СВИДЕРСКЕНЕ FLUX\\SP_SV_C_.txt", "w") !=0 )			AfxMessageBox(_T("ListDP NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		CString Sfold=_T("D:\\MOSH\\SOURCE\\СВИДЕРСКЕНЕ FLUX\\SV_SP");
+		CString Filename;
+	//	UINT Count_str;//CMyTeMath::CountDataFile(inpf);
+	Count_str=122;
+	fgets(InLinSp,len,inpf); //sp
+		 NCS=CMyTeMath::StrPtr(InLinSp,'|',ptrS);
+
+	 double** SpSV = new double*[Count_str];        // STEP 1: SET UP THE ROWS.
+	for (UINT i=0;i<Count_str;i++){
+		SpSV[i]=new double [150];
+	}
+//CMyTeMath::InpData(Data0,inpf, Count_str, NULL); 
+		char **NameSp=new char* [NCS];
+		for(UINT i = 0; i < NCS-1; i++){
+			NameSp[i]=new char [8];
+			memset(NameSp[i],0,8);
+		}
+	//char buff[10];
+	for(UINT i=0;i<NCS-1;i++){
+		memcpy((void*)NameSp[i],(void*)ptrS[i+1],8);
+		NameSp[i][8]=0;
+	}
+
+	 for(UINT i=0;i<Count_str;i++){
+		fgets(InLin,len,inpf); //Data
+//double b=0.0;
+		 NC=CMyTeMath::StrPtr(InLin,'|',ptr);
+		for(UINT j=0;j<NC-1;j++){
+			if(sscanf_s(ptr[j+1],"%lf",&SpSV[i][j])==NULL) {
+			}
+//			b=SpSV[i][j];
+		}
+	}
+	fclose(inpf);
+//		ULONG pos=0;
+////	 fseek(inpf, 0L, SEEK_SET);
+//
+//	 for(UINT j=0;j<NC;j++){
+//		for(UINT i=0;i<Count_str;i++){
+//				 //for(UINT j=0;j<NC;j++){
+//			fprintf(outf,"%10.1lf",SpSV[i][j]);
+//		}
+//		fputs("\n",outf);
+//
+//	}
+//		fclose(outf);
+	UINT* Lambda=new UINT[Count_str];
+	for (int i = 0; i < Count_str; i++)
+	{
+		Lambda[i]=300+5*i;
+	}
+	CString fmode;
+	fmode=_T("w"); //else fmode=_T("a");	
+	 for(UINT j=0;j<NCS-1;j++){
+		Filename=NameSp[j];
+		CString destfname;
+//		char*destfname="";
+		destfname=Sfold;
+		destfname.AppendChar('\\');		
+		destfname+=Filename;
+//		if (fopen_s(&outf,destfname, "w") !=0 )			AfxMessageBox(_T("ListDP NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+//	if (fopen_s(&outf,"D:\\MOSH\\SOURCE\\СВИДЕРСКЕНЕ FLUX\\SP_SV_C_.txt", "w") !=0 )			AfxMessageBox(_T("ListDP NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	if (_wfopen_s(&outf,destfname,fmode)!=0 )			AfxMessageBox(_T("ListDP NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		for(UINT i=0;i<Count_str;i++){
+			fprintf_s(outf,"%5d  %10.1lf\n",Lambda[i],SpSV[i][j]);
+
+		}
+		fclose(outf);
+	 }
+	 m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
+}
+//#ifdef ENASHE
+void CMyTeApp::OnConvert_2()//из столбцов в строки
+{
 	CRowToColDlg Dlg;
-	Dlg.SourceFileLambda=_T("D:\\MOSH\\STAR TRACK\\МАЛЫЙ ДАТЧИК\\uvk_pic.grd");//uvk_pic_spc.txtMosh_Kom\\Электро\\ЭЛЕКТРО_New\\Wizard\\program\\uvk_picls.grd";
-	Dlg.SourceFileFlux=_T("D:\\MOSH\\STAR TRACK\\МАЛЫЙ ДАТЧИК\\спектры Pickles.txt");//Mosh_Kom\\Электро\\ЭЛЕКТРО_New\\Wizard\\program\\uvk_picls.spc");
+//
+
+FILE *inpf,*outf,*errf;
+#define len 16384
+char InLin[16384];
+	Dlg.SourceFileLambda=_T("D:\\MOSH\\SOURCE\\СВИДЕРСКЕНЕ FLUX\\ST88FULL_lambda.txt");//uvk_pic_spc.txtMosh_Kom\\Электро\\ЭЛЕКТРО_New\\Wizard\\program\\uvk_picls.grd";
+	Dlg.SourceFileFlux=_T("D:\\MOSH\\SOURCE\\СВИДЕРСКЕНЕ FLUX\\ST88FULL_s.txt");//STAR TRACK\\МАЛЫЙ ДАТЧИК\\спектры Pickles.txt");//Mosh_Kom\\Электро\\ЭЛЕКТРО_New\\Wizard\\program\\uvk_picls.spc");
 	Dlg.DestFolder=_T("D:\\");
+
 	if(Dlg.DoModal()==IDOK)
 	{
 
@@ -885,24 +1575,21 @@ void CMyTeApp::OnConvert()
 		ULONG count=0;
 		double* Lambda=NULL;
 		CString Filename;
-		if(LoadRowFile(Dlg.SourceFileLambda,Lambda,count,pos,&Filename))
+	if(LoadRowFile(Dlg.SourceFileLambda,Lambda,count,pos,&Filename))
 		{
-
-		}
-
 		pos=0;
 		double* Flux=NULL;
 		DocDataType Data;
-		Data.Lambda=Lambda;
-		Data.Count=count;
+		//Data.Lambda=Lambda;
+		//Data.Count=count;
 		Filename.Empty();
 		while(LoadRowFile(Dlg.SourceFileFlux,Flux,count,pos,&Filename))
 		{		
-			Data.Flux=Flux;		
+			//Data.Flux=Flux;		
 			CString destfname;
 			destfname+=Dlg.DestFolder;
 			destfname+=Filename;
-			//destfname.AppendChar('\\');		
+//			destfname.AppendChar('\\');		
 			CMyTeMath::SaveFile(destfname,&Data,Options,true);		
 			delete[] Flux;
 			Flux=NULL;
@@ -911,6 +1598,7 @@ void CMyTeApp::OnConvert()
 		}
 		delete[] Lambda;
 		//
+		}
 	}
 }
 
@@ -923,18 +1611,18 @@ void CMyTeApp::OnRemoveMinus()
 		bool b=FileList.Over;
 		for(ULONG32 i=0;i<FileList.Count;i++)
 		{	
-			m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i], TRUE);
+			m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
 			CMyTeDoc* Doc;
-			Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i]);
+			Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i].c_str());
 			
 			Doc->OnMinusRemove();
-
-			CString outfname(FileList.Files[i]);
+			
+			CString outfname(FileList.Files[i].c_str());
 			int pos=outfname.ReverseFind('.');
 			outfname.Truncate(pos);
 			pos=outfname.ReverseFind('\\');
 			CString ResultString=NULL;
-			CString ResultStringZip(FileList.OutFile);
+			CString ResultStringZip(FileList.OutFile.c_str());
 			ResultStringZip.AppendChar(_T('\\'));
 			ResultString.AppendFormat(_T("%-10s"),outfname.Right(outfname.GetLength()-pos-1));	
 			ResultStringZip.Append(ResultString);
@@ -955,8 +1643,1174 @@ void CMyTeApp::OnMenuOH_8()
 	// TODO: добавьте свой код обработчика команд
 }
 
-void CMyTeApp::OnActionTesting()
+#ifdef EMOE
+	void CMyTeApp::OnActionTesting1()
 {
-	CMyTeMath::TESTING();
-	// TODO: добавьте свой код обработчика команд
+
+FILE *inpf,*outf,*errf;
+//#define len 16384
+//char InLin[16384];
+//#ifdef EMOE
+//char *ptr[16384];
+			//char FileInput[]="D:\\MOSH\\STAR TRACK NEW\\AZDK_GI_GB_GR.txt";//BC_7M_BASE_T2_AAA.txt";//BC_7m_BASE.txt";
+		char FileOut[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\H_K_GAIA.txt";//J_H_Vt_J_.txt";//J_Vt_AAA.txt";//BtVtJHK_WBVR
+	//if (fopen_s(&inpf, FileInput, "r") !=0 ){
+	//	AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	//	exit(1);//0U);
+	//	//AfxMessageBox(_T("Error Opening data_total File"));
+ ////      return;
+	//}
+	//if (fopen_s(&outf, FileOut, "w") !=0 ){
+	//	AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	//	exit(1);//0U);
+	//	//AfxMessageBox(_T("Error Opening data_total File"));
+ ////      return;
+	//}
+		CMyTeBand AZDK;
+	AZDK.FName=_T("D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\GB_GR_H_K.txt");//Vt_J_J_H.txt");//AZDK_GI_GB_GR.txt");
+	AZDK.LoadFromFile(AZDK.FName);
+	if (fopen_s(&outf, FileOut, "w") !=0 ){
+		AfxMessageBox(_T("OUT FALSE"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+
+
+	 //int Count_str=CMyTeMath::CountDataFile(inpf);
+	 //double *GB_GR=new double[Count_str];
+	 //double *M_GI=new double[Count_str];
+	 //double *K_Vt=new double[Count_str];
+	 //double *Bt_Vt=new double[Count_str];
+double GB_GR;
+double AZDK_GI;
+UINT Count=0;
+UINT k=0;
+UINT j=0;
+double Sum=0;
+double Sum1=0;
+double d=0;
+double *Vt_J=new double[AZDK.Count-1];
+double *J_K=new double[AZDK.Count-1];
+	 	 for (UINT i=0; i<AZDK.Count-1;i++ ){
+				 if(AZDK.Lambda[i]<7.0 && AZDK.Lambda[i]>-1.0 && AZDK.Flux[i]>-0.5 && AZDK.Flux[i]<0.8) {
+					 Vt_J[j]=AZDK.Lambda[i];
+					 J_K[j]=AZDK.Flux[i];
+					 j++;
+					 Count++;
+					 //continue;
+				 }else continue;
+		 }
+		 double LamBeg=Vt_J[0];
+	 	 for (UINT i=0; i<Count-1;/*i++*/ ){
+			 do{
+				Sum+=Vt_J[i];
+				Sum1+=J_K[i];
+				k++;
+				if(i==Count-1) break;
+				d=Vt_J[i+1]-LamBeg;
+				//if(i==6699) {
+				//	i=i;
+				//}
+				i++;
+			 }while(d<=0.1); 
+				GB_GR=Sum/(double)k;
+				AZDK_GI=Sum1/(double)k;
+				LamBeg=Vt_J[i];
+				fprintf(outf,"%8.4lf %8.4lf %5d",GB_GR,AZDK_GI,k);
+				fputs("\n",outf);
+				Sum=0;
+				Sum1=0;
+				k=0;
+		}
+		 m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
+
+	fcloseall();
+	//exit(0);
 }
+//#endif
+//GB_GR[j]=LamBeg+j*0.1;
+// AZDK.Lambda
+				//CMyTeMath::StrPtr(InLin,'|',ptr);
+				//sscanf(ptr[0],"%lf",GB_GR[i]);
+				//sscanf(ptr[1],"%lf",M_GI[i]);
+				//sscanf(ptr[130],"%lf",K_Vt[i]);
+				//sscanf(ptr[128],"%lf",Bt_Vt[i]);
+				//int Bt=strncmp(ptr[6],"      ",6);
+				//int V=strncmp(ptr[18],"      ",6);
+				//int Vbs=strncmp(ptr[31],"      ",6);
+				//int BVbs=strncmp(ptr[32],"      ",6);
+
+
+//	CMyTeMath::TESTING();
+	// TODO: добавьте свой код обработчика команд
+//FILE *inpf,*outf/*,*errf;*/
+//#define len 16384
+char InLin[16384];
+char *ptr[16384];
+char *ptrg[16384];
+bool flag=false;
+
+	//	char FileInput[]="D:\\MOSH\\STAR TRACK NEW\\OUT\\AZDK_MIX_1.txt";//BC_For_GEO.txt";//BC_7m_BASE_U.txt";//BC_END_export.txt";//DATA SHIT
+	//	char FileOut[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\BC_GEO_1.txt";//AZDK_END_.txt";//BtVtJHK_WBVR
+	//	//char FileErr[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\GEO_DAT.txt";
+	//	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+	//	AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	//	exit(1);//0U);
+	//	//AfxMessageBox(_T("Error Opening data_total File"));
+ ////      return;
+	//}
+	//if (fopen_s(&outf, FileOut, "w") !=0 ){
+	//	AfxMessageBox(_T("OutPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	//	exit(1);//0U);
+	//	//AfxMessageBox(_T("Error Opening data_total File"));
+ ////      return;
+	//}
+	////if (fopen_s(&errf, FileErr, "r") !=0 ){
+	////	AfxMessageBox(_T("Err NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	////	exit(1);//0U);
+	////	//AfxMessageBox(_T("Error Opening data_total File"));
+ //////      return;
+	////}
+	// int Count_str=CMyTeMath::CountDataFile(inpf);
+	// //int Count_geo=CMyTeMath::CountDataFile(errf);
+
+	//char** Data0 = new char*[Count_geo];        // STEP 1: SET UP THE ROWS.
+	//CMyTeMath::InpData(Data0,errf, Count_geo, NULL); 
+	//fclose(errf);
+	// for (UINT i=0; i<Count_str; ){
+	//	try {                      // TEST FOR EXCEPTIONS.
+ //  			if ( fgets(InLin,len,inpf)==0 ) break;
+	//		if (InLin[0]=='*'){ continue;
+	//		}else{
+ 	//char buff[2048];
+	 	// for (UINT i=0; i<Count_str; i++ ){
+   //			if ( fgets(InLin,len,inpf)==0 ) break;
+			//if (InLin[0]=='*'){ i--;
+			//	continue;
+			//}else{
+				//if(i==585)
+				//	i=i;
+
+		char FileInput[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\AZDK_MIX_1.txt";//BC_7m_BASE_U.txt";//BC_END_export.txt";//
+		char FileOut[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\AZDK_END_1.txt";//BC_GEO_.txt";//BtVtJHK_WBVR
+//		char FileErr[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\AZDK_BS_JC.txt";//GEO_DAT.txt";//BtVtJHK_WBVR\\ГЕОФИЗИКА\\
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+		AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	if (fopen_s(&outf, FileOut, "w") !=0 ){
+		AfxMessageBox(_T("OutPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	//if (fopen_s(&errf, FileErr, "r") !=0 ){
+	//	AfxMessageBox(_T("Err NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	//	exit(1);//0U);
+	//	//AfxMessageBox(_T("Error Opening data_total File"));
+ ////      return;
+	//}
+	 int Count_str=CMyTeMath::CountDataFile(inpf);
+	 //int Count=CMyTeMath::CountDataFile(errf);
+
+	 //	 for (UINT i=0; i<Count_str; ){
+		//try {                      // TEST FOR EXCEPTIONS.
+  // 			if ( fgets(InLin,len,inpf)==0 ) break;
+		//	if (InLin[0]=='*'){ continue;
+		//	}else{
+ 	//char buff[2048];
+	//char** Data0 = new char*[Count];        // STEP 1: SET UP THE ROWS.
+	//CMyTeMath::InpData(Data0,errf, Count, NULL); 
+	//fclose(errf);
+//#ifdef EMOE
+	 	 for (UINT i=0; i<Count_str; i++ ){
+   			if ( fgets(InLin,len,inpf)==0 ) break;
+			if (InLin[0]=='*'){ i--;
+				continue;
+			}else{
+				//if(i==585)
+				//	i=i;
+			int NA=	CMyTeMath::StrPtr(InLin,'|',ptr);
+			double *M=new double[NA-1];
+			double SumM=0;
+			//int pp=0;
+			int K=0;
+	 		for (UINT j=0; j<NA-1; j++ ){
+				int MISS=strncmp(ptr[j],"M",1);
+				if(MISS==0) {
+					//flag=false;
+					//j--;
+					continue;
+				}else 	{
+					sscanf(ptr[j],"%lf",&M[K]);
+					if(M[K]<-0.5 || M[K]>8.0) continue;
+					SumM+=M[K];
+					K++;
+					//flag=true;
+				}
+			}
+		if(K>0){
+			double MIN=1000.0;
+			double MAX=-1000.0;
+			double MIDL=0.0;
+			double Sigm=0.0;
+			double dM=0.0;
+			MIDL=SumM/(double)K;
+	 		for (UINT j=0; j<K; j++ ){
+				dM=M[j]-MIDL;
+				dM*=dM;
+				Sigm+=dM;
+				MIN=MIN(MIN,M[j]);
+				MAX=MAX(MAX,M[j]);
+			}
+			if(K>1){
+				Sigm=sqrt(Sigm)/(double)(K*(K-1));
+				fprintf(outf,"%7.3lf|%7.3lf|%7.3lf|%7.3lf|%3d|%6d|\n",MIDL,Sigm,MIN,MAX,K,i+1);
+			}else
+				fprintf(outf,"%7.3lf|%7.3lf|%7.3lf|%7.3lf|%3d|%6d|\n",MIDL,Sigm,0.0,0.0,K,i+1);
+				//fprintf(outf,"%7.3lf|%7.3lf|%7.3lf|0.000|%6d|\n",MIN,MIDL,MAX,i+1);
+		}else
+				fprintf(outf," | | | | |%6d|\n",i+1);
+		}
+//#endif
+			int pp=0;
+			flag=false;
+	 		for (UINT j=0; j<Count_geo; j++ ){
+				CMyTeMath::StrPtr(InLin,'|',ptr);
+				CMyTeMath::StrPtr(Data0[j],'|',ptrg);
+				int n=strncmp(ptr[0],ptrg[0],16);
+				memcpy(buff,ptr[0],16);
+				buff[16]=0;
+				int pp=0;
+				double M;
+				sscanf(ptrg[1],"%lf",&M);
+				sscanf(ptr[1],"%d",&pp);
+
+			//	//int Vbs=strncmp(ptr[31],"      ",6);
+				//int BVbs=strncmp(ptr[32],"      ",6);
+				//int UBbs=strncmp(ptr[33],"      ",6);
+				//int RIbs=strncmp(ptr[34],"      ",6);
+				//int WB=strncmp(ptr[19],"      ",6);
+				//int BV=strncmp(ptr[20],"      ",6);
+				//int VR=strncmp(ptr[21],"      ",6);
+				//int Vt=strncmp(ptr[8],"      ",6);
+				//int J=strncmp(ptr[60],"      ",6);
+				//int H=strncmp(ptr[62],"      ",6);
+				//int K=strncmp(ptr[64],"      ",6);
+				//if(V==0 && Vbs==0 && BVbs==0 && UBbs==0 && RIbs==0 && /*Hp==0 &&*//*Bt==0 && Vt==0 && J==0 && H==0 && K==0 &&*/ WB==0 && BV==0 && VR==0 ) continue;
+				if(n==0){
+					fprintf(outf,"%16s|%7.3lf|%6d|\n",buff,M,pp);
+					flag=true;
+
+					//fprintf(outf,"%16c|%5c|%6.0d|\n",ptr[58],ptrg[1],pp);
+					break;
+				}
+
+				else{
+						continue;
+				}
+					//if(j==Count_geo-1 && n!=0){
+					//	fprintf(outf,"  |  |%6d|\n",pp);
+					//	break;
+					//}	else
+					//	continue;
+////						if(V!=0 && Vbs!=0 && BVbs!=0 && UBbs!=0 && RIbs!=0 &&/*Bt!=0 && Vt!=0 && J!=0 && H!=0 && K!=0 && */WB!=0 && BV!=0 && VR!=0 ){
+//						fprintf(outf,"%s",InLin);
+//					}
+//					else continue;
+	
+					}
+					if(flag==false){
+						fprintf(outf,"  |  |%6d|\n",pp);
+						//continue;
+					}
+				}
+			}
+			catch (std::bad_alloc) {  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
+			 //YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+			//Application->MessageBox("Could not allocate. Bye ...",
+			//"Error...", MB_ICONERROR);
+				AfxMessageBox(_T("Error Reading File"));
+				exit(-1);
+				
+#endif
+#ifdef ETVOE
+void CMyTeApp::OnActionTesting(){//Усреднение двойных
+FILE *inpf,*outf,*errf;
+char InLin[16384];
+char *ptr[16384];
+char *ptrg[16384];
+bool flag=false;
+		char FileInput[]="D:\\MOSH\\STAR TRACK NEW\\b7_double_FOR_C1.txt";//BC_7m_BASE_U.txt";//AZDK_MIX_1.txt";////BC_END_export.txt";//
+		char FileOut[]="D:\\MOSH\\STAR TRACK NEW\\b7_double_CALC.txt";//BC_AZDK_Cstar.txt";//BC_GEO_.txt";//BtVtJHK_WBVR
+//		char FileErr[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\C_star.txt";//AZDK_BS_JC.txt";//GEO_DAT.txt";//BtVtJHK_WBVR\\ГЕОФИЗИКА\\
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+		AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	if (fopen_s(&outf, FileOut, "w") !=0 ){
+		AfxMessageBox(_T("OutPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	//if (fopen_s(&errf, FileErr, "r") !=0 ){
+	//	AfxMessageBox(_T("Err NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	//	exit(1);//0U);
+	//	//AfxMessageBox(_T("Error Opening data_total File"));
+ ////      return;
+	//}
+	 int Count_str=CMyTeMath::CountDataFile(inpf);
+	 //int Count=CMyTeMath::CountDataFile(errf);
+	 long double RA;
+	 long double DE;
+	 long double RA1;
+	 long double DE1;
+	 long double RA2;
+	 long double DE2;
+	 double Bt1;
+	 double Vt1;
+	 double Bt2;
+	 double Vt2;
+	 double J;
+	 double H;
+	 double K;
+	 double Bt;
+	 double Vt;
+	 char buff[20];
+	 	 for (UINT i=0; i<Count_str; ){
+		try {                      // TEST FOR EXCEPTIONS.
+   			if ( fgets(InLin,len,inpf)==0 ) break;
+			if (InLin[0]=='*' || InLin[0]=='|'){ continue;
+			}else{
+ 	//char buff[2048];
+			CMyTeMath::StrPtr(InLin,'|',ptr);
+			memcpy(buff,ptr[0],16);
+			buff[16]=0;
+
+			//sscanf(ptr[6],"%lf",&Bt1);
+			//sscanf(ptr[8],"%lf",&Vt1);
+			sscanf(ptr[6],"%lf",&Bt1);
+			sscanf(ptr[8],"%lf",&Vt1);
+			sscanf(ptr[10],"%lf",&J);
+			sscanf(ptr[12],"%lf",&H);
+			sscanf(ptr[14],"%lf",&K);
+			sscanf(ptr[1],"%lf",&RA1);
+			sscanf(ptr[2],"%lf",&DE1);
+
+			if ( fgets(InLin,len,inpf)==0 ) break;
+			CMyTeMath::StrPtr(InLin,'|',ptr);
+			//sscanf(ptr[6],"%lf",&Bt1);
+			//sscanf(ptr[8],"%lf",&Vt1);
+			sscanf(ptr[6],"%lf",&Bt2);
+			sscanf(ptr[8],"%lf",&Vt2);
+			sscanf(ptr[1],"%lf",&RA2);
+			sscanf(ptr[2],"%lf",&DE2);
+
+			long double IB1=pow(10.0,-Bt1*0.4);
+			long double IV1=pow(10.0,-Vt1*0.4);
+			long double IB2=pow(10.0,-Bt2*0.4);
+			long double IV2=pow(10.0,-Vt2*0.4);
+
+			long double IB=IB1+IB2;
+			long double IV=IV1+IV2;
+			Bt=-2.5*log10l(IB);
+			Vt=-2.5*log10l(IV);
+			RA=RA1*IV1/IV+RA2*IV2/IV;
+			DE=DE1*IV1/IV+DE2*IV2/IV;
+			double Bt_Vt=Bt-Vt;
+			double J_H=J-H;
+			double H_K=H-K;
+			double Vt_J=Vt-J;
+//double a1=	0.07213078596482563;
+//double a2=	-0.1364455053124737;
+//double a3=	-0.258708520516089;
+//double b1=	-0.39439088447677245;
+//double b2=	-0.04673489790259197;
+//double b3=	0.15057257619261641;
+////b4=	-0.1805031032488205;
+//b5=	0.2287292874839638;
+//b8=	-0.160695301049240;
+//b9=	0.130584488133696;
+//b10=	0.50166483947413076;
+//c1=	0.17884417594517213;
+//c2=	-0.01514442015946991;
+//c4=	0.27682520071280897;
+//c5=	-0.12158712866439111;
+//c7=	0.077550567502602877;
+//c8=	0.048585226088267791;
+//c9=	0.079066029190058826;
+//c11=	0.30915155226117919;
+//c12=	-0.65770926635601989;
+//c13=	-0.28053575519978863;
+//c17=	-0.19891698895345861;
+double AZDK_BtVtJHK=Vt+0.07213*Bt_Vt-0.13644*Vt_J-0.2587*J_H-0.39439*pow(Bt_Vt,2.0)-0.04673*pow(Vt_J,2.0)+0.15057*pow(J_H,2.0)
+	-0.1805*pow(H_K,2.0)+0.228729*Bt_Vt*Vt_J-0.1606953*Vt_J*H_K+0.130584488*Vt_J*J_H+0.5016648*J_H*H_K+0.178844*pow(Bt_Vt,3.0)-0.0151444*pow(Vt_J,3.0)
+	+0.276825*pow(H_K,3.0)-0.121587*pow(Bt_Vt,2.0)*Vt_J+0.07755*pow(Bt_Vt,2.0)*H_K+0.048585*pow(Vt_J,2.0)*Bt_Vt+0.079066*pow(Vt_J,2.0)*J_H+
+	0.30915*pow(J_H,2.0)*Bt_Vt-0.6577*pow(J_H,2.0)*H_K-0.28054*pow(J_H,2.0)*Vt_J-0.19892*Bt_Vt*Vt_J*J_H;
+			fprintf(outf,"%16s|%12.8lf|%12.8lf|D|%7.3lf|%7.3lf|%7.3lf|%7.3lf|%7.3lf|%8.3lf|\n",buff,RA,DE,Bt,Vt,J,H,K,AZDK_BtVtJHK);
+			}
+		}
+			catch (std::bad_alloc) {  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
+			 //YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+			//Application->MessageBox("Could not allocate. Bye ...",
+			//"Error...", MB_ICONERROR);
+				AfxMessageBox(_T("Error Reading File"));
+				exit(-1);
+			}
+		}
+		 m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
+//		}
+	fcloseall();
+}
+#endif
+//#ifdef ETVOE
+void CMyTeApp::OnActionTesting(){//выбор строк Err данных в порядке Input каталога
+FILE *inpf,*outf,*errf;
+char InLin[16384];
+char *ptr[16384];
+char *ptrg[16384];
+bool flag=false;
+		char FileInput[]="D:\\MOSH\\STAR TRACK NEW\\TYC_FOR_AZDK_PROBLEM_OUT_1.txt";//AZDK_LAST_PROBLEM.txt";//AZDK_PROBLEM_CORR_MIX.txt";//TYC_FOR_TRIPL_DP.txt";//AZDK_P_SINGL.txt";//AZDK_PROBLEM_OUT_MIX.txt";//TYC_FOR_PROBLEM_AZDK.txt";//d7_Double_DP_1.txt";//BC_7m_BASE.txt";//DATA SHIT\\_U1.txt";//b7_SINGL.txt";//b7_double_FOR_C.txt";//BC_7m_BASE_U.txt";//AZDK_MIX_1.txt";////BC_END_export.txt";//
+		char FileOut[]="D:\\MOSH\\STAR TRACK NEW\\pm_PROBLEM_OUT_1.txt";//b7_A_FOR_double_DP_1.txt";//BC_A_SINGL.txt";////b7_SINGL_Cstar.txt";//b7_double_CALC.txt";//BC_AZDK_Cstar.txt";//BC_GEO_.txt";//BtVtJHK_WBVR
+		char FileErr[]="D:\\MOSH\\STAR TRACK NEW\\TYC_FOR_PROBLEM_AZDK.txt";//BC_FOR_OUT.txt";//b7_DOUBLE_1.txt";//BC_A_For_SINGL.txt";//DATA SHITC_star.txt";//BC_FOR_A.txt";//C_star.txt";\\OUT//AZDK_BS_JC.txt";//GEO_DAT.txt";//BtVtJHK_WBVR\\ГЕОФИЗИКА\\
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+		AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	if (fopen_s(&outf, FileOut, "w") !=0 ){
+		AfxMessageBox(_T("OutPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	if (fopen_s(&errf, FileErr, "r") !=0 ){
+		AfxMessageBox(_T("Err NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	 int Count_str=CMyTeMath::CountDataFile(inpf);
+	 int Count=CMyTeMath::CountDataFile(errf);
+	 char buff[20];
+	char** Data0 = new char*[Count];        // STEP 1: SET UP THE ROWS.
+	for (UINT i=0;i<Count;i++){
+		Data0[i]=new char[16384];
+		memset(Data0[i],0,16384);
+	}
+	
+	CMyTeMath::InpData(Data0,errf, Count, NULL); 
+	fclose(errf);
+
+	 	 for (UINT i=0; i<Count_str; ){
+		try {                      // TEST FOR EXCEPTIONS.
+   			if ( fgets(InLin,len,inpf)==0 ) break;
+			if (InLin[0]=='*' /*|| InLin[0]=='|'*/){ continue;
+			}else
+			{
+ 	//char buff[2048];
+			CMyTeMath::StrPtr(InLin,'|',ptr);
+			memcpy(buff,ptr[0],16);
+			buff[16]=0;
+
+			//sscanf(ptr[6],"%lf",&Bt1);
+			flag=false;
+	 		for (UINT j=0; j<Count; j++ ){
+				//CMyTeMath::StrPtr(InLin,'|',ptr);
+				CMyTeMath::StrPtr(Data0[j],'|',ptrg);
+				int n=strncmp(ptr[0],ptrg[0],16);
+
+				//memcpy(buff,ptr[0],16);
+				//buff[16]=0;
+				//int pp=0;
+				//double M;
+				//sscanf(ptrg[1],"%lf",&M);
+				//sscanf(ptr[1],"%d",&pp);
+
+				if(n==0){
+					fprintf(outf,"%s",/*InLin*/Data0[j]);/*|%7.3lf|%6d|\n*/
+					flag=true;
+
+					//fprintf(outf,"%16c|%5c|%6.0d|\n",ptr[58],ptrg[1],pp);
+					break;
+				}
+
+				else{
+						continue;
+				}
+					//if(j==Count_geo-1 && n!=0){
+					//	fprintf(outf,"  |  |%6d|\n",pp);
+					//	break;
+					//}	else
+					//	continue;
+			}
+			if(flag==false)
+				fprintf(outf,"%s|       |\n",buff);
+			//
+		}
+		}
+//		}
+			catch (std::bad_alloc) {  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
+			 //YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+			//Application->MessageBox("Could not allocate. Bye ...",
+			//"Error...", MB_ICONERROR);
+				AfxMessageBox(_T("Error Reading File"));
+				exit(-1);
+			}
+		}
+		 m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
+//		}
+		 	delete [] Data0;
+//	de_allocate(Data0,Count_str);
+	fcloseall();
+}
+//#endif
+#ifdef ETVOE
+void CMyTeApp::OnActionTesting(){//FINAL COUNTDOWN
+FILE *inpf,*outf,*errf;
+char InLin[16384];
+char *ptr[16384];
+		char FileInput[]="D:\\MOSH\\STAR TRACK NEW\\A_LP.txt";//A_FOR_C_LAST_PROBLEM_.txt";//A_FOR_PROBLEM_CORR.txt";//A_TRIPL_DP_.txt";//A_FOR_b7_tripl_DP.txt";//A_FOR_AZDK_P_MIX.txt";//A_AZDK_DP_FP.txt";//A_FOR_double_PROBLEM_AZDK.txt";//A_FOR_double_C_1_2.txt";//A_FOR_double_DP_1.txt";//OUT\\BC_A_For_SINGL_С.txt";//DATA SHIT\\AZDK_MIX_1.txt";//BC_7m_BASE_U.txt";//BC_END_export.txt";//
+		char FileOut[]="D:\\MOSH\\STAR TRACK NEW\\AZDK_LP.txt";//LAST_PROBLEM_OUT.txt";//BC_GEO_.txt";//BtVtJHK_WBVR DATA SHIT OUT\\
+//		char FileErr[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\AZDK_BS_JC.txt";//GEO_DAT.txt";//BtVtJHK_WBVR\\ГЕОФИЗИКА\\
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+		AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	if (fopen_s(&outf, FileOut, "w") !=0 ){
+		AfxMessageBox(_T("OutPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	//if (fopen_s(&errf, FileErr, "r") !=0 ){
+	//	AfxMessageBox(_T("Err NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	//	exit(1);//0U);
+	//	//AfxMessageBox(_T("Error Opening data_total File"));
+ ////      return;
+	//}
+	 int Count_str=CMyTeMath::CountDataFile(inpf);
+	 //int Count=CMyTeMath::CountDataFile(errf);
+
+	 	 for (UINT i=0; i<Count_str; ){
+		try {                      // TEST FOR EXCEPTIONS.
+   			if ( fgets(InLin,len,inpf)==0 ) break;
+			if (InLin[0]=='*'){ continue;
+			}else{
+
+	 	// for (UINT i=0; i<Count_str; i++ ){
+   //			if ( fgets(InLin,len,inpf)==0 ) break;
+			//if (InLin[0]=='*'){ i--;
+			//	continue;
+			//}else{
+			//	//if(i==585)
+				//	i=i;
+			int NA=	CMyTeMath::StrPtr(InLin,'|',ptr);
+			double *M=new double[NA-1];
+			double SumM=0;
+			//int pp=0;
+			int K=0;
+	 		for (UINT j=0; j<NA-1; j++ ){
+				int MISS=strncmp(ptr[j],"M",1);
+				if(MISS==0) {
+					//flag=false;
+					//j--;
+					continue;
+				}else 	{
+					sscanf(ptr[j],"%lf",&M[K]);
+					//if(M[K]<-0.5 || M[K]>8.0) continue;
+					SumM+=M[K];
+					K++;
+					//flag=true;
+				}
+			}
+		if(K>0){
+			double MIN=1000.0;
+			double MAX=-1000.0;
+			double MIDL=0.0;
+			double Sigm=0.0;
+			double dM=0.0;
+			MIDL=SumM/(double)K;
+	 		for (UINT j=0; j<K; j++ ){
+				dM=M[j]-MIDL;
+				dM*=dM;
+				Sigm+=dM;
+				MIN=MIN(MIN,M[j]);
+				MAX=MAX(MAX,M[j]);
+			}
+			if(K>1){
+				Sigm=sqrt(Sigm)/(double)(/*K**/(K-1));
+				fprintf(outf,"%7.3lf|%7.3lf|%7.3lf|%7.3lf|%3d|\n",MIDL,Sigm,MIN,MAX,K);
+			}else
+				fprintf(outf,"%7.3lf|       |       |       |%3d|\n",MIDL,K);
+				//fprintf(outf,"%7.3lf|%7.3lf|%7.3lf|0.000|%6d|\n",MIN,MIDL,MAX,i+1);
+		}else
+				fprintf(outf," | | | | |%6d|\n",i+1);
+		}
+		}
+		//}
+			catch (std::bad_alloc) {  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
+			 //YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+			//Application->MessageBox("Could not allocate. Bye ...",
+			//"Error...", MB_ICONERROR);
+				AfxMessageBox(_T("Error Reading File"));
+				exit(-1);
+			}
+		}
+		 m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
+//		}
+		 	//delete [] Data0;
+//	de_allocate(Data0,Count_str);
+	fcloseall();
+}
+#endif
+#ifdef EVOE
+
+void CMyTeApp::OnActionTesting(){//Усреднение двойных
+FILE *inpf,*outf,*errf;
+char InLin[16384];
+char *ptr[16384];
+char *ptrg[16384];
+bool flag=false;
+		char FileInput[]="D:\\MOSH\\STAR TRACK NEW\\AZDK_LAST_PROBLEM.txt";//AZDK_PROBLEM_dbl_CORR.txt";//AZDK_PROBLEM_OUT.txt";//b7_double_FOR_CG1.txt";//BC_7m_BASE_U.txt";//AZDK_MIX_1.txt";////BC_END_export.txt";//
+		char FileOut[]="D:\\MOSH\\STAR TRACK NEW\\AZDK_LAST_PROBLEM_MIX.txt";//b7_double_CALC_G1.txt";//BC_AZDK_Cstar.txt";//BC_GEO_.txt";//BtVtJHK_WBVR
+//		char FileErr[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\C_star.txt";//AZDK_BS_JC.txt";//GEO_DAT.txt";//BtVtJHK_WBVR\\ГЕОФИЗИКА\\
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+		AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	if (fopen_s(&outf, FileOut, "w") !=0 ){
+		AfxMessageBox(_T("OutPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	//if (fopen_s(&errf, FileErr, "r") !=0 ){
+	//	AfxMessageBox(_T("Err NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	//	exit(1);//0U);
+	//	//AfxMessageBox(_T("Error Opening data_total File"));
+ ////      return;
+	//}
+	 int Count_str=CMyTeMath::CountDataFile(inpf);
+	 //int Count=CMyTeMath::CountDataFile(errf);
+	 long double RA;
+	 long double DE;
+	 long double RA1;
+	 long double DE1;
+	 long double RA2;
+	 long double DE2;
+	 double Bt1;
+	 double Vt1;
+	 double Bt2;
+	 double Vt2;
+	 double J;
+	 double H;
+	 double K;
+	 double Bt;
+	 double Vt;
+	 double pmRA;
+	 double pmDE;
+	 char buff[20];
+	 //double GI1;
+	 //double GI;
+	 //double AZ1;
+	 //double AZ2;
+	 //double AZ;
+	 /*double GI2;
+	 double GB2;
+	 double GR2;*/
+	 	 for (UINT i=0; i<Count_str; ){
+		try {                      // TEST FOR EXCEPTIONS.
+   			if ( fgets(InLin,len,inpf)==0 ) break;
+			if (InLin[0]=='*' || InLin[0]=='|'){ continue;
+			}else{
+ 	//char buff[2048];
+			CMyTeMath::StrPtr(InLin,'|',ptr);
+			memcpy(buff,ptr[0],16);
+			buff[16]=0;
+			//int MISS=strncmp(ptr[5],"       ",7);
+			//int MISS2=strncmp(ptr[10],"       ",7);
+			//int MISS3=strncmp(ptr[10],"       ",7);
+					//sscanf(ptr[6],"%lf",&Bt1);
+					sscanf(ptr[8],"%lf",&Vt1);
+					//sscanf(ptr[1],"%lf",&RA1);
+					//sscanf(ptr[2],"%lf",&DE1);
+					//sscanf(ptr[6],"%lf",&Bt1);
+					//sscanf(ptr[8],"%lf",&Vt1);
+					//fprintf(outf,"%16s|       |\n",buff);
+				////	continue;}
+				////else{
+				//if(MISS!=0){
+
+			//sscanf(ptr[5],"%lf",&AZ1);
+			//sscanf(ptr[12],"%lf",&GB1);
+			//sscanf(ptr[14],"%lf",&GR1);
+			sscanf(ptr[1],"%lf",&RA1);
+			sscanf(ptr[2],"%lf",&DE1);
+			sscanf(ptr[3],"%lf",&pmRA);
+			sscanf(ptr[4],"%lf",&pmDE);
+			sscanf(ptr[11],"%lf",&J);
+			sscanf(ptr[13],"%lf",&H);
+			sscanf(ptr[15],"%lf",&K);
+
+			if ( fgets(InLin,len,inpf)==0 ) break;
+			CMyTeMath::StrPtr(InLin,'|',ptr);
+			//int MISS1=strncmp(ptr[5],"       ",7);
+		//if(MISS1!=0){
+			//sscanf(ptr[5],"%lf",&AZ2);
+			//sscanf(ptr[1],"%lf",&RA2);
+			//sscanf(ptr[2],"%lf",&DE2);
+			//long double IZ1=pow(10.0,-AZ1*0.4);
+			//long double IZ2=pow(10.0,-AZ2*0.4);
+			//long double IZ=IZ1+IZ2;
+			//AZ=-2.5*log10l(IZ);
+			//RA=RA1*IZ1/IZ+RA2*IZ2/IZ;
+			//DE=DE1*IZ1/IZ+DE2*IZ2/IZ;
+			//fprintf(outf,"%16s|%13.8lf|%13.8lf|%7.3lf|\n",buff,RA,DE,AZ);
+			//continue;
+			
+			//			fprintf(outf,"%16s|%7.3lf|\n",buff,GI1);
+			//sscanf(ptr[6],"%lf",&Bt1);
+			//sscanf(ptr[8],"%lf",&Vt1);
+			//sscanf(ptr[6],"%lf",&Bt2);
+			sscanf(ptr[8],"%lf",&Vt2);
+			sscanf(ptr[1],"%lf",&RA2);
+			sscanf(ptr[2],"%lf",&DE2);
+
+			//long double IB1=pow(10.0,-Bt1*0.4);
+			long double IV1=pow(10.0,-Vt1*0.4);
+			//long double IB2=pow(10.0,-Bt2*0.4);
+			long double IV2=pow(10.0,-Vt2*0.4);
+
+			//long double IB=IB1+IB2;
+			long double IV=IV1+IV2;
+			//Bt=-2.5*log10l(IB);
+			Vt=-2.5*log10l(IV);
+			RA=RA1*IV1/IV+RA2*IV2/IV;
+			DE=DE1*IV1/IV+DE2*IV2/IV;
+			//double Bt_Vt=Bt-Vt;
+			double J_H=J-H;
+			double H_K=H-K;
+			double Vt_J=Vt-J;
+////double a1=	0.07213078596482563;
+////double a2=	-0.1364455053124737;
+////double a3=	-0.258708520516089;
+////double b1=	-0.39439088447677245;
+////double b2=	-0.04673489790259197;
+////double b3=	0.15057257619261641;
+//////b4=	-0.1805031032488205;
+////b5=	0.2287292874839638;
+////b8=	-0.160695301049240;
+////b9=	0.130584488133696;
+////b10=	0.50166483947413076;
+////c1=	0.17884417594517213;
+////c2=	-0.01514442015946991;
+////c4=	0.27682520071280897;
+////c5=	-0.12158712866439111;
+////c7=	0.077550567502602877;
+////c8=	0.048585226088267791;
+////c9=	0.079066029190058826;
+////c11=	0.30915155226117919;
+////c12=	-0.65770926635601989;
+////c13=	-0.28053575519978863;
+////c17=	-0.19891698895345861;
+//double AZDK_BtVtJHK=Vt+0.07213*Bt_Vt-0.13644*Vt_J-0.2587*J_H-0.39439*pow(Bt_Vt,2.0)-0.04673*pow(Vt_J,2.0)+0.15057*pow(J_H,2.0)
+//	-0.1805*pow(H_K,2.0)+0.228729*Bt_Vt*Vt_J-0.1606953*Vt_J*H_K+0.130584488*Vt_J*J_H+0.5016648*J_H*H_K+0.178844*pow(Bt_Vt,3.0)-0.0151444*pow(Vt_J,3.0)
+//	+0.276825*pow(H_K,3.0)-0.121587*pow(Bt_Vt,2.0)*Vt_J+0.07755*pow(Bt_Vt,2.0)*H_K+0.048585*pow(Vt_J,2.0)*Bt_Vt+0.079066*pow(Vt_J,2.0)*J_H+
+//	0.30915*pow(J_H,2.0)*Bt_Vt-0.6577*pow(J_H,2.0)*H_K-0.28054*pow(J_H,2.0)*Vt_J-0.19892*Bt_Vt*Vt_J*J_H;
+
+//fprintf(outf,"%16s|%13.8lf|%13.8lf|%7.1lf|%7.1lf|/*%7.3lf|*/%7.3lf|%7.3lf|%7.3lf|%7.3lf|/*%7.3lf|*/\n",
+				//buff,RA,DE,pmRA,pmDE,/*Bt,*/Vt,J,H,K/*,AZDK_BtVtJHK*/);
+fprintf(outf,"%16s|%13.8lf|%13.8lf|%7.1lf|%7.1lf|%7.3lf|%7.3lf|%7.3lf|%7.3lf|\n",
+				buff,RA,DE,pmRA,pmDE,/*Bt,*/Vt,J,H,K/*,AZDK_BtVtJHK*/);
+			}
+			}
+
+		//}
+		//else{
+		//	fprintf(outf,"%16s|       |\n",buff);
+		//	if ( fgets(InLin,len,inpf)==0 ) break;
+		//	continue;
+		//}
+			//}
+		//}
+			catch (std::bad_alloc) {  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
+			 //YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+			//Application->MessageBox("Could not allocate. Bye ...",
+			//"Error...", MB_ICONERROR);
+				AfxMessageBox(_T("Error Reading File"));
+				exit(-1);
+			}
+		}
+		 m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
+//		}
+	fcloseall();
+}
+#endif
+#ifdef EEMOE
+//#ifdef TMOE
+void CMyTeApp::OnActionTesting(){//Усреднение кратных
+FILE *inpf,*outf,*errf;
+char InLin[16384];
+char *ptr[16384];
+char *ptrg[16384];
+bool flag=false;
+		char FileInput[]="D:\\MOSH\\STAR TRACK NEW\\AZDK_tripl_DP_FOR_C.txt";//AZDK_PROBLEM_OUT.txt";//b7_double_FOR_CG1.txt";//BC_7m_BASE_U.txt";//AZDK_MIX_1.txt";////BC_END_export.txt";//
+		char FileOut[]="D:\\MOSH\\STAR TRACK NEW\\AZDK_tripl_OUT_MIX.txt";//b7_double_CALC_G1.txt";//BC_AZDK_Cstar.txt";//BC_GEO_.txt";//BtVtJHK_WBVR
+//		char FileErr[]="D:\\MOSH\\STAR TRACK NEW\\DATA SHIT\\C_star.txt";//AZDK_BS_JC.txt";//GEO_DAT.txt";//BtVtJHK_WBVR\\ГЕОФИЗИКА\\
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+		AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	if (fopen_s(&outf, FileOut, "w") !=0 ){
+		AfxMessageBox(_T("OutPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		exit(1);//0U);
+		//AfxMessageBox(_T("Error Opening data_total File"));
+ //      return;
+	}
+	//if (fopen_s(&errf, FileErr, "r") !=0 ){
+	//	AfxMessageBox(_T("Err NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+	//	exit(1);//0U);
+	//	//AfxMessageBox(_T("Error Opening data_total File"));
+ ////      return;
+	//}
+	 int Count_str=CMyTeMath::CountDataFile(inpf);
+	 //int Count=CMyTeMath::CountDataFile(errf);
+	 long double RA;
+	 long double DE;
+	 long double* RA[10];
+	 long double* DE[10];
+	 //long double RA2;
+	 //long double DE2;
+	 
+	 char buff[20];
+	 double GI1;
+	 double GI;
+	 double* AZ[10];
+	 //double AZ2;
+	 //double AZ;
+	 //double GI2;
+	 //double GB2;
+	 //double GR2;
+	 	 for (UINT i=0; i<Count_str; ){
+		try {                      // TEST FOR EXCEPTIONS.
+   			if ( fgets(InLin,len,inpf)==0 ) break;
+			if (InLin[0]=='*' || InLin[0]=='|'){ continue;
+			}else{
+ 	//char buff[2048];
+			CMyTeMath::StrPtr(InLin,'|',ptr);
+			memcpy(buff,ptr[0],16);
+			buff[16]=0;
+			int K=0;
+	do{
+		int MISS=strncmp(ptr[1],"M",1);
+		int MISS2=strncmp(ptr[2],"M",1);
+		int MISS3=strncmp(ptr[5],"M",1);
+		if(	MISS==0 || MISS2==0 || MISS3==0) continue;
+		else{
+			sscanf(ptr[1],"%lf",&RA[K]);
+			sscanf(ptr[2],"%lf",&DE[K]);
+			sscanf(ptr[5],"%lf",&AZ[K]);
+
+   			if ( fgets(InLin,len,inpf)==0 ) break;
+	}while(InLin[0]!='|')
+						sscanf(ptr[1],"%lf",&RA[K]);
+						sscanf(ptr[2],"%lf",&DE[K]);
+						sscanf(ptr[5],"%lf",&AZ[K]);
+
+//			//sscanf(ptr[6],"%lf",&Bt1);
+//			//sscanf(ptr[8],"%lf",&Vt1);
+//			//sscanf(ptr[6],"%lf",&Bt1);
+//			//sscanf(ptr[8],"%lf",&Vt1);
+//			//fprintf(outf,"%16s|       |\n",buff);
+//			//continue;}
+//		//else{
+//		if(MISS!=0){
+
+			sscanf(ptr[5],"%lf",&AZ1);
+			//sscanf(ptr[12],"%lf",&GB1);
+			//sscanf(ptr[14],"%lf",&GR1);
+			sscanf(ptr[1],"%lf",&RA1);
+			sscanf(ptr[2],"%lf",&DE1);
+
+			if ( fgets(InLin,len,inpf)==0 ) break;
+			CMyTeMath::StrPtr(InLin,'|',ptr);
+			int MISS1=strncmp(ptr[5],"M",1);
+		if(MISS1!=0){
+			sscanf(ptr[5],"%lf",&AZ2);
+			sscanf(ptr[1],"%lf",&RA2);
+			sscanf(ptr[2],"%lf",&DE2);
+			long double IZ1=pow(10.0,-AZ1*0.4);
+			long double IZ2=pow(10.0,-AZ2*0.4);
+			long double IZ=IZ1+IZ2;
+			AZ=-2.5*log10l(IZ);
+			RA=RA1*IZ1/IZ+RA2*IZ2/IZ;
+			DE=DE1*IZ1/IZ+DE2*IZ2/IZ;
+			fprintf(outf,"%16s|%13.8lf|%13.8lf|%7.3lf|\n",buff,RA,DE,AZ);
+			continue;
+			
+			//if(MISS1==0){
+			//fprintf(outf,"%16s|       |\n",buff);
+			//continue;
+		}
+		//else{
+		//	fprintf(outf,"%16s|%7.3lf|\n",buff,GI1);
+			//sscanf(ptr[6],"%lf",&Bt1);
+			//sscanf(ptr[8],"%lf",&Vt1);
+			//sscanf(ptr[6],"%lf",&Bt2);
+			//sscanf(ptr[8],"%lf",&Vt2);
+			//sscanf(ptr[1],"%lf",&RA2);
+			//sscanf(ptr[2],"%lf",&DE2);
+
+//			long double IB1=pow(10.0,-GI1*0.4);
+////			long double IV1=pow(10.0,-Vt1*0.4);
+//			long double IB2=pow(10.0,-GI2*0.4);
+//			long double IV2=pow(10.0,-Vt2*0.4);
+
+			//long double IB=IB1+IB2;
+			////long double IV=IV1+IV2;
+			//GI=-2.5*log10l(IB);
+			//Vt=-2.5*log10l(IV);
+			//RA=RA1*IV1/IV+RA2*IV2/IV;
+			//DE=DE1*IV1/IV+DE2*IV2/IV;
+//			double Bt_Vt=Bt-Vt;
+//			double J_H=J-H;
+//			double H_K=H-K;
+//			double Vt_J=Vt-J;
+////double a1=	0.07213078596482563;
+////double a2=	-0.1364455053124737;
+////double a3=	-0.258708520516089;
+////double b1=	-0.39439088447677245;
+////double b2=	-0.04673489790259197;
+////double b3=	0.15057257619261641;
+//////b4=	-0.1805031032488205;
+////b5=	0.2287292874839638;
+////b8=	-0.160695301049240;
+////b9=	0.130584488133696;
+////b10=	0.50166483947413076;
+////c1=	0.17884417594517213;
+////c2=	-0.01514442015946991;
+////c4=	0.27682520071280897;
+////c5=	-0.12158712866439111;
+////c7=	0.077550567502602877;
+////c8=	0.048585226088267791;
+////c9=	0.079066029190058826;
+////c11=	0.30915155226117919;
+////c12=	-0.65770926635601989;
+////c13=	-0.28053575519978863;
+////c17=	-0.19891698895345861;
+//double AZDK_BtVtJHK=Vt+0.07213*Bt_Vt-0.13644*Vt_J-0.2587*J_H-0.39439*pow(Bt_Vt,2.0)-0.04673*pow(Vt_J,2.0)+0.15057*pow(J_H,2.0)
+//	-0.1805*pow(H_K,2.0)+0.228729*Bt_Vt*Vt_J-0.1606953*Vt_J*H_K+0.130584488*Vt_J*J_H+0.5016648*J_H*H_K+0.178844*pow(Bt_Vt,3.0)-0.0151444*pow(Vt_J,3.0)
+//	+0.276825*pow(H_K,3.0)-0.121587*pow(Bt_Vt,2.0)*Vt_J+0.07755*pow(Bt_Vt,2.0)*H_K+0.048585*pow(Vt_J,2.0)*Bt_Vt+0.079066*pow(Vt_J,2.0)*J_H+
+//	0.30915*pow(J_H,2.0)*Bt_Vt-0.6577*pow(J_H,2.0)*H_K-0.28054*pow(J_H,2.0)*Vt_J-0.19892*Bt_Vt*Vt_J*J_H;
+			}
+		//}
+		//else{
+		//	fprintf(outf,"%16s|       |\n",buff);
+		//	if ( fgets(InLin,len,inpf)==0 ) break;
+		//	continue;
+		//}
+			//}
+		//}
+			catch (std::bad_alloc) {  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
+			 //YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+			//Application->MessageBox("Could not allocate. Bye ...",
+			//"Error...", MB_ICONERROR);
+				AfxMessageBox(_T("Error Reading File"));
+				exit(-1);
+			}
+		}
+		 m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
+//		}
+	fcloseall();
+}
+#endif
+void CMyTeApp::OnActionAid1()// много прозрачностей
+{
+	CCalculateDlg calcdlg;
+	if(calcdlg.DoModal()==IDOK)	
+	{
+		double* VegaArray=new double[BandCount];
+		double* VegaXArray=new double[BandCount];
+		for(int i=0;i<BandCount;i++) VegaArray[i]=0.0;
+		for(int i=0;i<BandCount;i++) VegaXArray[i]=0.0;
+		CString RString;
+		CMyTeDoc* VDoc;
+		//CString ResultString=NULL;
+		//CString ResultStringZip=NULL;
+
+		if(FileList.VegaFile.size())
+		{
+			//CMyTeDoc* VDoc;
+			//подсчет Bеги
+			VDoc=(CMyTeDoc*)OpenDocumentFile(FileList.VegaFile.c_str());
+			for(int i=0;i<BandCount;i++)
+			{
+				VegaArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,NULL,0);
+				//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
+			}
+			int cou=GetOpenDocumentCount();
+			if(cou>0) VDoc->OnCloseDocument();
+		}	
+			//for(int i=0;i<BandCount;i++)
+			//{
+			//	//VegaXArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,&Redden,X);
+			//	ResultString.AppendFormat(_T(" %10.4lf "),VegaArray[i]);
+			//	//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
+			//}
+			//ResultString.Append(_T("\n"));
+
+		RString.AppendFormat(_T("%-12s"),_T("File_Name"));
+		RString.AppendFormat(_T("%7s "),_T("   RedX"));
+		RString.AppendFormat(_T("%11s "),_T("       Mz"));
+		for(int i=0;i<BandCount;i++)
+		{
+			CString outfname(BandArray[i].FName.c_str());
+			outfname.Truncate(outfname.GetLength()-4);
+			int pos=outfname.ReverseFind('\\');		
+			RString.AppendFormat(_T(" %10s "),outfname.Right(outfname.GetLength()-pos-1));	
+//			RString.AppendFormat(_T(" %10s "),_T("Ai"));
+		}	
+		RString.AppendFormat(_T("%s "),_T("          AB          AR          AV          AW          LB          LR          LV           LW"));
+		RString.Append(_T("\n"));
+		
+	double RX=0;
+	bool FlagYes=false;
+	double X=0.0;
+	double Mz=1.0;
+	CMyTeBand EXTIN;
+	EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\ОБРАБОТКА\\EXTATM\\200186\\281185.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\MAR_S.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\JULE_S.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\DEC_S.txt");
+	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\SEP_S.txt");
+	EXTIN.LoadFromFile(EXTIN.FName);
+
+	int Nred=6;//0;//0;//0;//5;//5;	//number of random i.s.ext. amount (thickness, depth) 
+	//CString ResultString=NULL;
+	//CString ResultStringZip=NULL;
+
+		if(CMyTeMath::WriteResult1(FileList.OutFile.c_str(),RString,true)==0)
+		{
+
+			bool b=FileList.Over;	
+			for(ULONG32 i=0;i<FileList.Count;i++)//FileList.Count
+			{	
+				m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
+				CMyTeDoc* Doc;
+				Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i].c_str());
+				CString outfname(FileList.Files[i].c_str());
+
+				int pos=outfname.ReverseFind('.');
+				outfname.Truncate(pos);
+				pos=outfname.ReverseFind('\\');
+				CString ResultString=NULL;
+				CString ResultStringZip=NULL;
+				ResultString.AppendFormat(_T("%-10s"),outfname.Right(outfname.GetLength()-pos-1));	
+				ResultStringZip=ResultString;
+				CString midName=outfname.Right(outfname.GetLength()-pos-1);//-pos-1
+				for(int jj=0;jj<Nred;jj++){
+					if (jj==0) X=0.0;
+					else {
+
+						X=CMyTeMath::RANDisex()*4.0;///**RedMax[i]RANDisex()*///X+=0.1;1;//
+					//	//X*=RedMax[i];//2
+					}
+					ResultString.Empty();//.Append(_T("\n"));
+					ResultString=ResultStringZip;
+					ResultString.AppendFormat(_T(" %10.3lf "),X);
+					//ResultStringZip=ResultString;
+					//if(FileList.VegaFile!="")
+					//{
+						//CMyTeDoc* VDoc;
+						//подсчет Bеги
+						//VDoc=(CMyTeDoc*)OpenDocumentFile(FileList.VegaFile);
+						//for(int i=0;i<BandCount;i++)
+						//{
+						//	VegaXArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,&Redden,X);
+						//	//ResultString.AppendFormat(_T(" %10.4lf "),VegaXArray[i]);
+						//	//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
+						//}
+
+						//}	
+
+
+						for(UINT ij=0;ij<6;ij++){//Mz
+							ResultString.Empty();//.Append(_T("\n"));
+							ResultString=ResultStringZip;
+							ResultString.AppendFormat(_T(" %10.3lf "),X);
+							//ResultString=ResultStringZip;
+							//if(ij==0) Mz=0.0;
+							//	else {
+									if(ij==0) Mz=0.0;
+								else {
+									Mz=1.0+CMyTeMath::RANDisex()*2.2;///**RedMax[i]RANDisex()*///X+=0.1;1;//
+								} 
+							//} 
+							ResultString.AppendFormat(_T(" %10.4lf "),Mz);
+							//for(UINT j=0;j<BandCount;j++){//BandCount
+							//	ResultString.AppendFormat(_T(" %10.4lf "),VegaArray[j]);
+							//}
+							//	ResultString.Append(_T("\n"));
+							for(UINT j=0;j<BandCount;j++){//BandCount
+								ResultString.AppendFormat(_T(" %10.4lf "),
+									CMyTeMath::SBand_4(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN));
+							}
+							for(UINT j=0;j<BandCount;j++){//BandCount
+							ResultString.AppendFormat(_T(" %10.4lf "),
+								CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN));//-VegaXArray[j]);
+								//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
+							}
+							for(UINT j=0;j<BandCount;j++){//BandCount
+							ResultString.AppendFormat(_T(" %10.4lf "),
+								1.086*(CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN)-
+								 CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,0.0,&EXTIN)));//-VegaXArray[j]);
+							}
+							//for(UINT j=0;j<BandCount;j++){//BandCount
+							//ResultString.AppendFormat(_T(" %10.4lf "),
+							//	CMyTeMath::SBand_L2(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN)-CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,0.0,&EXTIN));//-VegaXArray[j]);
+							//	//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
+							//}
+								ResultString.Append(_T("\n"));
+							if(CMyTeMath::WriteResult1(FileList.OutFile.c_str(),ResultString,false)!=0) break;					
+						}
+					}
+		
+						b=false;
+						int cou=GetOpenDocumentCount();
+						if(cou>0) Doc->OnCloseDocument();
+						//fcloseall();
+						this->PumpMessage();
+			}	
+			m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
+			
+		}else
+		{
+			m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Ошибка записи в файл."), TRUE);
+		}
+		
+	}
+}
+
+
+
+

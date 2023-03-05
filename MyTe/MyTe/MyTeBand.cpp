@@ -4,18 +4,12 @@
 
 CMyTeBand::CMyTeBand(void)
 {
-	Count=0;
-	LBeg=0;
-	LEnd=0;
+	
 }
 
 CMyTeBand::~CMyTeBand(void)
 {
-	if(Count>0)
-	{
-		delete[] Lambda;
-		delete[] Flux;
-	}
+	this->MyData.clear();
 }
 //типа ввода
 #ifdef EMOE		
@@ -82,6 +76,15 @@ for(UINT j=0;j<DLRSP;j++){
 
 class VECTOR 
 #endif
+void CMyTeBand::LoadFromFile(wstring fname) {
+	size_t k = fname.find_last_of(_T('\\'));
+	this->Name = fname[k+1];
+	this->FName = fname;
+	this->MyData.clear();
+	ReadData(fname, this->MyData);
+}
+
+#ifdef EMOE
 void CMyTeBand::LoadFromFile(CString fname)
 {
 	BYTE*	szBuffer; 
@@ -177,21 +180,19 @@ void CMyTeBand::LoadFromFile(CString fname)
 		delete[] szBuffer;
 	}
 }
-
+#endif
 // вычисляет значение кривой реакции для данного значения лямбды
 double CMyTeBand::GetFlux(double lambda)
 {
 	//исключаем значения вне кривой
 	if((lambda<Lambda[0])||(lambda>Lambda[Count-1])) 
 		return 0.0;
-	for(ULONG32 i=0;i<Count-1;i++)
-	{
-		if((Lambda[i]<=lambda)&&(Lambda[i+1]>lambda))
-		{
+	for (size_t i = 0; i < Count - 1; i++) {
+		if ((Lambda[i] <= lambda) && (Lambda[i + 1] > lambda)) {
 			return CMyTeMath::LinInt(Flux[i],Flux[i+1],Lambda[i],Lambda[i+1],lambda);
 		}
 	}
-	return 0;
+	return 0.0;
 }
 
 void CMyTeBand::NormMax(void)
@@ -211,8 +212,36 @@ void CMyTeBand::ConvertLnToFlux(void)
 {
 	for(ULONG32 i=0;i<Count;i++)
 	{
-		double X=Flux[i]/E_CONST;
+		double X = Flux[i]/E_CONST;
 		Flux[i]=exp(X);		
 		Lambda[i]*=10.0;
 	}
+}
+size_t CMyTeBand::GetCount_p() {
+	return this->MyData.size();
+}
+
+double CMyTeBand::GetLambda_p(size_t i) {
+	if ((this->MyData.size() > 0) && (this->MyData[0].size() > i)) {
+		return this->MyData[0][i];
+	}
+	return -1.0;
+}
+
+double CMyTeBand::GetFlux_p(size_t i) {
+	if ((this->MyData.size() > 0) && (this->MyData[1].size() > i)) {
+		return this->MyData[1][i];
+	}
+	return -1.0;
+}
+void CMyTeBand::PutLambda_p(size_t i, double b) {
+	if (this->MyData.size() == 0) {
+		return;
+	}
+	if (this->MyData[0].size() <= i) {
+		this->MyData[0].push_back(b);
+	}	
+}
+void CMyTeBand::PutFlux_p(size_t i, double b) {
+
 }

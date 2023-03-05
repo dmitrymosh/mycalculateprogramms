@@ -43,7 +43,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -151,9 +151,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Ai.cpp" />
+    <ClCompile Include="DocDataType.cpp" />
     <ClCompile Include="extint.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MyFile.cpp" />
+    <ClCompile Include="MyTeBand.cpp" />
+    <ClCompile Include="MyTeMath.cpp" />
+    <ClCompile Include="ReadPol.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DocDataType.h" />
+    <ClInclude Include="Main.h" />
+    <ClInclude Include="MyFile.h" />
+    <ClInclude Include="MyTeBand.h" />
+    <ClInclude Include="MyTeMath.h" />
     <ClInclude Include="optparse.h" />
     <ClInclude Include="optparse_convert.h" />
   </ItemGroup>

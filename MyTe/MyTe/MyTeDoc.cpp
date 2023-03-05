@@ -182,11 +182,11 @@ void CMyTeDoc::LoadFile(CFile* myFile)
 			bi++;
 		}
 		
-		swscanf_s((wchar_t*)&temp,_T("%lf%lf%lf%lf"),&Data.Lambda[j],&Data.Flux[j],
-					&Data.ErrFlux[j],&Data.NormErrFlux[j]);
+		swscanf_s((wchar_t*)&temp,_T("%lf%lf%lf%lf"), Data.Lambda[j],Data.Flux[j],
+					Data.ErrFlux[j],Data.NormErrFlux[j]);
 					
 	}
-	Data.Count=strcount;
+	
 	int OutCount=strcount;
 	double LmBeg=0.0;
 	double LmEnd=0.0;
@@ -492,7 +492,7 @@ void CMyTeDoc::OnSubResponce()
 	{		 
 		for(ULONG32 j=0;j<theApp.BandCount;j++)
 		{
-			if(theApp.BandArray[j].FName==Dlg.BandNameArray[i])
+			if(theApp.BandArray[j].FName == Dlg.BandNameArray[i])
 			{
 				CMyTeMath::Energy_Distribution2(&Data,theApp.Options,&theApp.BandArray[j]);
 			}
@@ -524,9 +524,9 @@ void CMyTeDoc::OnViewData( void )
 		if(!ret)   //Create failed.
 			AfxMessageBox(_T("Error creating Dialog"));
 		Dlg->SetWindowText(this->GetPathName());
-		Dlg->AddColumn(_T("Lambda"), Data.Lambda, Data.Count,0, 120);
-		Dlg->AddColumn(_T("Flux"), Data.Flux, Data.Count,1 ,120);
-		Dlg->AddColumn("Lambda", Data.Lambda, Data.Count,2, 120);
+		//Dlg->AddColumn(_T("Lambda"), Data.Lambda, Data.Count,0, 120);
+		//Dlg->AddColumn(_T("Flux"), Data.Flux, Data.Count,1 ,120);
+		//Dlg->AddColumn("Lambda", Data.Lambda, Data.Count,2, 120);
 		Dlg->ShowWindow(SW_SHOW);
 	}
 	else
@@ -552,12 +552,12 @@ void CMyTeDoc::RemoveItem( UINT i )
 	{	
 		if ((i<Data.Count)&&(i>=0))
 		{
-			for (UINT j=i;j<Data.Count-1;j++)
+			for (size_t j=i;j<Data.Count-1;j++)
 			{
 				Data.Lambda[j]=Data.Lambda[j+1];
 				Data.Flux[j]=Data.Flux[j+1];
 			}
-			Data.Count--;
+			//Data.Count--;
 		}
 	}
 }
@@ -575,8 +575,8 @@ void CMyTeDoc::OnViewResult( void )
 		if(!ret)   //Create failed.
 			AfxMessageBox(_T("Error creating Dialog"));
 		Dlg->SetWindowText(this->GetPathName());
-		Dlg->AddColumn(_T("Lambda"), Data.Lambda, Data.Count,0, 120);
-		Dlg->AddColumn(_T("Flux"), Data.Flux, Data.Count,1 ,120);
+		//Dlg->AddColumn(_T("Lambda"), Data.Lambda, Data.Count,0, 120);
+		//Dlg->AddColumn(_T("Flux"), Data.Flux, Data.Count,1 ,120);
 		Dlg->ShowWindow(SW_SHOW);
 	}
 	else

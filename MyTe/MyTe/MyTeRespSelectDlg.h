@@ -10,7 +10,7 @@ class CMyTeRespSelectDlg : public CDialog
 public:
 	CMyTeRespSelectDlg(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CMyTeRespSelectDlg();
-	CString* BandNameArray;
+	PathsArray BandNameArray;
 	UINT BandCount;
 // Dialog Data
 	enum { IDD = IDD_RESP_SELECT_DLG };

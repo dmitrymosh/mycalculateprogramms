@@ -51,18 +51,24 @@ void CMyTeOptionPage3::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
+		ULONG32 ccount = (ULONG32)hListBox->SendMessage(LB_GETCOUNT, 0, 0);
+		while (ccount > 0) {
+			ccount = (ULONG32)hListBox->SendMessage(LB_DELETESTRING, 0, 0);
+		}
+		
 		//заполняем список файлов в диалоге
 		int count=theApp.BandCount;
 		if(count!=0)
 		{
 			for(int i=0;i<count;i++)
 			{
-				int pos = (int)hListBox->SendMessage(LB_ADDSTRING, 0, (LPARAM) theApp.BandArray[i].FName.GetString()); 
+				int pos = (int)hListBox->SendMessage(LB_ADDSTRING, 0, (LPARAM) theApp.BandArray[i].FName.c_str()); 
 				hListBox->SendMessage(LB_SETITEMDATA, pos, (LPARAM) i); 
 			}
 		}		
 	}
-	DDX_Text(pDX, IDC_REDDEN,theApp.Redden.FName);
+	CString A = theApp.Redden.FName.c_str();
+	DDX_Text(pDX, IDC_REDDEN, A);
 	theApp.Redden.LoadFromFile(theApp.Redden.FName);	
 	//theApp.Redden.ConvertLnToFlux();
 	//theApp.Redden.NormMax();

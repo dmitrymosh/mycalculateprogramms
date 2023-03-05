@@ -1,7 +1,11 @@
-#include "StdAfx.h"
+
 #include "MyTeMath.h"
+#include "MyTeBand.h"
+#include "DocDataType.h"
 #include <math.h>
 #include <new>
+#include <windows.h>
+#include <string>
 #define MAX(a,b) a>=b?a:b
 #define MIN(a,b) a<=b?a:b
 #define MaxBand 4
@@ -12,9 +16,10 @@
 #define Pi  3.1415926535897932384626433832795
 double SINfi=0.682887823460;
 double COSfi=0.730523251217;
-FILE *inpf,*outf,*errf;
+//FILE *inpf,*outf,*errf;
 #define len 16384
-char InLin[16384];
+#define _T(x) TEXT(x)
+//char InLin[16384];
 //int SP_Cod[6][36]={ 
 //					{0,80,81,82,83,84,85,86,87,88,89,90,// I sp class ic=0
 //						91,92,93,94,95,96,97,99,-1},
@@ -32,6 +37,7 @@ char InLin[16384];
 //						14,15,16,17,18,19,20,21,22,23,
 //						24,25,26,27,28,29,30,31,32,33,99,-1} 
 //				  };	
+
 CMyTeMath::CMyTeMath(void)
 {
 }
@@ -40,14 +46,14 @@ CMyTeMath::~CMyTeMath(void)
 {
 }
 
-double CMyTeMath::swscanfd(CString str)
+double CMyTeMath::swscanfd(std::wstring str)
 {
 	//
 	double t=0.0;
 	double d=0.0;
 	double f=1.0;
 	bool p=false;
-	for(int i=0;i<str.GetLength();i++)
+	for(size_t i=0;i<str.size();i++)
 	{
 		switch (str[i])
 		{
@@ -253,39 +259,38 @@ UINT CMyTeMath::CopyStrNumber(BYTE* szBuffer, UINT begin, UINT bufsize, wchar_t*
 	return 0;
 }
 
-int CMyTeMath::WriteResult(CString fname, CString rfname, DocDataType* data,bool Over)
+int CMyTeMath::WriteResult(std::wstring fname, std::wstring rfname, DocDataType* data,bool Over)
 {
-	FILE *outf;	
-	CString fmode;
-	if(Over)fmode=_T("w"); else fmode=_T("a");
-	CString outstr;
-	CString outfname(rfname);
-	
-	outfname.Truncate(outfname.GetLength()-4);
-	int pos=outfname.ReverseFind('\\');
-	outstr=outfname.Right(outfname.GetLength()-pos-1);	
-	//CString  outstring[255];
+	//FILE *outf;	
+	std::wstring fmode;
+	if(Over)fmode=TEXT("w"); else fmode=TEXT("a");
+	std::wstring outstr;
+	std::wstring outfname(rfname);
+		
+	outfname.erase(outfname.size() - 3, 3);
+	size_t pos = outfname.find_last_of(TEXT('\\'));
+	outstr = outfname.substr(pos);
 	wchar_t outstring[255];
-	swprintf_s(&outstring[0],254,_T("%-20s %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f\n"),
-		outstr.GetString(),
+	swprintf_s(&outstring[0],254,TEXT("%-20s %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f %10.5f\n"),
+		outstr.c_str(),
 		data->SummFlux[0],data->SummErrFlux[0],
 		data->SummFlux[1],data->SummErrFlux[1],
 		data->SummFlux[2],data->SummErrFlux[2],
 		data->SummFlux[1]-data->SummFlux[0],
 		data->SummFlux[1]-data->SummFlux[2],
 		data->SummFlux[0]-data->SummFlux[2]);
-	_wfopen_s(&outf,fname,fmode);
-	fputws(outstring,outf);
-	fclose(outf);
+	//_wfopen_s(&outf,fname,fmode);
+	//fputws(outstring,outf);
+	//fclose(outf);
 	return 0;	
 }
-int CMyTeMath::WriteResult1(CString fname, CString data,bool Over)
+int CMyTeMath::WriteResult1(std::wstring fname, std::wstring data,bool Over)
 {
-	FILE *outf;	
-	CString fmode;
+	//FILE *outf;	
+	std::wstring fmode;
 	if(Over)fmode=_T("w"); else fmode=_T("a");		
-	errno_t err;
-
+	//errno_t err;
+/*
 	if( (err  = _wfopen_s(&outf,fname,fmode)) !=0 )
 	{		
 		//AfxMessageBox(_T("Файл не может быть открыт для записи."));
@@ -297,14 +302,16 @@ int CMyTeMath::WriteResult1(CString fname, CString data,bool Over)
 		fclose(outf);
 		return 0;	
 	}
-	
+	*/
+	return 0;
 }
-int CMyTeMath::SaveChangedFile(CString fname, DocDataType* data,SData_option option,bool Over)
+int CMyTeMath::SaveChangedFile(std::wstring fname, DocDataType* data,SData_option option,bool Over)
 {
-	FILE *outf;	
-	CString fmode;
+	/*
+	FILE* outf;
+	std::wstring fmode;
 	if(Over)fmode=_T("w"); else fmode=_T("a");	
-	CString outstr;	
+	std::wstring outstr;	
 	_wfopen_s(&outf,fname,fmode);	
 	wchar_t outstring[255];
 	for(ULONG32 i=0;i<data->OutCount;i++)
@@ -313,10 +320,10 @@ int CMyTeMath::SaveChangedFile(CString fname, DocDataType* data,SData_option opt
 										data->LambdaOut[i],data->FluxOutW[i]);//,data->ErrOut[i]);		
 		fputws(outstring,outf);
 	}
-	fclose(outf);	
+	fclose(outf);	*/
 	return 0;
 }
-int CMyTeMath::SaveFile(CString fname, DocDataType* data,SData_option option,bool Over)
+int CMyTeMath::SaveFile(std::wstring fname, DocDataType* data,SData_option option,bool Over)
 {
 /*
 	CFile myFile;
@@ -340,20 +347,21 @@ int CMyTeMath::SaveFile(CString fname, DocDataType* data,SData_option option,boo
 	myFile.Close();
 */
 
-	FILE *outf;	
-	CString fmode;
-	if(Over)fmode=_T("w"); else fmode=_T("a");	
-	CString outstr;	
+	//FILE *outf;	
+	std::wstring fmode;
+	if(Over)fmode= TEXT("w"); else fmode= TEXT("a");
+	std::wstring outstr;
+	/*
 	_wfopen_s(&outf,fname,fmode);
-	if(!outf) return 0;
+	//if(!outf) return 0;
 	wchar_t outstring[255];
 	for(ULONG32 i=0;i<data->Count;i++)
 	{
-		swprintf_s(outstring,255,_T("%5.5f  %8.5e \n"),
+		swprintf_s(outstring,255,TEXT("%5.5f  %8.5e \n"),
 			data->Lambda[i],data->Flux[i]);		
 		fputws(outstring,outf);
 	}
-	fclose(outf);	
+	fclose(outf);	*/
 	return 0;
 }
 #ifdef BLOCK_OFF_LINE
@@ -858,8 +866,8 @@ int CMyTeMath::Energy_Distribution1( DocDataType* data,SData_option option )
 			break;
 		}
 	}
-	delete DataFlux;
-	delete DataNormErr;
+	delete [] DataFlux;
+	delete [] DataNormErr;
 	return 0;
 }
 double* CMyTeMath::Vec_Mult(DocDataType* data,double* a)
@@ -1100,14 +1108,14 @@ int CMyTeMath::EnergyCount( DocDataType* data, SData_option option)
 }
 
 // Сохранение энергий в файл
-int CMyTeMath::SaveEnergy(DocDataType* data, SData_option option,CString rfname,bool Over)
+int CMyTeMath::SaveEnergy(DocDataType* data, SData_option option,std::wstring rfname,bool Over)
 {
-	FILE *outf;	
-	CString fmode;
+	//FILE *outf;	
+	std::wstring fmode;
 	if(Over)fmode=_T("w"); else fmode=_T("a");	
-	CString outfname(rfname);
-	CString OutTextAll;
-	_wfopen_s(&outf,rfname,fmode);
+	std::wstring outfname(rfname);
+	std::wstring OutTextAll;
+	/*_wfopen_s(&outf, rfname, fmode);
 	for(ULONG32 i=0;i<option.NumberBand;i++)
 	{
 		OutTextAll=_T("Band:[");
@@ -1123,6 +1131,7 @@ int CMyTeMath::SaveEnergy(DocDataType* data, SData_option option,CString rfname,
 	}	
 	
 	fclose(outf);
+	*/
 	return 0;
 }
 
@@ -1431,7 +1440,7 @@ double CMyTeMath::SBand_2(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBan
 	for(UINT i=0;i<Band->Count-1;i++)
 	{
 		double BandFlux0=Band->Flux[i];
-		double BandFlux1=Band->Flux[i+1];
+		double BandFlux1=Band->Flux[UINT(i+1)];
 		if ((!Lbegin)&&(BandFlux0==0) && (BandFlux1!=0))
 		{
 			lambdaBeg=Band->Lambda[i];
@@ -1439,7 +1448,7 @@ double CMyTeMath::SBand_2(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBan
 		}
 		if ((!Lend)&&(BandFlux0!=0) && (BandFlux1==0))
 		{
-			lambdaEnd=Band->Lambda[i+1];
+			lambdaEnd=Band->Lambda[UINT(i+1)];
 			Lend=true;
 		}
 		if (i==data->Count-2)
@@ -1493,16 +1502,16 @@ double CMyTeMath::SBand_3(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBan
 
 	for(UINT i=0;i<Band->Count-1;i++)
 	{
-		double BandFlux0=Band->Flux[i];
-		double BandFlux1=Band->Flux[i+1];
+		double BandFlux0=Band->Lambda[i];
+		double BandFlux1=Band->Lambda[i+1];
 		if ((!Lbegin)&&(BandFlux0==0) && (BandFlux1!=0))
 		{
-			lambdaBeg=Band->Lambda[i];
+			lambdaBeg=Band->Flux[i];
 			Lbegin=true;
 		}
 		if ((!Lend)&&(BandFlux0!=0) && (BandFlux1==0))
 		{
-			lambdaEnd=Band->Lambda[i+1];
+			lambdaEnd=Band->Flux[i+1];
 			Lend=true;
 		}
 		if (i==data->Count-2)
@@ -1559,16 +1568,16 @@ double CMyTeMath::SBand_4(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBan
 
 	for(UINT i=0;i<Band->Count-1;i++)
 	{
-		double BandFlux0=Band->Flux[i];
-		double BandFlux1=Band->Flux[i+1];
+		double BandFlux0=Band->Lambda[i];
+		double BandFlux1=Band->Lambda[i+1];
 		if ((!Lbegin)&&(BandFlux0==0) && (BandFlux1!=0))
 		{
-			lambdaBeg=Band->Lambda[i];
+			lambdaBeg=Band->Flux[i];
 			Lbegin=true;
 		}
 		if ((!Lend)&&(BandFlux0!=0) && (BandFlux1==0))
 		{
-			lambdaEnd=Band->Lambda[i+1];
+			lambdaEnd=Band->Flux[i+1];
 			Lend=true;
 		}
 		if (i==data->Count-2)
@@ -1625,16 +1634,16 @@ double CMyTeMath::SBand_L(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBan
 
 	for(UINT i=0;i<Band->Count-1;i++)
 	{
-		double BandFlux0=Band->Flux[i];
-		double BandFlux1=Band->Flux[i+1];
+		double BandFlux0=Band->Lambda[i];
+		double BandFlux1=Band->Lambda[i+1];
 		if ((!Lbegin)&&(BandFlux0==0) && (BandFlux1!=0))
 		{
-			lambdaBeg=Band->Lambda[i];
+			lambdaBeg=Band->Flux[i];
 			Lbegin=true;
 		}
 		if ((!Lend)&&(BandFlux0!=0) && (BandFlux1==0))
 		{
-			lambdaEnd=Band->Lambda[i+1];
+			lambdaEnd=Band->Flux[i+1];
 			Lend=true;
 		}
 		if (i==data->Count-2)
@@ -1712,8 +1721,8 @@ double CMyTeMath::SBand_L2(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBa
 
 	for(UINT i=0;i<Band->Count-1;i++)
 	{
-		double BandFlux0=Band->Flux[i];
-		double BandFlux1=Band->Flux[i+1];
+		double BandFlux0=Band->Lambda[i];
+		double BandFlux1=Band->Lambda[i+1];
 		if ((!Lbegin)&&(BandFlux0==0) && (BandFlux1!=0))
 		{
 			lambdaBeg=Band->Lambda[i];
@@ -1781,7 +1790,7 @@ return Res=2.5*log10l((long double) Res/Res0);//+Vega;//return 0;	//(data->Lambd
 //}
 //#if defined BLOCK_OFF_LINE
 #ifdef EMOE
-void CMyTeMath::ProcessCatalog(CString CatInFName, CString CatOutFName, CString AdvDataFName, SData_option option , CMyTeBand Bands)
+void CMyTeMath::ProcessCatalog(std::wstring CatInFName, std::wstring CatOutFName, std::wstring AdvDataFName, SData_option option , CMyTeBand Bands)
 {	
 	FILE* InFile;
 	FILE* OutFile;
@@ -1821,7 +1830,7 @@ void CMyTeMath::ProcessCatalog(CString CatInFName, CString CatOutFName, CString 
 	//double** Mo_J_Ko;
 	//ULONG32 Mo_J_Ko_Count;
 	double** Mo_am_J_K;
-	CString* Mo_am_J_K_Class;
+	std::wstring* Mo_am_J_K_Class;
 	ULONG32 Mo_am_J_K_Count;
 	//_wfopen_s(&AdvFile,AdvDataFName,_T("r"));
 	//_wfopen_s(&AdvFile2,AdvDataFName2,_T("r"));
@@ -1859,7 +1868,7 @@ void CMyTeMath::ProcessCatalog(CString CatInFName, CString CatOutFName, CString 
 		//создаём массивы
 		Mo_am_J_K_Count=strcount;
 		Mo_am_J_K=new double*[26];
-		Mo_am_J_K_Class=new CString[strcount];
+		Mo_am_J_K_Class=new std::wstring[strcount];
 		for(ULONG32 i=0;i<26;i++)
 		{
 			Mo_am_J_K[i]=new double[strcount];
@@ -2032,7 +2041,7 @@ void CMyTeMath::ProcessCatalog(CString CatInFName, CString CatOutFName, CString 
 		}
 		StarCount++;		
 	}while(EndOfFile!=-1);
-	CString OutStr;
+	std::wstring OutStr;
 	for(UINT i=0;i<12;i++)
 	{
 		fwprintf_s(OutFile,_T("%s %d, StarCount %d, BadStar %d\n"),_T("Table "),i,StarCount,BadStar);	
@@ -4269,9 +4278,10 @@ double CMyTeMath::SpSearch_d(char *SPEC)
 		default : return 99.0;
 	}
 }
+
 int CMyTeMath::CountDataFile(FILE *inpf){
-	int Count_str=0;
-	if (inpf) {
+	int Count_str = 0;
+	/*if (inpf) {
 		while (!feof(inpf)){
 			if ( fgets(InLin,len,inpf)==0 ){
 				//AfxMessageBox(_T("End Reading data_total File"));
@@ -4283,12 +4293,12 @@ int CMyTeMath::CountDataFile(FILE *inpf){
 			}
 		}
 	}
-	 fseek(inpf, 0L, SEEK_SET);
+	 fseek(inpf, 0L, SEEK_SET);*/
 	 return Count_str;
 }
 void CMyTeMath::InpData(char** data,FILE *inpf, int Count_str,const char* Message){ 
 	 ///*char** */data = new char*[Count_str];        // STEP 1: SET UP THE ROWS.
-	 for (UINT i=0; i<Count_str; ){
+/*	 for (int i = 0; i<Count_str; ) {
 		try {                      // TEST FOR EXCEPTIONS.
    			if ( fgets(InLin,len,inpf)==0 ) break;
 			if (InLin[0]=='*'){ continue;
@@ -4308,7 +4318,7 @@ void CMyTeMath::InpData(char** data,FILE *inpf, int Count_str,const char* Messag
 			exit(-1);
 	   }
 	}
-	//fclose(inpf);
+	//fclose(inpf);*/
 }
 
 UINT CMyTeMath::SpSearch(char N ,char P)
@@ -4333,8 +4343,8 @@ void CMyTeMath::Search_Band(CMyTeBand* Band,double* lambdaBeg,double* lambdaEnd)
 bool Lbegin=false;
 bool Lend=false;
     for(UINT i=0; i < Band->Count - 1; i++){
-        double BandFlux0 = Band->Flux[i];
-        double BandFlux1 = Band->Flux[i + 1];
+        double BandFlux0 = Band->Lambda[i];
+        double BandFlux1 = Band->Lambda[i + 1];
         if ((!Lbegin) && (BandFlux0 == 0) && (BandFlux1 != 0)){
 	        (*lambdaBeg) = Band->Lambda[i];
 	        Lbegin = true;
@@ -4383,9 +4393,9 @@ double CMyTeMath::Aid(CMyTeBand* Band,CMyTeBand* Extint,double Mz){
 }
 void SolverLSQ::Init()
 {
-	for(int i=0;i<N;i++){
+	for(UINT i=0;i<N;i++){
 		d[i]=0;
-		for(int j=0;j<N;j++) R[i][j]=0;
+		for(UINT j=0;j<N;j++) R[i][j]=0;
   }
 }
 void SolverLSQ::Accumulate (/*const*/ double A[], double b)
@@ -4449,7 +4459,7 @@ void SolverLSQ::Solve (double x[])
   // Check for singular matrix
   for (UINT i=0;i<N;i++)
 	if ( R[i][i] == 0.0 ) {
- 		AfxMessageBox(_T("ERROR: Singular matrix R in SolverLSQ::Solve()"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
+ 		//AfxMessageBox(_T("ERROR: Singular matrix R in SolverLSQ::Solve()"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
      //      cerr << " ERROR: Singular matrix R in SolverLSQ::Solve()" << endl;
 		exit(1);
     }
@@ -6758,9 +6768,9 @@ void CMyTeMath::TESTING()
 //	fprintf(outf,"*TYC|V|W_B|B_V|V_R|B_R|R|Vt|Bt_Vt|Vt_J|J|H|K|Qf|J_H|H_K|J_K|GIwbvrR|GIwbvrRmin|GIwbvrRmax|GImVRIc1|\
 //				 GImVRIc1min|GImVRIc1max|GIhmHp|GIhmHpmin|GIhmHpmax|GItjhkmVt|GItjhkmVtmin|GItjhkmVtmax|GImtjhk|GImtjhkmin|GImtjhkmax|pp|\n");
 //	fprintf(outf,"%s|%8.4lf|%8.4lf|%8.4lf|%8.4lf|%8.4lf|%8.4lf|%8.4lf|%8.4lf|%8.4lf|%8.4lf|%8.4lf|%8.4lf|\
-				 %s|%8.4lf|%8.4lf|%8.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%7d|\n",\
-				 Name,V,W_B,B_V,V_R,B_R,R,Vt,Bt_Vt,Vt_J,J,H,K,Qflag,J_H,H_K,J_K,GIwbvrR,GIwbvrRmin,GIwbvrRmax,GImVRIc1,\
-				 GImVRIc1min,GImVRIc1max,GIhmHp,GIhmHpmin,GIhmHpmax,GItjhkmVt,GItjhkmVtmin,GItjhkmVtmax,GImtjhk,GImtjhkmin,GImtjhkmax,pp);
+//				 %s|%8.4lf|%8.4lf|%8.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%10.4lf|%7d|\n",\
+//				 Name,V,W_B,B_V,V_R,B_R,R,Vt,Bt_Vt,Vt_J,J,H,K,Qflag,J_H,H_K,J_K,GIwbvrR,GIwbvrRmin,GIwbvrRmax,GImVRIc1,\
+//				 GImVRIc1min,GImVRIc1max,GIhmHp,GIhmHpmin,GIhmHpmax,GItjhkmVt,GItjhkmVtmin,GItjhkmVtmax,GImtjhk,GImtjhkmin,GImtjhkmax,pp);
 
 	char Name[17];
 	char Qflag[4];
@@ -8094,11 +8104,11 @@ void CMyTeMath::TESTING()
 }
 #endif
 char* CMyTeMath::_AWAY(char*NameStr){
-char Outstr[16384];
+char * Outstr = new char[16384];
 //int NStr_len=0;
-int NStr_len=strlen(NameStr);
+size_t NStr_len=strlen(NameStr);
 int j=0;
-for (int i=0;i<NStr_len;i++){
+for (size_t i=0;i<NStr_len;i++){
 	if(NameStr[i]==' '||NameStr[i]=='*' ) continue;
 	else {
 		Outstr[j]=NameStr[i];
@@ -8446,7 +8456,7 @@ void CMyTeMath::TESTING()
 	}
 #endif
 	if (fopen_s(&outf, OutFile, "w") !=0 ){
-		AfxMessageBox(_T("Error Opening Out File")); 
+		//AfxMessageBox(_T("Error Opening Out File")); 
 		//      return;
 	}
 	for(UINT j=0;j<4772;j++){//4772
@@ -8467,7 +8477,7 @@ double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
 //	long double Pi2=6.283185307179586476925286766559;
 	//UINT BandCount=4;
 
-	//FILE *inpf;
+	FILE *inpf, *errf, *outf;
 	//int len=2048;
 	//int NCRV=4;
 	char InLin[len];
@@ -8504,9 +8514,9 @@ double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
     CMyTeBand Extint;// пользоваться как обычным бандом
     // задаём Имя файла средней экстинкции
     Extint.FName=_T("D:\\mecalculateprogramm\\MyTe\\EXTINCT_nm.txt");
-    if(Extint.FName!="") {
+    if(Extint.FName!=_T("")) {
         // загружаем файл
-        Extint.LoadFromFile(Extint.FName);	
+        Extint.LoadFromFile(NULL,Extint.FName);	
     }   
 //БЛОК №1 ВВОД ДАННЫХ
 //_____________________
@@ -8568,7 +8578,7 @@ double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
 //***********************************
 //открываем входной файл 
 	if (fopen_s(&inpf, FileInput, "r") !=0 ){
-		AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		//AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
 		exit(1);//0U);
 		//AfxMessageBox(_T("Error Opening data_total File"));
  //      return;
@@ -8584,7 +8594,7 @@ double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
 //***********************************
 	//открыли файл типов с координатами
 	 if(fopen_s(&inpf, FileTypes, "r") !=0 ){ 
-		AfxMessageBox(_T("TYPES NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
+		//AfxMessageBox(_T("TYPES NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
 			//AfxMessageBox(_T("Error Opening Coord File"));
 		  return -1.0;
 	 }
@@ -8597,7 +8607,7 @@ double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
 // $ 1.3 ВВод данных спектров 
 //*******************====================
 	 if(fopen_s(&inpf, FileSpect, "r") !=0 ){ 
-		AfxMessageBox(_T("SPECTRA NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
+		//AfxMessageBox(_T("SPECTRA NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
 		//AfxMessageBox(_T("Error Opening Spectra File"));
 		//goto error_return;
 	 }
@@ -8641,7 +8651,7 @@ double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
 	  //fputs("\n",errf);
 	}	
 	if (fopen_s(&errf, ErrFile, "a") !=0 ){
-			AfxMessageBox(_T("ERR NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
+			//AfxMessageBox(_T("ERR NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
 		//AfxMessageBox(_T("Error Opening Err File"));
 	}
 //char SpBUFF[]="A05 "; 
@@ -8650,7 +8660,7 @@ double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
 // $ 1.4 ВВод старого каталога WBVR
  //***********************************
 	 if (fopen_s(&inpf, FileWBVR, "r") !=0 ){
-		AfxMessageBox(_T("WBVR NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
+		//AfxMessageBox(_T("WBVR NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
 		 //AfxMessageBox(_T("Error Opening WBVR File"));
 	 }
 	 // Подсчёт кол-ва строк в файле WBVR
@@ -8662,7 +8672,7 @@ double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
 // $ 1.5 ВВод списка первоочередных звезд
  //***********************************
 	 if (fopen_s(&inpf, FileListDP, "r") !=0 ){
-		AfxMessageBox(_T("ListDP NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
+		//AfxMessageBox(_T("ListDP NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
 		 //AfxMessageBox(_T("Error Opening WBVR File"));
 	 }
 	 // Подсчёт кол-ва строк в файле WBVR8766
@@ -8774,8 +8784,8 @@ for(UINT i=0;i<Count_DPCat;i++){
 //наполнение DS
 #define	MaxTypSt 200 // максимальное количество типов стандартов
 #define	MaxSt 300	// максимальное количество наблюдений стандартов в куске
-int CountSt=0;//число стандартов в куске
-int CountTypSt=0;//число типов стандартов куске
+UINT CountSt=0;//число стандартов в куске
+UINT CountTypSt=0;//число типов стандартов куске
 
 UINT IOUT=0; // счетчик выходного массива обработанных строк 
 Date0* DS1=0;//new Date0[Count_str]
@@ -8922,6 +8932,7 @@ for(UINT I0=0;I0<Count_str;){//НАЧАЛО ГЛОБАЛЬНОГО ЦИКЛА ПО КУСКАМ
 int ic=0;
 UINT p1,p2,cc;
 UINT m=0;
+FILE outf;
 if(i==69){
 	i=i;}
 		cc=SpSearch(DS1[i].Spect[0],DS1[i].Spect[1]);
@@ -8990,7 +9001,7 @@ double **Subint = new double* [MaxBand];
 // контрольная печать в файл ПРОБКИ
 	//открыли выходной файл печати ПРОБКИ
 		if (fopen_s(&outf, OutFile, "w") !=0 ){
-			AfxMessageBox(_T("OUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
+			//AfxMessageBox(_T("OUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
 			//AfxMessageBox(_T("Error Opening result File"));
 		}
 		fprintf(outf,"NAME|KLAD|ST|TA|RA|DE|Mz|W|B|V|R|JD|Sp|Date|Time|WO|BO|VO|RO|Bt|Vt|\n");
@@ -9037,7 +9048,7 @@ CountTypSt=0;//число типов стандартов куске
 	}
 	double RA=0;
 	double DE=0;
-	for(int jk=0;jk<CountSt;jk++){ //перетряс стандартов куска
+	for(UINT jk=0;jk<CountSt;jk++){ //перетряс стандартов куска
 		if(!DDS[jk].FlagYes){
 			RA=DDS[jk].RA;
 			DE=DDS[jk].DE;
@@ -9046,7 +9057,7 @@ CountTypSt=0;//число типов стандартов куске
 		for (int k = 0; k<MaxBand; k++){
 			DDD[CountTypSt][k]=0;
 		}
-		for (int ik = 0; ik < CountSt; ik++){
+		for (UINT ik = 0; ik < CountSt; ik++){
 			if(DDS[ik].RA==RA && DDS[ik].DE==DE){
 				DDST[CountTypSt][ij]=DDS[ik];
 				for(UINT k=0;k<MaxBand;k++){
@@ -9108,7 +9119,7 @@ CountTypSt=0;//число типов стандартов куске
 						FlagYes=true;
 						break;
 					}
-					for(int ij=0;ij<CountSt;ij++){
+					for(UINT ij=0;ij<CountSt;ij++){
 						if( (DS1[i].JD>DDST[ii][ij].JD) && (DS1[i].JD<DDST[ii][ij+1].JD) )/* &&*/ {
 							for(int k=0;k<MaxBand;k++){
 								double b=LinInt(DDST[ii][ij].RM[k],DDST[ii][ij+1].RM[k],DDST[ii][ij].JD,DDST[ii][ij+1].JD,DS1[i].JD);
@@ -9122,7 +9133,7 @@ CountTypSt=0;//число типов стандартов куске
 				break;
 			}
 			if (!FlagYes){	//если не найдены подходящие стандарты - любые соседние
-				for(int ij=0;ij<CountSt;ij++){
+				for(UINT ij=0;ij<CountSt;ij++){
 					if( (DS1[i].JD>DDS[ij].JD) && (DS1[i].JD<DDS[ij+1].JD) ){
 						for(int k=0;k<MaxBand;k++){
 							double b=LinInt(DDS[ij].RM[k],DDS[ij+1].RM[k],DDS[ij].JD,DDS[ij+1].JD,DS1[i].JD);
@@ -9196,9 +9207,10 @@ CountTypSt=0;//число типов стандартов куске
 	COUNT_PART++;
 	I0=ENd_Part+1;
 	fprintf(errf,"%d\n",COUNT_PART);
+	FILE * outf;
 }//КОНЕЦ ГЛОБАЛЬНОГО ЦИКЛА ПО КУСКАМ
 		if (fopen_s(&outf, OutNormFile, "w") !=0 ){
-			AfxMessageBox(_T("OUTnorm NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
+			//AfxMessageBox(_T("OUTnorm NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
 //AfxMessageBox(_T("Error Opening result NormFile"));
 		}
 		fprintf(outf,"NAME|KLAD|ST|TA|RA|DE|Mz|Rw|Rb|Rv|Rr|W|B|V|R|JD|Sp|Date|Time|WO|BO|VO|RO|Bt|Vt|\n");
@@ -9244,7 +9256,7 @@ CountTypSt=0;//число типов стандартов куске
 		if(!DSI[i].FlagYes)	
 			memcpy(buff,DSI[i].Name,12);
 		else continue;
-		int kk=0;
+		UINT kk=0;
 		double Ddd[MaxBand]={0,0,0,0};
 		for(UINT j=0,ij=0;j<IDPC;j++){//IOUT
 			int a=strncmp(buff,DSI[j].Name,11);
@@ -9575,7 +9587,7 @@ double CMyTeMath::nonlinear(double N){
 	}while(b>0.0001);
 	return(n);
 }
-void Polinom(double *Coeff,/*double *RO,*/double W, double B,  double V, double R,double Mz,double lgG){//
+double Polinom(double *Coeff,/*double *RO,*/double W, double B,  double V, double R,double Mz,double lgG){//
 	//double W_B=R0[0]-R0[1];
 	//double B_V=R0[1]-R0[2];
 	//double V_R=R0[2]-R0[3];
@@ -9584,7 +9596,7 @@ void Polinom(double *Coeff,/*double *RO,*/double W, double B,  double V, double 
 	double B_V=B-V;
 	double V_R=V-R;
 	double B_R=B-R;
-	double Member[20];
+	double Member[21];
 	double Ai;
 	//Member[0]=W_B;
 	Member[1]=W_B;
@@ -9615,7 +9627,7 @@ void Polinom(double *Coeff,/*double *RO,*/double W, double B,  double V, double 
 //	/*b3*B_R^^2+b4*W_B*B_V+b5*W_B*B_R+*/b6*B_V*B_R+/*c1*W_B^^3+*/
 //	c2*B_V^^3+c3*B_R^^3+c4*W_B^^2*B_V+/*c5*W_B^^2*B_R+*/
 //	c6*W_B*B_V^^2+c7*B_V^^2*B_R+c8*W_B*B_R^^2+c9*B_V*B_R^^2+c10*W_B*B_V*B_R;
-		for(UINT j=1;j<20;j++){
+		for(UINT j=1;j<21;j++){
 			Ai=Coeff[0];
 			Ai+=Coeff[j]*Member[j];
 		}
@@ -9626,7 +9638,7 @@ void ReadPolinom(FILE *outf,char *FileInput){//
 char *ptr[16384];
 FILE *inpf;
 		if (fopen_s(&inpf, FileInput, "r") !=0 ){
-		AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
+		//AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
 		exit(1);//0U);
 		//AfxMessageBox(_T("Error Opening data_total File"));
  //      return;
@@ -9634,7 +9646,7 @@ FILE *inpf;
 	char** Data0 = new char*[500];        // STEP 1: SET UP THE ROWS.
 	double R=0.0;
 //	char* Coeff = new char[20];        // STEP 1: SET UP THE ROWS.
-	char *Coeff0[20]={"a0","a1","a2","a3","b1","b2","b3","b4","b5","b6","c1","c2","c3","c4","c5","c6","c7","c8","c9","c10"};
+	char Coeff0[20][4]={"a0","a1","a2","a3","b1","b2","b3","b4","b5","b6","c1","c2","c3","c4","c5","c6","c7","c8","c9","c10"};
 	double CoVal[20];
 
 UINT Count=CMyTeMath::CountDataFile(inpf);
@@ -9653,7 +9665,7 @@ UINT Count=CMyTeMath::CountDataFile(inpf);
 		for(UINT j=1;j<Count-1;j++){
 			CMyTeMath::StrPtr(Data[j],'\t',ptr);
 			memcpy(ptr[0],Pol[j].Coeff,2);
-			sscanf(ptr[1],"%lf",&Pol[j].CoVal);
+			sscanf_s(ptr[1],"%lf",&Pol[j].CoVal);
 		}
 	for(UINT i=0;i<20;i++){
 		//if ( fgets(InLin,len,inpf)==0 ) break;
@@ -9681,7 +9693,7 @@ UINT Count=CMyTeMath::CountDataFile(inpf);
 		fprintf(outf,"%8.4lf ",Coeff[i]);
 		fputs("\n",outf);
 	}
-fcloseall();
+_fcloseall();
 }
 
 
@@ -9719,6 +9731,6 @@ fcloseall();
 //	c2*B_V^^3+c3*B_R^^3+c4*W_B^^2*B_V+/*c5*W_B^^2*B_R+*/
 //	c6*W_B*B_V^^2+c7*B_V^^2*B_R+c8*W_B*B_R^^2+c9*B_V*B_R^^2+c10*W_B*B_V*B_R;
 
-}
-if(strcmp(C[i],"a0")==0)
-	C[i]=="a0";
+//}
+//if(strcmp(C[i],"a0")==0)
+//	C[i]=="a0";

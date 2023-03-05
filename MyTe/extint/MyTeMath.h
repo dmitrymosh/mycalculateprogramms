@@ -1,9 +1,28 @@
 #pragma once
 
-
-#include "stdafx.h"
 #include<stdlib.h>
+#include <windows.h>
+#include <string>
 #include "MyTeBand.h"
+#include "MyFile.h"
+#include "DocDataType.h"
+struct SData_option
+{
+	double Vega; //Значение Веги
+	std::wstring VegaFile;//путь к файлу Веги
+	double* Lambda_Beg;//описание диапазонов. массив с Лямбдой начала диапазона
+	double* Lambda_End;//описание диапазонов. массив с Лямбдой конца диапазона
+	double* VegaFlux;//описание диапазонов. массив со значением Веги в этом диапазоне
+	UINT NumberBand;//описание диапазонов. количество диапазонов
+	double StepLmkm;//Выходные данные. размер шага
+	double LmkmBeg;//Выходные данные. начало диапазона
+	double LmkmEnd;//Выходные данные. конец диапазона
+	//ULONG32 OutCount;//Выходные данные. размер массивов
+	double GraphBeg;//Построение графиков.начало диапазона 
+	double GraphEnd;//Построение графиков.конец диапазона
+	double Coeff;//
+};
+
 class CMyTeMath
 {
 public:
@@ -11,7 +30,7 @@ public:
 	~CMyTeMath(void);
 	static double RANDisex();
 	static double RANDisexN(double N);
-	static double swscanfd(CString str);
+	static double swscanfd(std::wstring str);
 	static double MyTe_scanf(BYTE* buffer,ULONG size, ULONG& pos, ULONG& beg, ULONG& end);
 	static UINT SkipNotNumber(BYTE* szBuffer, UINT begin,UINT bufsize);
 	static UINT CopyStrNumber(BYTE* szBuffer, UINT begin, UINT bufsize, wchar_t* dest,UINT dsize);
@@ -42,12 +61,12 @@ public:
 	static int EnergyCountIntegrBand( DocDataType* data, SData_option option);
 	static double LinInt(double a,double b,double ta,double tb,double t);	
 	static float LinInt(float a,float b,float ta,float tb,float t);
-	static int WriteResult(CString fname, CString rfname, DocDataType* data,bool Over);
-	static int WriteResult1(CString fname, CString data,bool Over);
-	static int SaveChangedFile(CString fname, DocDataType* data,SData_option option,bool Over);
-	static int SaveFile(CString fname, DocDataType* data,SData_option option,bool Over);
+	static int WriteResult(std::wstring fname, std::wstring rfname, DocDataType* data,bool Over);
+	static int WriteResult1(std::wstring fname, std::wstring data,bool Over);
+	static int SaveChangedFile(std::wstring fname, DocDataType* data,SData_option option,bool Over);
+	static int SaveFile(std::wstring fname, DocDataType* data,SData_option option,bool Over);
 	// Сохранение энергий в файл
-	static int SaveEnergy(DocDataType* data, SData_option option,CString rfname,bool Over);
+	static int SaveEnergy(DocDataType* data, SData_option option,std::wstring rfname,bool Over);
 	static int Norm5500(DocDataType* data, SData_option option);
 	static double SBand(DocDataType* data, CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik);
 	static double SBand_2(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik);
@@ -62,7 +81,7 @@ public:
 	static double Mz(double t, double Sinfi, double Cosfi, double d, short zz);
 	static double Stims(int jd50);
 	//static double SBand(DocDataType* data, SData_option option,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik);
-	//static void ProcessCatalog(CString CatInFName, CString CatOutFName, CString AdvDataFName, SData_option option , CMyTeBand Bands);
+	//static void ProcessCatalog(std::wstring CatInFName, std::wstring CatOutFName, std::wstring AdvDataFName, SData_option option , CMyTeBand Bands);
 	static double GetFlux(double lambda,double* Lambda,double* Flux, ULONG32 Count);
 	static UINT SpSearch(char N ,char P);
 	static double SpSearch_d(char *SPEC);
@@ -89,14 +108,14 @@ class SolverLSQ
     {
       d=new double[N];
       R=new double*[N];
-      for(int  i=0;i<N;i++) R[i]=new double[N];
+      for(UINT  i=0;i<N;i++) R[i]=new double[N];
     	Init();
     }
 
     ~SolverLSQ()
     {
 		delete d;
-		for(int  i=0;i<N;i++) delete R[i];
+		for(UINT  i=0;i<N;i++) delete R[i];
 		delete R;
     }
 
@@ -114,7 +133,7 @@ class SolverLSQ
 
   private:
 
-    int      N;         // Number of estimation parameters
+    UINT      N;         // Number of estimation parameters
     double   *d;        // Right hand side of transformed equations
     double   **R;       // Upper right triangular matrix
 

@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by MyTe.rc
+// Включаемый файл, созданный в Microsoft Visual C++.
+// Используется MyTe.rc
 //
 #define IDD_ABOUTBOX                    100
 #define IDP_OLE_INIT_FAILED             100
@@ -45,6 +45,9 @@
 #define IDC_BUTTON3                     1016
 #define IDC_REMOVE_FILE                 1016
 #define IDC_REMOVE_BAND                 1016
+#define IDC_INPUT_FILES2                1017
+#define IDC_ADD_FILE2                   1018
+#define IDC_REMOVE_FILE2                1019
 #define IDC_REWRITE                     1025
 #define IDC_APPEND                      1026
 #define IDC_ADD_FOLDER                  1028
@@ -192,7 +195,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        147
+#define _APS_NEXT_RESOURCE_VALUE        148
 #define _APS_NEXT_COMMAND_VALUE         32895
 #define _APS_NEXT_CONTROL_VALUE         1055
 #define _APS_NEXT_SYMED_VALUE           106
