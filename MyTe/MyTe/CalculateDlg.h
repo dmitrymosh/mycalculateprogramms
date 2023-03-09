@@ -29,6 +29,8 @@ public:
 	afx_msg void OnBnClickedBrowseFileVega();
 	afx_msg void OnBnClickedAddFile2();
 	afx_msg void OnBnClickedRemoveFile2();
+	afx_msg void OnBnClickedAddFile3();
+	afx_msg void OnBnClickedRemoveFile3();
 	bool NeedFolder;
-	//bool ToFolder;
+	
 };

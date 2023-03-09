@@ -1,17 +1,12 @@
-#include <iostream>
-#include <fstream>
 #include <iterator>
 #include <string>
-#include <regex>
 #include <vector>
-#include <sstream>
-//#include <windows.h>
-#include <tchar.h> 
-#include <stdio.h>
-#include <strsafe.h>
 #include "MyFile.h"
 #include "stdafx.h"
-#pragma warning(suppress : 4996)
+#include <iostream>
+#include <fstream>
+#include <sstream>
+using namespace std;
 // ----------------------------------------------------------------------------
 // FileName - строка 
 int ReadData(wstring FileName, VectorArray& Data)

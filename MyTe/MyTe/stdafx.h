@@ -61,9 +61,7 @@
 #include <vector>
 #include <string>
 using namespace std;
-//#include "DocDataType.h"
-#include "MyFile.h" 
-
+#include "MyFile.h"
 typedef vector <wstring> PathsArray;
 //typedef vector < vector<double>> VectorArray;
 
@@ -91,7 +89,8 @@ struct FileListType//список файлов для вычислений
 	PathsArray Files;//список файлов для вычислений
 	wstring VegaFile;//имя файла Веги
 	wstring OutFile;//имя файла для вывода отчета. может быть задана папка. тогда имя файла будет формироваться динамически
-	PathsArray ExtintFile; 
+	PathsArray ExtintFile; // файлы атмосферных прозрачностей
+	PathsArray AdvFilterFile; //файлы дополнительных фильтров
 	int Over;//признак перезаписи или добавления файла отчета
 };
 
@@ -119,7 +118,7 @@ struct SBand//кривые реакций
 	double Count;
 	CString fname;
 };*/
-#include "MyFile.h"
+
 #include "MyTeBand.h"
 #include "DocDataType.h"
 #include "MyTeMath.h"

@@ -1,8 +1,8 @@
 #include "StdAfx.h"
 //#include "MyTeBand.h"
 //#include "MyTeMath.h"
-CMyTeBand::CMyTeBand(void) noexcept {};
-CMyTeBand::~CMyTeBand(void) noexcept {};
+CMyTeBand::CMyTeBand(void) {};
+CMyTeBand::~CMyTeBand(void) {};
 //типа ввода
 #ifdef EMOE		
 int _strptr(char Str[],char c,char** pt){

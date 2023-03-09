@@ -902,6 +902,7 @@ void CMyTeApp::OnActionAid()// много прозрачностей
     {
 	vector <double> VegaArray;
 	vector <double> VegaXArray;
+	vector <CMyTeBand> AdvFilters;
 
 	CString HeadStr;
 
@@ -910,9 +911,15 @@ void CMyTeApp::OnActionAid()// много прозрачностей
 	    Vega.LoadFromFile(FileList.VegaFile);
 	    //подсчет Bеги
 	    for (int i = 0; i < BandCount; i++) {
-		double res = CMyTeMath::SBand_2(&Vega, &BandArray[i], 0, NULL, 0);
+		const double res = CMyTeMath::SBand_2(&Vega, &BandArray[i], 0, NULL, 0);
 		VegaArray.push_back(res);
 	    }
+	}
+	if (FileList.AdvFilterFile.size() > 0) {
+	    AdvFilters.resize(FileList.AdvFilterFile.size());
+	    for (size_t i = 0; i < FileList.AdvFilterFile.size(); i++) {
+		AdvFilters.at(i).LoadFromFile(FileList.AdvFilterFile.at(i));
+	    }	    
 	}
 
 	wstring HeaderStr;
@@ -943,7 +950,7 @@ void CMyTeApp::OnActionAid()// много прозрачностей
 		DocDataType Data;		
 		Data.LoadFromFile(FileList.Files[i].c_str());
 
-		CMyTeMath::Ai(Data, BandArray, Redden, Extint, VegaArray, OutData);
+		CMyTeMath::Ai(Data, BandArray, Redden, Extint, AdvFilters, VegaArray, OutData);
 		for (size_t k = FileNames.size(); k < OutData.size(); k++) {
 		    wstring s = Data.FileName;
 		    size_t t = s.find_last_of(_T('.'));
@@ -1139,22 +1146,19 @@ void CMyTeApp::OnActionBands()
 	if(calcdlg.DoModal()==IDOK)
 	
 	{
-		double* VegaArray=new double[BandCount];
-		for(int i=0;i<BandCount;i++) VegaArray[i]=0.0;
+	    vector <double> VegaArray;// = new double[BandCount];
+		//for(int i=0;i<BandCount;i++) VegaArray[i]=0.0;
 		CString RString;
 
 		if(FileList.VegaFile.size())
 		{
-			CMyTeDoc* VDoc;
-			//подсчет Bеги
-			VDoc=(CMyTeDoc*)OpenDocumentFile(FileList.VegaFile.c_str());
+		    DocDataType Data;
+		    Data.LoadFromFile(FileList.VegaFile);
+			
 			for(int i=0;i<BandCount;i++)
 			{
-				VegaArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,NULL,0);
-				//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
+				VegaArray.push_back(CMyTeMath::SBand_2(&Data,&BandArray[i],0,NULL,0));
 			}
-			int cou=GetOpenDocumentCount();
-			if(cou>0) VDoc->OnCloseDocument();
 		}	
 
 		RString.AppendFormat(_T("%-12s"),_T("File_Name"));

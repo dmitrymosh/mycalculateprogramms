@@ -34,11 +34,11 @@ char InLin[16384];
 //						14,15,16,17,18,19,20,21,22,23,
 //						24,25,26,27,28,29,30,31,32,33,99,-1} 
 //				  };	
-CMyTeMath::CMyTeMath(void) noexcept
+CMyTeMath::CMyTeMath(void) 
 {
 }
 
-CMyTeMath::~CMyTeMath(void) noexcept
+CMyTeMath::~CMyTeMath(void) 
 {
 }
 
@@ -9493,6 +9493,7 @@ int CMyTeMath::Ai(DocDataType& Data,
     vector <CMyTeBand>& BandArray,
     CMyTeBand& Redden,
     CMyTeBand& Extint,
+    vector <CMyTeBand>& AdvFilters,
     vector <double>& VegaArray,
     VectorArray& OutData)
 {

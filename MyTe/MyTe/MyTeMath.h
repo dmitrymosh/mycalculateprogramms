@@ -4,8 +4,8 @@
 class CMyTeMath
 {
 public:
-	CMyTeMath(void) noexcept;
-	~CMyTeMath(void) noexcept;
+	CMyTeMath(void) ;
+	~CMyTeMath(void) ;
 	static double RANDisex();
 	static double RANDisexN(double N);
 	static double swscanfd(CString str);
@@ -62,7 +62,7 @@ public:
 	//static void ProcessCatalog(CString CatInFName, CString CatOutFName, CString AdvDataFName, SData_option option , CMyTeBand Bands);
 	static UINT SpSearch(char N ,char P);
 	static double SpSearch_d(char *SPEC);
-	static int Ai(DocDataType& Data, vector <CMyTeBand>& BandArray, CMyTeBand& Redden, CMyTeBand& Extint, vector <double>& VegaArray, VectorArray& OutData);
+	static int Ai(DocDataType& Data, vector <CMyTeBand>& BandArray, CMyTeBand& Redden, CMyTeBand& Extint, vector <CMyTeBand> &AdvFilters, vector <double>& VegaArray, VectorArray& OutData);
 	static double Aid(CMyTeBand* Band,CMyTeBand* Extint,double Mz);
 	static int StrPtr(char Str[],char c,char** pt);
 	static int StrPtrP(char Str[],char c,char** pt);

@@ -48,6 +48,9 @@
 #define IDC_INPUT_FILES2                1017
 #define IDC_ADD_FILE2                   1018
 #define IDC_REMOVE_FILE2                1019
+#define IDC_INPUT_FILES3                1020
+#define IDC_ADD_FILE3                   1021
+#define IDC_REMOVE_FILE3                1022
 #define IDC_REWRITE                     1025
 #define IDC_APPEND                      1026
 #define IDC_ADD_FOLDER                  1028

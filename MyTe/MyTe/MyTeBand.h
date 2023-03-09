@@ -20,8 +20,8 @@ public:
     wstring Name;
 
 public:
-    CMyTeBand(void) noexcept;
-    ~CMyTeBand(void) noexcept;
+    CMyTeBand(void);
+    ~CMyTeBand(void);
     size_t GetCount_p();
     double GetLambda_p(size_t i);
     double GetFlux_p(size_t i);
