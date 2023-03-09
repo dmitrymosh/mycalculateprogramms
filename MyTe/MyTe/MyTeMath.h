@@ -1,20 +1,18 @@
 #pragma once
-
-
 #include "stdafx.h"
-#include<stdlib.h>
-#include "MyTeBand.h"
+
 class CMyTeMath
 {
 public:
-	CMyTeMath(void);
-	~CMyTeMath(void);
+	CMyTeMath(void) noexcept;
+	~CMyTeMath(void) noexcept;
 	static double RANDisex();
+	static double RANDisexN(double N);
 	static double swscanfd(CString str);
 	static double MyTe_scanf(BYTE* buffer,ULONG size, ULONG& pos, ULONG& beg, ULONG& end);
 	static UINT SkipNotNumber(BYTE* szBuffer, UINT begin,UINT bufsize);
 	static UINT CopyStrNumber(BYTE* szBuffer, UINT begin, UINT bufsize, wchar_t* dest,UINT dsize);
-	static int MagnK(DocDataType* data,SData_option option);
+	static int MagnK(DocDataType *data,SData_option option);
 	static double Integral(double* SubInt,ULONG32 MaxCount,double* lambda,double lambdaBeg,double lambdaEnd,double LBREAK,bool ERRF);
 	static int Energy_Distribution(DocDataType* data,SData_option option);
 	static int Energy_Distribution1_0(DocDataType* data,SData_option option);	
@@ -50,23 +48,33 @@ public:
 	static int Norm5500(DocDataType* data, SData_option option);
 	static double SBand(DocDataType* data, CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik);
 	static double SBand_2(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik);
+	static double SBand_3(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN);
+	static double SBand_4(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN);
+	static double SBand_L(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN);
+	static double SBand_L2(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN);
 	static int JDm1950(int year,int data);
-	static double PROBKA_1(CMyTeBand* Band);
-	static double PROBKA(CMyTeBand* Band);
+	static double PROBKA_1(vector <CMyTeBand> Band);
+	static double PROBKA(vector <CMyTeBand> Band);
 	//static double Z(double t, double Sinfi, double Cosfi, double d);
 	static double Mz(double t, double Sinfi, double Cosfi, double d, short zz);
 	static double Stims(int jd50);
 	//static double SBand(DocDataType* data, SData_option option,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik);
 	//static void ProcessCatalog(CString CatInFName, CString CatOutFName, CString AdvDataFName, SData_option option , CMyTeBand Bands);
-	//static double GetFlux(double lambda,double* Lambda,double* Flux, ULONG32 Count);
 	static UINT SpSearch(char N ,char P);
+	static double SpSearch_d(char *SPEC);
+	static int Ai(DocDataType& Data, vector <CMyTeBand>& BandArray, CMyTeBand& Redden, CMyTeBand& Extint, vector <double>& VegaArray, VectorArray& OutData);
 	static double Aid(CMyTeBand* Band,CMyTeBand* Extint,double Mz);
 	static int StrPtr(char Str[],char c,char** pt);
+	static int StrPtrP(char Str[],char c,char** pt);
 	static void Search_Band(CMyTeBand* Band,double* lambdaBeg,double* lambdaEnd);
 	//static void Search_Band(CMyTeBand* Band,double lambdaBeg,double lambdaEnd);
 	//double SIRIUS(DocDataType* data, SData_option option,CMyTeBand* Band,CMyTeBand* Extint,double Mz);
 	static void TESTING();
+	static char* _AWAY(char*NameStr);
 	static void TEST();
+	static double CorrColorSp(double Sp,UINT NRC,UINT NCln,UINT NOut,double InColor, double ** RedCol/*,bool Flg0*/);
+	static double nonlinear(double N);
+	static double Polinom( double DS,double N);
 };
 class SolverLSQ
 {

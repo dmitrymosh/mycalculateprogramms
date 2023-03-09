@@ -16,13 +16,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// русский resources
+// Русский (Россия) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
-#ifdef _WIN32
 LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
 #pragma code_page(1251)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -99,26 +97,30 @@ BEGIN
     LTEXT           "",IDC_STATIC,12,4,300,8
 END
 
-IDD_MULTI_FLUX_DIALOG DIALOGEX 0, 0, 488, 272
+IDD_MULTI_FLUX_DIALOG DIALOGEX 0, 0, 488, 293
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Вычисление величин по спектру"
+CAPTION ","
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "Посчитать",IDOK,318,251,70,14
-    PUSHBUTTON      "Отмена",IDCANCEL,398,251,70,14
-    LISTBOX         IDC_INPUT_FILES,14,35,374,128,LBS_SORT | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,WS_EX_ACCEPTFILES
-    EDITTEXT        IDC_OUTPUT_FILE,14,215,374,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Обзор",IDC_BROWSE_FILE,398,216,70,14
+    DEFPUSHBUTTON   "Посчитать",IDOK,318,272,70,14
+    PUSHBUTTON      "Отмена",IDCANCEL,398,272,70,14
+    LISTBOX         IDC_INPUT_FILES,14,35,374,63,LBS_SORT | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,WS_EX_ACCEPTFILES
+    EDITTEXT        IDC_OUTPUT_FILE,14,234,374,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Обзор",IDC_BROWSE_FILE,398,234,70,14
     LTEXT           "Исходные файлы",IDC_STATIC,14,18,64,10
-    LTEXT           "Путь результатов",IDC_STATIC,14,202,63,8
+    LTEXT           "Путь результатов",IDC_STATIC,14,222,63,8
     PUSHBUTTON      "Добавить",IDC_ADD_FILE,398,35,70,14
     PUSHBUTTON      "Удалить",IDC_REMOVE_FILE,398,55,70,14
-    CONTROL         "Заменить данные в файле",IDC_REWRITE,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,135,235,105,10
-    CONTROL         "Добавить к существующим",IDC_APPEND,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,14,235,110,10
+    CONTROL         "Заменить данные в файле",IDC_REWRITE,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,135,254,105,10
+    CONTROL         "Добавить к существующим",IDC_APPEND,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,14,254,110,10
     PUSHBUTTON      "Добавить папку",IDC_ADD_FOLDER,398,75,70,14
-    EDITTEXT        IDC_VEGA_FILE,14,181,374,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Обзор",IDC_BROWSE_FILE_VEGA,398,181,70,14
-    LTEXT           "Вега",IDC_STATIC,14,167,16,8
+    EDITTEXT        IDC_VEGA_FILE,14,204,374,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Обзор",IDC_BROWSE_FILE_VEGA,398,204,70,14
+    LTEXT           "Вега",IDC_STATIC,14,191,16,8
+    LISTBOX         IDC_INPUT_FILES2,14,116,374,67,LBS_SORT | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,WS_EX_ACCEPTFILES
+    LTEXT           "Атмосферные прозрачности",IDC_STATIC,14,103,139,10
+    PUSHBUTTON      "Добавить",IDC_ADD_FILE2,398,116,70,14
+    PUSHBUTTON      "Удалить",IDC_REMOVE_FILE2,398,137,70,14
 END
 
 IDD_OPTION_PAGE1 DIALOGEX 0, 0, 309, 289
@@ -212,7 +214,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_OPTION_DIALOG, DIALOG
     BEGIN
@@ -245,16 +247,18 @@ BEGIN
         VERTGUIDE, 398
         VERTGUIDE, 468
         TOPMARGIN, 7
-        BOTTOMMARGIN, 265
+        BOTTOMMARGIN, 286
         HORZGUIDE, 28
         HORZGUIDE, 35
         HORZGUIDE, 55
-        HORZGUIDE, 155
-        HORZGUIDE, 195
-        HORZGUIDE, 210
-        HORZGUIDE, 215
+        HORZGUIDE, 116
+        HORZGUIDE, 183
+        HORZGUIDE, 199
+        HORZGUIDE, 218
         HORZGUIDE, 230
-        HORZGUIDE, 245
+        HORZGUIDE, 248
+        HORZGUIDE, 264
+        HORZGUIDE, 286
     END
 
     IDD_OPTION_PAGE1, DIALOG
@@ -332,7 +336,9 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\MyTe.ico"
+
 IDR_MyTeTYPE            ICON                    "res\\MyTeDoc.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -341,12 +347,13 @@ IDR_MyTeTYPE            ICON                    "res\\MyTeDoc.ico"
 
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR  16, 15
+IDR_MAINFRAME TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_OPEN
@@ -367,7 +374,7 @@ END
 // Menu
 //
 
-IDR_MAINFRAME MENUEX 
+IDR_MAINFRAME MENUEX
 BEGIN
     POPUP "&File",                          65535,MFT_STRING,MFS_ENABLED
     BEGIN
@@ -412,7 +419,7 @@ BEGIN
     END
 END
 
-IDR_MyTeTYPE MENU 
+IDR_MyTeTYPE MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -474,7 +481,7 @@ BEGIN
     END
 END
 
-IDR_MENU1 MENU 
+IDR_MENU1 MENU
 BEGIN
     POPUP "Pop"
     BEGIN
@@ -560,7 +567,7 @@ END
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS 
+IDR_MAINFRAME ACCELERATORS
 BEGIN
     "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
@@ -622,29 +629,40 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_MULTI_FLUX_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDP_OLE_INIT_FAILED     "OLE initialization failed.  Make sure that the OLE libraries are the correct version."
     IDP_SOCKETS_INIT_FAILED "Windows sockets initialization failed."
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "MyTe"
     IDR_MyTeTYPE            "\nMyTe\nMyTe\n\n\nMyTe.Document\nMyTe.Document"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_APP_TITLE       "MyTe"
     AFX_IDS_IDLEMESSAGE     "For Help, press F1"
     AFX_IDS_HELPMODEMESSAGE "Select an object on which to get Help"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_INDICATOR_EXT        "EXT"
     ID_INDICATOR_CAPS       "CAP"
@@ -654,7 +672,7 @@ BEGIN
     ID_INDICATOR_REC        "REC"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_NEW             "Create a new document\nNew"
     ID_FILE_OPEN            "Open an existing document\nOpen"
@@ -667,7 +685,7 @@ BEGIN
     ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
     ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
@@ -678,7 +696,7 @@ BEGIN
     ID_HELP                 "Display help for current task or command\nHelp"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_MRU_FILE1       "Open this document"
     ID_FILE_MRU_FILE2       "Open this document"
@@ -698,13 +716,13 @@ BEGIN
     ID_FILE_MRU_FILE16      "Open this document"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
     ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
     ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
@@ -714,7 +732,7 @@ BEGIN
     ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_CLEAR           "Erase the selection\nErase"
     ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
@@ -729,13 +747,13 @@ BEGIN
     ID_EDIT_REDO            "Redo the previously undone action\nRedo"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
     ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
@@ -746,19 +764,19 @@ BEGIN
     AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCRESTORE       "Restore the window to normal size"
     AFX_IDS_SCTASKLIST      "Activate Task List"
     AFX_IDS_MDICHILD        "Activate this window"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
 END
 
-#endif    // русский resources
+#endif    // Русский (Россия) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

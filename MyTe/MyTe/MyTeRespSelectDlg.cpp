@@ -31,20 +31,21 @@ void CMyTeRespSelectDlg::DoDataExchange(CDataExchange* pDX)
 
 	//LPTSTR lpszFileToDelete; 
 	//int nSelItems; 
-	int nSelItemsInBuffer; 	    
+	UINT nSelItemsInBuffer; 	    
 	int nBuffer[8192]; 
 
 	if(pDX->m_bSaveAndValidate) 
 	{							  
 		BandCount = (int)hListBox->SendMessage(LB_GETSELCOUNT, 0, 0); 
 		nSelItemsInBuffer = (int)hListBox->SendMessage(LB_GETSELITEMS, 512, (LPARAM) nBuffer); 
-		BandNameArray = new CString[BandCount];
+		//BandNameArray = new CString[BandCount];
+		BandNameArray.clear();
 		if (BandCount <= nSelItemsInBuffer) 
 		{ 
 			for (int i = nSelItemsInBuffer - 1; i >= 0; i--) 
 			{             
 				hListBox->SendMessage(LB_GETTEXT,nBuffer[i], (LPARAM) lpszFile); 
-				BandNameArray[i]=lpszFile;
+				BandNameArray.push_back(lpszFile);
 				//hListBox->SendMessage(LB_DELETESTRING, nBuffer[i], 0); 
 			} 
 			hListBox->SendMessage(LB_SETCARETINDEX, 0, 0); 
@@ -60,7 +61,7 @@ void CMyTeRespSelectDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			for(int i=0;i<count;i++)
 			{
-				int pos = (int)hListBox->SendMessage(LB_ADDSTRING, 0, (LPARAM) theApp.BandArray[i].FName.GetString()); 
+				int pos = (int)hListBox->SendMessage(LB_ADDSTRING, 0, (LPARAM) theApp.BandArray[i].FName.c_str()); 
 				hListBox->SendMessage(LB_SETITEMDATA, pos, (LPARAM) i); 
 			}
 		}		

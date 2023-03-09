@@ -58,8 +58,14 @@
 
 #define E_CONST -1.0857362047581295691278222972915
 #include <math.h>
+#include <vector>
+#include <string>
+using namespace std;
+//#include "DocDataType.h"
+#include "MyFile.h" 
 
-
+typedef vector <wstring> PathsArray;
+//typedef vector < vector<double>> VectorArray;
 
 #ifndef _MYTE_STDAFX
 #define _MYTE_STDAFX
@@ -80,41 +86,12 @@ struct SData_option
 	double Coeff;//
 };
 
-class DocDataType
-{
-public:
-	double *Lambda;//Лямбда, входные данные(X) массив с размером Count
-	double *Flux;	//Светимость, входные данные(Y) массив с размером Count
-	double *ErrFlux;//Ошибка входные данные массив с размером Count
-	double *NormErrFlux;//Нормальная ошибка, входные данные массив с размером Count
-	UINT Count;//размер входных массивов
-	UINT  NumberBand;
-	double *SummErrFlux;//сумма квадратов ошибок по диапазонам, массив с размером options->NumberBand
-	double *SummNormErrFlux;//сумма нормальных ошибок , массив с размером options->NumberBand
-	double *SummFlux;//сумма светимости , массив с размером options->NumberBand
-	double *LambdaOut;//Лямбда, выходные данные массив с размером options->OutCount; 
-	double *FluxOutW;//Светимость , выходные данные массив с размером options->OutCount;
-	double *ErrOut;//ошибка,  выходные данные массив с размером options->OutCount;
-	double *FotonCount;//Количество фотонов, выходной массив с размером options->NumberBand
-	double *EmFluxWsm2A_7;//Поток в полосах в W/cm2/A, выходной массив с размером options->NumberBand
-	double LmBeg;
-	double LmEnd;
-	double LmStep;
-	UINT OutCount;
-	DocDataType (void);
-	void Init (UINT strcount,UINT NumberBand);
-	void InitOut (UINT _OutCount);
-	~DocDataType ();
-	void operator=(DocDataType &Source); 
-	double GetFlux(DocDataType* data,double lambda);
-};
-typedef DocDataType DDT;
 struct FileListType//список файлов для вычислений
 {
-	CString* Files;//список файлов для вычислений
-	UINT Count;
-	CString VegaFile;//имя файла Веги
-	CString OutFile;//имя файла для вывода отчета
+	PathsArray Files;//список файлов для вычислений
+	wstring VegaFile;//имя файла Веги
+	wstring OutFile;//имя файла для вывода отчета. может быть задана папка. тогда имя файла будет формироваться динамически
+	PathsArray ExtintFile; 
 	int Over;//признак перезаписи или добавления файла отчета
 };
 
@@ -142,7 +119,9 @@ struct SBand//кривые реакций
 	double Count;
 	CString fname;
 };*/
+#include "MyFile.h"
 #include "MyTeBand.h"
+#include "DocDataType.h"
 #include "MyTeMath.h"
 #include "DataView.h"
 #endif

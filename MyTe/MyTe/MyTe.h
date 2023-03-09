@@ -19,11 +19,13 @@ class CMyTeApp : public CWinApp
 public:
 	CMyTeApp();
 	SData_option Options;
-	CMyTeBand* BandArray;//массив кривых реакций
+	vector <CMyTeBand> BandArray;//массив кривых реакций
 	CMyTeBand Redden;//кривая покраснений
+	CMyTeBand EXTINT;//кривая атмосферной экстинкции
 	ULONG32 BandCount;//количество кривых реакций в массиве
 	//SData_option TempOptions;
 	FileListType FileList;//список файлов для вычислений
+	//PathsArray ExtintList;//список файлов атмосферной экстинкции
 	CMainFrame* m_nWnd;
 	
 // Overrides
@@ -44,12 +46,17 @@ public:
 	afx_msg void OnActionNorm5500();
 	afx_msg void OnSaveData();
 	afx_msg void OnActionAid();
+	afx_msg void OnActionAid1();
 	afx_msg void OnConvert();
+	afx_msg void OnConvert_1();
+	afx_msg void OnConvert_2();
 	afx_msg void OnRemoveMinus();
 	void OnFileOpen(void);
 	afx_msg void OnActionBands();
 	afx_msg void OnMenuOH_8();
 	afx_msg void OnActionTesting();
+	//afx_msg void OnActionAid();
+	//afx_msg void OnActionTest();
 };
 
 // The one and only CMyTeApp object

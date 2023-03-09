@@ -14,3 +14,6 @@
 /MyTe/extint/Data
 /find/find/find.vcxproj.user
 *.user
+/MyTe/MyTe/*.txt
+/MyTe/extint/*.user
+/MyTe/MyTe/*.user

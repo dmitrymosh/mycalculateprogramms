@@ -101,7 +101,9 @@ void CMyTeDoc::Serialize(CArchive& ar)
 	else
 	{
 		// TODO: add loading code here
-		LoadFile(ar.GetFile());
+		wstring filename = ar.GetFile()->GetFilePath();
+		LoadFile(filename);
+		//ar.GetFile()->Close();
 		//LoadFITSFile(ar.GetFile());
 	}
 }
@@ -125,69 +127,11 @@ void CMyTeDoc::Dump(CDumpContext& dc) const
 // CMyTeDoc commands
 
 
-void CMyTeDoc::LoadFile(CFile* myFile)
+void CMyTeDoc::LoadFile(wstring FileName)
 {	
-	BYTE*	szBuffer; 
-	UINT    nActual = 0; 	
-	UINT strcount=0;
-
-	UINT filesize = (UINT)myFile->GetLength();
-	szBuffer= new BYTE [filesize];
-	nActual = (UINT)myFile->Read( szBuffer, filesize ); 
-	//myFile->Close();
-	if(nActual < filesize) filesize = nActual;	
-
-	//пропускаем заголовок
-	UINT head=CMyTeMath::SkipNotNumber(szBuffer,0,filesize);
-
-	//подсчет строк
-	for(UINT i=head;i<filesize;i++)
-	{
-		if (szBuffer[i]==0x09)
-		{
-			szBuffer[i]=0x20;
-		}
-		/*
-		if((szBuffer[i]==0x0A)&&(szBuffer[i+1]==0x20)&&(szBuffer[i-1]!=0x0D))
-		{
-			szBuffer[i]=0x0D;
-			szBuffer[i+1]=0x0A;
-		}*/
-		if(/*((szBuffer[i]==0x0D)&&(szBuffer[i+1]==0x0A))||*/(szBuffer[i]==0x0A)) 
-		{
-			strcount++;
-		}
-	}
+	this->Data.LoadFromFile(FileName);
 	
-	Data.Init(strcount,theApp.Options.NumberBand);	
-
-	//загружаем данные в массивы	
-	wchar_t temp[200];
-	//int FieldCount;
-	UINT bi=0;
-	int tj=0;
-	bool First=true;
-	bi=CMyTeMath::SkipNotNumber(szBuffer,bi,filesize);	
-	for(UINT j=0;j<strcount;j++)
-	{	
-		int i=0;		
-		while((bi<filesize)&&(szBuffer[bi]!=0x0D)&&(szBuffer[bi]!=0x0A))
-		{			
-			temp[i]=szBuffer[bi];
-			bi++;i++;
-			temp[i]=0x00;
-		}		
-		while((szBuffer[bi]==0x0D)||(szBuffer[bi]==0x0A))
-		{
-			bi++;
-		}
-		
-		swscanf_s((wchar_t*)&temp,_T("%lf%lf%lf%lf"),&Data.Lambda[j],&Data.Flux[j],
-					&Data.ErrFlux[j],&Data.NormErrFlux[j]);
-					
-	}
-	Data.Count=strcount;
-	int OutCount=strcount;
+	
 	double LmBeg=0.0;
 	double LmEnd=0.0;
 	double LmStep=0.0;
@@ -211,9 +155,9 @@ void CMyTeDoc::LoadFile(CFile* myFile)
 		Data.LmBeg=LmBeg;
 		Data.LmEnd=LmEnd;
 		Data.LmStep=LmStep;
-		OutCount=(int)(((LmEnd-LmBeg)/LmStep)+1);		
+		//OutCount=(int)(((LmEnd-LmBeg)/LmStep)+1);		
 	}
-	Data.InitOut(OutCount);
+	//Data.InitOut(OutCount);
 	
 	/*
 	for(ULONG32 i=0;i<Data.Count;i++)
@@ -221,7 +165,7 @@ void CMyTeDoc::LoadFile(CFile* myFile)
 		Data.Lambda[i]*=10000.0;
 	}
 	*/
-	delete[] szBuffer;
+	
 	//CMyTeMath::MagnK(&Data,theApp.Options);
 	//CMyTeMath::Energy_Distribution1(&Data,theApp.Options);
 	//CMyTeMath::EnergyCount(&Data,theApp.Options);
@@ -492,7 +436,7 @@ void CMyTeDoc::OnSubResponce()
 	{		 
 		for(ULONG32 j=0;j<theApp.BandCount;j++)
 		{
-			if(theApp.BandArray[j].FName==Dlg.BandNameArray[i])
+			if(theApp.BandArray[j].FName == Dlg.BandNameArray[i])
 			{
 				CMyTeMath::Energy_Distribution2(&Data,theApp.Options,&theApp.BandArray[j]);
 			}
@@ -524,9 +468,9 @@ void CMyTeDoc::OnViewData( void )
 		if(!ret)   //Create failed.
 			AfxMessageBox(_T("Error creating Dialog"));
 		Dlg->SetWindowText(this->GetPathName());
-		Dlg->AddColumn(_T("Lambda"), Data.Lambda, Data.Count,0, 120);
-		Dlg->AddColumn(_T("Flux"), Data.Flux, Data.Count,1 ,120);
-		Dlg->AddColumn("Lambda", Data.Lambda, Data.Count,2, 120);
+		//Dlg->AddColumn(_T("Lambda"), Data.Lambda, Data.Count,0, 120);
+		//Dlg->AddColumn(_T("Flux"), Data.Flux, Data.Count,1 ,120);
+		//Dlg->AddColumn("Lambda", Data.Lambda, Data.Count,2, 120);
 		Dlg->ShowWindow(SW_SHOW);
 	}
 	else
@@ -552,12 +496,12 @@ void CMyTeDoc::RemoveItem( UINT i )
 	{	
 		if ((i<Data.Count)&&(i>=0))
 		{
-			for (UINT j=i;j<Data.Count-1;j++)
+			for (size_t j=i;j<Data.Count-1;j++)
 			{
 				Data.Lambda[j]=Data.Lambda[j+1];
 				Data.Flux[j]=Data.Flux[j+1];
 			}
-			Data.Count--;
+			//Data.Count--;
 		}
 	}
 }
@@ -575,8 +519,8 @@ void CMyTeDoc::OnViewResult( void )
 		if(!ret)   //Create failed.
 			AfxMessageBox(_T("Error creating Dialog"));
 		Dlg->SetWindowText(this->GetPathName());
-		Dlg->AddColumn(_T("Lambda"), Data.Lambda, Data.Count,0, 120);
-		Dlg->AddColumn(_T("Flux"), Data.Flux, Data.Count,1 ,120);
+		//Dlg->AddColumn(_T("Lambda"), Data.Lambda, Data.Count,0, 120);
+		//Dlg->AddColumn(_T("Flux"), Data.Flux, Data.Count,1 ,120);
 		Dlg->ShowWindow(SW_SHOW);
 	}
 	else

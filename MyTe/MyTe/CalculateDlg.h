@@ -27,6 +27,8 @@ public:
 	afx_msg void OnBnClickedAddFolder();
 	INT_PTR DoModal(bool NeedFolder=false);
 	afx_msg void OnBnClickedBrowseFileVega();
+	afx_msg void OnBnClickedAddFile2();
+	afx_msg void OnBnClickedRemoveFile2();
 	bool NeedFolder;
 	//bool ToFolder;
 };
