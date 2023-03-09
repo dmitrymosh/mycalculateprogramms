@@ -921,7 +921,7 @@ void CMyTeApp::OnActionAid()// много прозрачностей
 		AdvFilters.at(i).LoadFromFile(FileList.AdvFilterFile.at(i));
 	    }	    
 	}
-
+	
 	wstring HeaderStr;
 	vector <wstring> Header;
 	HeaderStr = wformat(TEXT("%-12s %7s %11s "), TEXT("File_Name"), TEXT("   RedX"), TEXT("       Mz"));
