@@ -903,66 +903,75 @@ void CMyTeApp::OnActionAid()// много прозрачностей
 	vector <double> VegaArray;
 	vector <double> VegaXArray;
 	vector <CMyTeBand> AdvFilters;
-
+	int Err = 0;
 	CString HeadStr;
-
-	if (FileList.VegaFile.size() > 0) {
-	    DocDataType Vega;
-	    Vega.LoadFromFile(FileList.VegaFile);
-	    //подсчет Bеги
-	    for (int i = 0; i < BandCount; i++) {
-		const double res = CMyTeMath::SBand_2(&Vega, &BandArray[i], 0, NULL, 0);
-		VegaArray.push_back(res);
-	    }
-	}
-	if (FileList.AdvFilterFile.size() > 0) {
-	    AdvFilters.resize(FileList.AdvFilterFile.size());
-	    for (size_t i = 0; i < FileList.AdvFilterFile.size(); i++) {
-		AdvFilters.at(i).LoadFromFile(FileList.AdvFilterFile.at(i));
-	    }	    
-	}
-	
-	wstring HeaderStr;
-	vector <wstring> Header;
-	HeaderStr = wformat(TEXT("%-12s %7s %11s "), TEXT("File_Name"), TEXT("   RedX"), TEXT("       Mz"));
-	for (int i = 0; i < BandCount; i++)
-	{
-	    wstring hB = wformat(TEXT(" %10s "), BandArray[i].Name.c_str());
-	    HeaderStr.append(hB);
-	}
-	HeaderStr += wformat(_T("%s "), _T("          AB          AR          AV          AW          LB          LR          LV           LW"));
-	//HeaderStr += wformat(_T("%s "), _T("          AB          AR          AV          AW          LB          LR          LV           LW"));
-
-	Header.push_back(HeaderStr);
-	for (size_t j = 0; j < FileList.ExtintFile.size(); j++) {
-	    CMyTeBand Extint;
-	    Extint.LoadFromFile(FileList.ExtintFile.at(j));
-	    vector <wstring> FileNames;
-	    VectorArray OutData;
-	    wstring OutFile = FileList.OutFile;
-	    size_t p = OutFile.find_last_of(_T("\\"));
-	    OutFile.erase(p + 1);
-	    OutFile.append(Extint.Name);
-	    OutFile.append(_T("_out.txt"));
-
-	    OutData.clear();
-	    FileNames.clear();
-	    for (size_t i = 0; i < FileList.Files.size(); i++) {
-		DocDataType Data;		
-		Data.LoadFromFile(FileList.Files[i].c_str());
-
-		int res = CMyTeMath::Ai(Data, BandArray, Redden, Extint, AdvFilters, VegaArray, OutData);
-		if(res == 0) return;
-		for (size_t k = FileNames.size(); k < OutData.size(); k++) {
-		    wstring s = Data.FileName;
-		    size_t t = s.find_last_of(_T('.'));
-		    s.erase(t);
-		    FileNames.push_back(s);
-		    FileNames.push_back(_T("|"));
+	try {
+	    if (FileList.VegaFile.size() > 0) {
+		DocDataType Vega;
+		Vega.LoadFromFile(FileList.VegaFile);
+		//подсчет Bеги
+		for (int i = 0; i < BandCount; i++) {
+		    const double res = CMyTeMath::SBand_2(&Vega, &BandArray[i], 0, NULL, 0);
+		    VegaArray.push_back(res);
 		}
 	    }
-	    WriteDataHead(OutFile, FileNames, OutData, Header, _T(" %10.5lf|"));
+	    if (FileList.AdvFilterFile.size() > 0) {
+		AdvFilters.resize(FileList.AdvFilterFile.size());
+		for (size_t i = 0; i < FileList.AdvFilterFile.size(); i++) {
+		    AdvFilters.at(i).LoadFromFile(FileList.AdvFilterFile.at(i));
+		}
+	    }
+
+	    wstring HeaderStr;
+	    vector <wstring> Header;
+	    HeaderStr = wformat(TEXT("%-12s\| %7s\| %11s\| "), TEXT("File_Name"), TEXT("   RedX"), TEXT("       Mz"));
+	    for (int i = 0; i < BandCount; i++)
+	    {
+		wstring hB = wformat(TEXT(" %10s "), BandArray[i].Name.c_str());
+		HeaderStr.append(hB);
+	    }
+	    HeaderStr += wformat(_T("%s "), _T("          AB|         AR|         AV|         AW|         LB|         LR|         LV|         LW|"));
+	    HeaderStr += wformat(_T("%s "), _T("          GB|         GR|         GV|         GW|"));
+
+	    Header.push_back(HeaderStr);
+	    for (size_t j = 0; j < FileList.ExtintFile.size(); j++) {
+		CMyTeBand Extint;
+		Extint.LoadFromFile(FileList.ExtintFile.at(j));
+		vector <wstring> FileNames;
+		VectorArray OutData;
+		wstring OutFile = FileList.OutFile;
+		size_t p = OutFile.find_last_of(_T("\\"));
+		OutFile.erase(p + 1);
+		OutFile.append(Extint.Name);
+		OutFile.append(_T("_out.txt"));
+
+		OutData.clear();
+		FileNames.clear();
+		for (size_t i = 0; i < FileList.Files.size(); i++) {
+		    DocDataType Data;
+		    Data.LoadFromFile(FileList.Files[i].c_str());
+		    wstring Msg = _T("Обработка: Файл: ") + Data.FileName + _T(" Атмосферный фильтр: ") + Extint.FName;
+		    m_nWnd->m_wndStatusBar.SetPaneText(0, Msg.c_str(), TRUE);
+		    this->PumpMessage();
+
+		    Err = CMyTeMath::Ai(Data, BandArray, Redden, Extint, AdvFilters, VegaArray, OutData);
+		    
+		    for (size_t k = FileNames.size(); k < OutData.size(); k++) {
+			wstring s = Data.FileName;
+			size_t t = s.find_last_of(_T('.'));
+			s.erase(t);
+			s.append(_T("\|"));
+			FileNames.push_back(s);
+			
+		    }
+		}
+		WriteDataHead(OutFile, FileNames, OutData, Header, _T(" %10.5lf\|"));
+	    }
+	    m_nWnd->m_wndStatusBar.SetPaneText(0, _T("Подсчет закончен."), TRUE);
 	}
+	catch (...) {
+	    m_nWnd->m_wndStatusBar.SetPaneText(0, _T("Ошибка обработки."), TRUE);
+	}	
     }
 }
 

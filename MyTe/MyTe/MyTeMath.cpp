@@ -9503,7 +9503,7 @@ int CMyTeMath::Ai(DocDataType& Data,
     double Mz = 1.0;
     int Nred = 6;//0;//0;//0;//5;//5;	//number of random i.s.ext. amount (thickness, depth) 
     const size_t BandCount = BandArray.size();
-    
+
     for (int jj = 0; jj < Nred; jj++) {
 
 	if (jj == 0) {
@@ -9529,20 +9529,15 @@ int CMyTeMath::Ai(DocDataType& Data,
 	    }
 	    for (UINT j = 0; j < BandCount; j++) {
 		Result.push_back(1.086 * (CMyTeMath::SBand_L(&Data, &BandArray[j], 0, &Redden, X, Mz, &Extint) -
-			CMyTeMath::SBand_L(&Data, &BandArray[j], 0, &Redden, X, 0.0, &Extint)));
+		    CMyTeMath::SBand_L(&Data, &BandArray[j], 0, &Redden, X, 0.0, &Extint)));
 	    }
 	    for (UINT j = 0; j < BandCount; j++) {
-		try{
-		    Result.push_back(CMyTeMath::SBand_LG(&Data, &BandArray[j], &AdvFilters[j], 0.0, &Redden, X, Mz, &Extint));
-		} 
-		catch(...) {
-		    return 0;
-		}
+		Result.push_back(CMyTeMath::SBand_LG(&Data, &BandArray[j], &AdvFilters[j], 0.0, &Redden, X, Mz, &Extint));
 	    }
 	    OutData.push_back(Result);
 	}
     }
-    return 1;
+    return 0;
 }
 double CMyTeMath::SBand_LG(DocDataType* data, CMyTeBand* Band, CMyTeBand* LGBand,double Vega, CMyTeBand* Redden, double RedThik, double Mz, CMyTeBand* EXTIN)
 
