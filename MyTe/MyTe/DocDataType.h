@@ -6,16 +6,13 @@
 class DocDataType
 {
 public:
-	__declspec(property(get = GetLambda_p, put = PutLambda_p)) double Lambda[];
-	__declspec(property(get = GetFlux_p, put = PutFlux_p)) double Flux[];
-	__declspec(property(get = GetErrFlux_p, put = PutErrFlux_p)) double ErrFlux[];
-	__declspec(property(get = GetNormErrFlux_p, put = PutNormErrFlux_p)) double NormErrFlux[];
-	__declspec(property(get = GetCount_p, put = PutCount_p)) size_t Count;
-	//double* Lambda;//Лямбда, входные данные(X) массив с размером Count
-	//double* Flux;	//Светимость, входные данные(Y) массив с размером Count
-	//double* ErrFlux;//Ошибка входные данные массив с размером Count
-	//double* NormErrFlux;//Нормальная ошибка, входные данные массив с размером Count
-	//UINT Count;//размер входных массивов
+	__declspec(property(get = GetLambda_p, put = PutLambda_p)) double Lambda[]; //Лямбда, входные данные(X) массив с размером Count
+	__declspec(property(get = GetFlux_p, put = PutFlux_p)) double Flux[];		//Светимость, входные данные(Y) массив с размером Count
+	__declspec(property(get = GetErrFlux_p, put = PutErrFlux_p)) double ErrFlux[];//Ошибка входные данные массив с размером Count
+	__declspec(property(get = GetNormErrFlux_p, put = PutNormErrFlux_p)) double NormErrFlux[];//Нормальная ошибка, входные данные массив с размером Count
+	__declspec(property(get = GetCount_p, put = PutCount_p)) size_t Count; //размер входных массивов
+	//__declspec(property(get = GetCount_p, put = PutCount_p)) size_t NumberBand; //размер входных массивов
+	
 	UINT  NumberBand;
 	double* SummErrFlux;//сумма квадратов ошибок по диапазонам, массив с размером options->NumberBand
 	double* SummNormErrFlux;//сумма нормальных ошибок , массив с размером options->NumberBand
@@ -48,8 +45,12 @@ public:
 	void PutFlux_p(size_t i, double b);
 	void PutErrFlux_p(size_t i, double b);
 	void PutNormErrFlux_p(size_t i, double b);
-
+	int LoadFromFile(wstring FileName);
+	wstring FileName;
+	wstring FilePath;
 	VectorArray MyData;
+	VectorArray SummData;
+	VectorArray OutData;
 };
 //typedef DocDataType DDT;
 

@@ -19,7 +19,7 @@ class CMyTeApp : public CWinApp
 public:
 	CMyTeApp();
 	SData_option Options;
-	CMyTeBand* BandArray;//массив кривых реакций
+	vector <CMyTeBand> BandArray;//массив кривых реакций
 	CMyTeBand Redden;//кривая покраснений
 	CMyTeBand EXTINT;//кривая атмосферной экстинкции
 	ULONG32 BandCount;//количество кривых реакций в массиве

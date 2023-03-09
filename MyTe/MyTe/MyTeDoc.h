@@ -47,7 +47,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 //double GetFlux(DocDataType* data,double lambda);
-	void LoadFile(CFile* myFile);
+	void LoadFile(wstring FileName);
 	void LoadFITSFile(CFile* myFile);
 	void RemoveItem(UINT i);
 	ULONG32 SkipNotNumber(BYTE* szBuffer, ULONG32 begin,ULONG32 bufsize);

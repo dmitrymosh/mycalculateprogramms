@@ -5,31 +5,10 @@ void DocDataType::Init(UINT strcount, UINT NumBand)
 	
 	NumberBand = NumBand;
 
-	SummErrFlux = new double[NumberBand];
-	SummFlux = new double[NumberBand];
-	EmFluxWsm2A_7 = new double[NumberBand];
-	FotonCount = new double[NumberBand];
-	SummNormErrFlux = new double[NumberBand];
-	for (ULONG32 i = 0; i < NumberBand; i++)
-	{
-		SummErrFlux[i] = 0.0;
-		SummFlux[i] = 0.0;
-	}
 }
 void DocDataType::InitOut(UINT _OutCount)
 {
-	//создаём массивы
-	OutCount = _OutCount;
-	ErrOut = new double[OutCount];
-	FluxOutW = new double[OutCount];
-	LambdaOut = new double[OutCount];
-
-	for (ULONG32 i = 0; i < OutCount; i++)
-	{
-		ErrOut[i] = 0.0;
-		FluxOutW[i] = 0.0;
-		LambdaOut[i] = 0.0;
-	}
+	
 }
 DocDataType::DocDataType(void)
 	
@@ -52,15 +31,6 @@ double DocDataType::GetFlux(DocDataType* data, double lambda) {
 DocDataType::~DocDataType()
 {
 	
-	if (ErrOut != NULL)	delete ErrOut;
-	if (FluxOutW != NULL)	delete FluxOutW;
-	if (LambdaOut != NULL)	delete LambdaOut;
-
-	if (EmFluxWsm2A_7 != NULL)	delete EmFluxWsm2A_7;
-	if (FotonCount != NULL)	delete FotonCount;
-	if (SummErrFlux != NULL)	delete SummErrFlux;
-	if (SummNormErrFlux != NULL)	delete SummNormErrFlux;
-	if (SummFlux != NULL)	delete SummFlux;
 }
 void DocDataType::operator=(DocDataType& Source)
 {
@@ -69,20 +39,8 @@ void DocDataType::operator=(DocDataType& Source)
 	InitOut(Source.OutCount);
 	
 	this->MyData = Source.MyData;
-	for (ULONG32 j = 0; j < OutCount; j++)
-	{
-		FluxOutW[j] = Source.FluxOutW[j];
-		LambdaOut[j] = Source.LambdaOut[j];
-		ErrOut[j] = Source.ErrOut[j];
-	}
-	for (ULONG32 j = 0; j < NumberBand; j++)
-	{
-		SummErrFlux[j] = Source.SummErrFlux[j];
-		SummNormErrFlux[j] = Source.SummNormErrFlux[j];
-		SummFlux[j] = Source.SummFlux[j];
-		FotonCount[j] = Source.FotonCount[j];
-		EmFluxWsm2A_7[j] = Source.EmFluxWsm2A_7[j];
-	}
+	this->OutData = Source.OutData;
+	this->SummData = Source.SummData;
 }
 
 double DocDataType::LinInt(double a, double b, double ta, double tb, double t)
@@ -107,39 +65,37 @@ size_t DocDataType::GetCount_p() {
 }
 
 double DocDataType::GetLambda_p(size_t i) {
-	if ((this->MyData.size() > 0) && (this->MyData[0].size() > i)) {
-		return this->MyData[0][i];
-	}
-	return -1.0;
+	return this->MyData.at(i).at(0);
 }
 
 double DocDataType::GetFlux_p(size_t i) {
-	if ((this->MyData.size() > 0) && (this->MyData[1].size() > i)) {
-		return this->MyData[1][i];
-	}
-	return -1.0;
+	return this->MyData.at(i).at(1);
 }
 double DocDataType::GetErrFlux_p(size_t i) {
-	if ((this->MyData.size() > 0) && (this->MyData[2].size() > i)) {
-		return this->MyData[2][i];
-	}
-	return -1.0;
+	return this->MyData.at(i).at(2);
 }
 double DocDataType::GetNormErrFlux_p(size_t i) {
-	if ((this->MyData.size() > 0) && (this->MyData[3].size() > i)) {
-		return this->MyData[3][i];
-	}
-	return -1.0;
+	return this->MyData.at(i).at(3);
 }
-void DocDataType::PutLambda_p(size_t i, double b){
-
+void DocDataType::PutLambda_p(size_t i, double b) {
+	this->MyData.at(i).at(0) = b;	
 }
 void DocDataType::PutFlux_p(size_t i, double b) {
-
+	this->MyData.at(i).at(1) = b;
 }
 void DocDataType::PutErrFlux_p(size_t i, double b) {
-
+	this->MyData.at(i).at(2) = b;
 }
 void DocDataType::PutNormErrFlux_p(size_t i, double b) {
+	this->MyData.at(i).at(3) = b;
+}
+
+int DocDataType::LoadFromFile(wstring FileName) {
+    wstring t = FileName;
+    size_t l = t.find_last_of(_T("\\"));
+    this->FileName = t.substr(l+1);
+
+    this->FilePath = FileName;
+    return ReadData( FileName,  this->MyData);
 
 }

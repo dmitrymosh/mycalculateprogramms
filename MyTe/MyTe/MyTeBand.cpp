@@ -1,16 +1,8 @@
 #include "StdAfx.h"
 //#include "MyTeBand.h"
 //#include "MyTeMath.h"
-
-CMyTeBand::CMyTeBand(void)
-{
-	
-}
-
-CMyTeBand::~CMyTeBand(void)
-{
-	this->MyData.clear();
-}
+CMyTeBand::CMyTeBand(void) noexcept {};
+CMyTeBand::~CMyTeBand(void) noexcept {};
 //типа ввода
 #ifdef EMOE		
 int _strptr(char Str[],char c,char** pt){
@@ -76,12 +68,21 @@ for(UINT j=0;j<DLRSP;j++){
 
 class VECTOR 
 #endif
-void CMyTeBand::LoadFromFile(wstring fname) {
-	size_t k = fname.find_last_of(_T('\\'));
-	this->Name = fname[k+1];
-	this->FName = fname;
-	this->MyData.clear();
-	ReadData(fname, this->MyData);
+    void CMyTeBand::LoadFromFile(wstring fname) {
+
+    if (fname.size() == 0) return;
+    size_t k = fname.find_last_of(_T('\\'));
+    FilePath = fname;
+    FName = fname.substr(k + 1);
+    k = FName.find_last_of(_T('.'));
+    Name = FName;
+    Name.erase(k, FName.size());    
+    MyData.clear();   
+    ReadData(fname, MyData);
+    if (MyData.size() > 0) {
+	LBeg = MyData.at(0).at(0);
+	LEnd = MyData.at(MyData.size() - 1).at(0);
+    }
 }
 
 #ifdef EMOE
@@ -212,8 +213,7 @@ void CMyTeBand::ConvertLnToFlux(void)
 {
 	for(ULONG32 i=0;i<Count;i++)
 	{
-		double X = Flux[i]/E_CONST;
-		Flux[i]=exp(X);		
+		Flux[i] = exp(Flux[i] / E_CONST);
 		Lambda[i]*=10.0;
 	}
 }
@@ -221,27 +221,16 @@ size_t CMyTeBand::GetCount_p() {
 	return this->MyData.size();
 }
 
-double CMyTeBand::GetLambda_p(size_t i) {
-	if ((this->MyData.size() > 0) && (this->MyData[0].size() > i)) {
-		return this->MyData[0][i];
-	}
-	return -1.0;
+double CMyTeBand::GetLambda_p(size_t i)  {
+	return this->MyData.at(i).at(0);
 }
 
-double CMyTeBand::GetFlux_p(size_t i) {
-	if ((this->MyData.size() > 0) && (this->MyData[1].size() > i)) {
-		return this->MyData[1][i];
-	}
-	return -1.0;
+double CMyTeBand::GetFlux_p(size_t i)  {
+	return this->MyData.at(i).at(1);
 }
-void CMyTeBand::PutLambda_p(size_t i, double b) {
-	if (this->MyData.size() == 0) {
-		return;
-	}
-	if (this->MyData[0].size() <= i) {
-		this->MyData[0].push_back(b);
-	}	
+void CMyTeBand::PutLambda_p(size_t i, double b)  {
+	this->MyData.at(i).at(0) = b;
 }
-void CMyTeBand::PutFlux_p(size_t i, double b) {
-
+void CMyTeBand::PutFlux_p(size_t i, double b)  {
+	this->MyData.at(i).at(1) = b;
 }

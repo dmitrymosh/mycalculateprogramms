@@ -22,7 +22,7 @@ int ReadData(wstring FileName, VectorArray& Data)
 		string s_row;
 		while (getline(in, s_row))
 		{
-			double var;
+			
 			istringstream st(s_row);
 			if (st.bad() || st.eof() || s_row == "") {
 				continue;
@@ -30,8 +30,9 @@ int ReadData(wstring FileName, VectorArray& Data)
 			vector <double> v_row;
 			while (st.good())
 			{
+				double var;
 				st >> std::dec >> var;
-				if (st.good() || st.eof()) {
+				if (!st.fail()) {
 					v_row.push_back(var);
 				}
 				if (st.eof()) {
@@ -52,28 +53,33 @@ int ReadData(wstring FileName, VectorArray& Data)
 	}
 }
 
-int WriteDataHead(wstring FileName, VectorArray Data, vector <wstring> Header) {
-	wofstream out (FileName, ios::trunc); // open renew
-	if (out.is_open()) {
-		for (size_t i = 0; i < Header.size(); i++) {
-			out << Header[i];
-			out << "\n";
-		}
-		for (size_t i = 0; i < Data.size(); i++) {
-			for (size_t j = 0; j < Data[i].size(); j++) {
-				out << Data[i][j];
-				out << "  ";
-			}
-			out << "\n";
-		}
+int WriteDataHead(wstring FileName,vector <wstring> NameCol, VectorArray Data, vector <wstring> Header, wstring Fmt) {
+    wofstream out(FileName, ios::trunc); // open renew
+    if (out.is_open()) {
+	for (size_t i = 0; i < Header.size(); i++) {
+	    out << Header[i];
+	    out << "\n";
 	}
-	out.close();     // закрываем файл
-	return 0;
+	for (size_t i = 0; i < Data.size(); i++) {
+	    if (NameCol.size() > i) {
+		wstring h = wformat(_T("%-10s"), NameCol.at(i).c_str());
+		out << h;
+	    }
+	   
+	    for (size_t j = 0; j < Data[i].size(); j++) {	
+		wstring t = wformat(Fmt.c_str(), Data[i][j]);
+		out << t;
+	    }
+	    out << endl;
+	}
+    }
+    out.close();     // закрываем файл
+    return 0;
 }
 
 int WriteData(wstring FileName, VectorArray Data) {
 	vector <wstring> Header;
-	return WriteDataHead(FileName, Data, Header);
+	return WriteDataHead(FileName, Header, Data, Header, _T(" %10.3lf "));
 }
 // ‘ункци€ читает папку и помещает файлы, удовлетвор€ющие маске в массив Paths
 int ReadFolder(wstring Folder, wstring Mask, PathsArray& Paths) {
@@ -111,7 +117,7 @@ std::string format(const char* fmt, ...)
 	{
 		va_list args2;
 		va_copy(args2, args);
-		int res = vsnprintf(v.data(), v.size(), fmt, args2);
+		const int res = vsnprintf(v.data(), v.size(), fmt, args2);
 		if ((res >= 0) && (res < static_cast<int>(v.size())))
 		{
 			va_end(args);
@@ -137,20 +143,13 @@ std::wstring wformat(const wchar_t* fmt, ...)
 	{
 		va_list args2;
 		va_copy(args2, args);
-		int res = _snwprintf(v.data(), v.size(), fmt, args2);
-		if ((res >= 0) && (res < static_cast<int>(v.size())))
-		{
+		int res = vswprintf(v.data(), v.size(), fmt, args2);
+		if ((res >= 0) && (res < 1024)) {
 			va_end(args);
 			va_end(args2);
 			return std::wstring(v.data());
 		}
-		size_t size;
-		if (res < 0)
-			size = v.size() * 2;
-		else
-			size = static_cast<size_t>(res) + 1;
-		v.clear();
-		v.resize(size);
+		
 		va_end(args2);
 	}
 }

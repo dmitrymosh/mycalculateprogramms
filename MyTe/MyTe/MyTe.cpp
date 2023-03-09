@@ -139,14 +139,14 @@ BOOL CMyTeApp::InitInstance()
 	swscanf_s(GetProfileString(pszKey, _T("GraphEnd")),_T("%lf"),&Options.GraphEnd);
 	
 	swscanf_s(GetProfileString(pszKey, _T("BandCount")),_T("%d"),&BandCount);	
-	BandArray=new CMyTeBand[BandCount];
+	theApp.BandArray.resize(theApp.BandCount);
 	for(ULONG32 i=0;i<BandCount;i++)
 	{
 		CString b;
 		subKey=pszKey;
 		subKey.Append(_T("\\Band"));
 		b.AppendFormat(_T("%d"),i);
-		theApp.BandArray[i].LoadFromFile(GetProfileString(subKey, b).GetBuffer());
+		theApp.BandArray.at(i).LoadFromFile(GetProfileString(subKey, b).GetBuffer());
 	}
 	for(ULONG32 i=0;i<Options.NumberBand;i++)
 	{
@@ -386,10 +386,10 @@ int CMyTeApp::ExitInstance()
 		subKey=pszKey;
 		subKey.Append(_T("\\Band"));
 		//swprintf( buf, 100, L"%10.16f", BandArray[i].fname);
-		WriteProfileString(subKey,KeyName, BandArray[i].FName.c_str());	
+		WriteProfileString(subKey,KeyName, BandArray[i].FilePath.c_str());	
 	}
 	WriteProfileString(pszKey, _T("VegaFile"), Options.VegaFile);	
-	WriteProfileString(pszKey, _T("ReddenFile"), Redden.FName.c_str());
+	WriteProfileString(pszKey, _T("ReddenFile"), Redden.FilePath.c_str());
 	swprintf( buf, 100, L"%10.16f", Options.StepLmkm);		
 	WriteProfileString(pszKey, _T("StepLmkm"), buf);
 	swprintf( buf, 100, L"%10.16f", Options.LmkmBeg);
@@ -422,7 +422,7 @@ void CMyTeApp::OnActionEnergyDistr()
 	{
 		CString OutfName;
 		bool b=FileList.Over;
-		for(ULONG32 i=0;i<FileList.Count;i++)
+		for(ULONG32 i=0;i<FileList.Files.size();i++)
 		{	
 			m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
 			CMyTeDoc* Doc;
@@ -462,7 +462,7 @@ void CMyTeApp::OnActionMagn()
 	calcdlg.DoModal();	
 	
 	bool b=FileList.Over;
-	for(ULONG32 i=0;i<FileList.Count;i++)
+	for(ULONG32 i=0;i<FileList.Files.size();i++)
 	{	
 		m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
 		CMyTeDoc* Doc;
@@ -695,7 +695,7 @@ void CMyTeApp::OnActionNorm5500()
 	calcdlg.DoModal(true);	
 	CString OutfName;
 	bool b=FileList.Over;
-	for(ULONG32 i=0;i<FileList.Count;i++)
+	for(ULONG32 i=0;i<FileList.Files.size();i++)
 	{	
 		m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
 		CMyTeDoc* Doc;
@@ -789,7 +789,7 @@ void CMyTeApp::OnActionAid()
 	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\SEP_S.txt");
 	EXTIN.LoadFromFile(EXTIN.FName);
 
-	int Nred=6;//0;//0;//0;//5;//5;	//number of random i.s.ext. amount (thickness, depth) 
+	int Nred=6;//0;//0;//0;//5;//5;	//number of   i.s.ext. amount (thickness, depth) 
 	//CString ResultString=NULL;
 	//CString ResultStringZip=NULL;
 
@@ -897,179 +897,141 @@ void CMyTeApp::OnActionAid()
 #endif
 void CMyTeApp::OnActionAid()// много прозрачностей
 {
-	CCalculateDlg calcdlg;
-	if(calcdlg.DoModal()==IDOK)	
-	{
-		double* VegaArray=new double[BandCount];
-		double* VegaXArray=new double[BandCount];
-		for(int i=0;i<BandCount;i++) VegaArray[i]=0.0;
-		for(int i=0;i<BandCount;i++) VegaXArray[i]=0.0;
+    CCalculateDlg calcdlg;
+    if (calcdlg.DoModal() == IDOK)
+    {
+	vector <double> VegaArray;
+	vector <double> VegaXArray;
 
-		CString RString;
-		CMyTeDoc* VDoc;
-		//CString ResultString=NULL;
-		//CString ResultStringZip=NULL;
-		
-		if(FileList.VegaFile.size() > 0 )
-		{
-			//CMyTeDoc* VDoc;
-			//подсчет Bеги
-			VDoc = (CMyTeDoc*)OpenDocumentFile(FileList.VegaFile.c_str());
-			for(int i=0;i<BandCount;i++)
-			{
-				VegaArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,NULL,0);
-				//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
-			}
-			int cou=GetOpenDocumentCount();
-			if(cou>0) VDoc->OnCloseDocument();
-		}	
-			//for(int i=0;i<BandCount;i++)
-			//{
-			//	//VegaXArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,&Redden,X);
-			//	ResultString.AppendFormat(_T(" %10.4lf "),VegaArray[i]);
-			//	//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
-			//}
-			//ResultString.Append(_T("\n"));
+	CString HeadStr;
 
-		RString.AppendFormat(_T("%-12s"),_T("File_Name"));
-		RString.AppendFormat(_T("%7s "),_T("   RedX"));
-		RString.AppendFormat(_T("%11s "),_T("       Mz"));
-		for(int i=0;i<BandCount;i++)
-		{
-			CString outfname(BandArray[i].FName.c_str());
-			outfname.Truncate(outfname.GetLength()-4);
-			int pos=outfname.ReverseFind('\\');		
-			RString.AppendFormat(_T(" %10s "),outfname.Right(outfname.GetLength()-pos-1));	
-//			RString.AppendFormat(_T(" %10s "),_T("Ai"));
-		}	
-		RString.AppendFormat(_T("%s "),_T("          AB          AR          AV          AW          LB          LR          LV           LW"));
-		RString.Append(_T("\n"));
-		
-	double RX=0;
-	bool FlagYes=false;
-	double X=0.0;
-	double Mz=1.0;
-	CMyTeBand EXTIN;
-	EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\ОБРАБОТКА\\EXTATM\\200186\\281185.txt");
-	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\MAR_S.txt");
-	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\JULE_S.txt");
-	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\DEC_S.txt");
-	//EXTIN.FName=_T("D:\\MOSH\\СИРИУС NEW\\SEP_S.txt");
-	EXTIN.LoadFromFile(EXTIN.FName);
-
-	int Nred=6;//0;//0;//0;//5;//5;	//number of random i.s.ext. amount (thickness, depth) 
-	//CString ResultString=NULL;
-	//CString ResultStringZip=NULL;
-
-		if(CMyTeMath::WriteResult1(FileList.OutFile.c_str(),RString,true)==0)
-		{
-
-			bool b=FileList.Over;	
-			for(ULONG32 i=0;i<FileList.Count;i++)//FileList.Count
-			{	
-				m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
-				CMyTeDoc* Doc;
-				Doc=(CMyTeDoc*)OpenDocumentFile(FileList.Files[i].c_str());
-				CString outfname(FileList.Files[i].c_str());
-
-				int pos=outfname.ReverseFind('.');
-				outfname.Truncate(pos);
-				pos=outfname.ReverseFind('\\');
-				CString ResultString=NULL;
-				CString ResultStringZip=NULL;
-				ResultString.AppendFormat(_T("%-10s"),outfname.Right(outfname.GetLength()-pos-1));	
-				ResultStringZip=ResultString;
-				CString midName=outfname.Right(outfname.GetLength()-pos-1);//-pos-1
-				for(int jj=0;jj<Nred;jj++){
-					if (jj==0) X=0.0;
-					else {
-
-						X=CMyTeMath::RANDisex()*4.0;///**RedMax[i]RANDisex()*///X+=0.1;1;//
-					//	//X*=RedMax[i];//2
-					}
-					ResultString.Empty();//.Append(_T("\n"));
-					ResultString=ResultStringZip;
-					ResultString.AppendFormat(_T(" %10.3lf "),X);
-					//ResultStringZip=ResultString;
-					//if(FileList.VegaFile!="")
-					//{
-						//CMyTeDoc* VDoc;
-						//подсчет Bеги
-						//VDoc=(CMyTeDoc*)OpenDocumentFile(FileList.VegaFile);
-						//for(int i=0;i<BandCount;i++)
-						//{
-						//	VegaXArray[i]=CMyTeMath::SBand_2(&VDoc->Data,&BandArray[i],0,&Redden,X);
-						//	//ResultString.AppendFormat(_T(" %10.4lf "),VegaXArray[i]);
-						//	//			VegaArray[i]=CMyTeMath::SBand(&VDoc->Data,Options,&BandArray[i],0,NULL,0);
-						//}
-
-						//}	
-
-
-						for(UINT ij=0;ij<6;ij++){//Mz
-
-							ResultString.Empty();//.Append(_T("\n"));
-							ResultString=ResultStringZip;
-							ResultString.AppendFormat(_T(" %10.3lf "),X);
-							//ResultString=ResultStringZip;
-							//if(ij==0) Mz=0.0;
-							//	else {
-									if(ij==0) Mz=0.0;
-								else {
-									Mz=1.0+CMyTeMath::RANDisex()*2.2;///**RedMax[i]RANDisex()*///X+=0.1;1;//
-								} 
-							//} 
-							ResultString.AppendFormat(_T(" %10.4lf "),Mz);
-							//for(UINT j=0;j<BandCount;j++){//BandCount
-							//	ResultString.AppendFormat(_T(" %10.4lf "),VegaArray[j]);
-							//}
-							//	ResultString.Append(_T("\n"));
-							for(UINT j=0;j<BandCount;j++){//BandCount
-								ResultString.AppendFormat(_T(" %10.4lf "),
-									CMyTeMath::SBand_4(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN));
-							}
-							for(UINT j=0;j<BandCount;j++){//BandCount
-							ResultString.AppendFormat(_T(" %10.4lf "),
-								CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN));//-VegaXArray[j]);
-								//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
-							}
-							for(UINT j=0;j<BandCount;j++){//BandCount
-							ResultString.AppendFormat(_T(" %10.4lf "),
-								1.086*(CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN)-
-								 CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,0.0,&EXTIN)));//-VegaXArray[j]);
-							}
-							//for(UINT j=0;j<BandCount;j++){//BandCount
-							//ResultString.AppendFormat(_T(" %10.4lf "),
-							//	CMyTeMath::SBand_L2(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN)-CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,0.0,&EXTIN));//-VegaXArray[j]);
-							//	//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
-							//}
-								ResultString.Append(_T("\n"));
-							if(CMyTeMath::WriteResult1(FileList.OutFile.c_str(),ResultString,false)!=0) break;
-						}
-					}
-		
-						b=false;
-						int cou=GetOpenDocumentCount();
-						if(cou>0) Doc->OnCloseDocument();
-						//fcloseall();
-						this->PumpMessage();
-			}	
-			m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Подсчет закончен."), TRUE);
-			
-		}else
-		{
-			m_nWnd->m_wndStatusBar.SetPaneText(0,_T("Ошибка записи в файл."), TRUE);
-		}
-		
+	if (FileList.VegaFile.size() > 0) {
+	    DocDataType Vega;
+	    Vega.LoadFromFile(FileList.VegaFile);
+	    //подсчет Bеги
+	    for (int i = 0; i < BandCount; i++) {
+		double res = CMyTeMath::SBand_2(&Vega, &BandArray[i], 0, NULL, 0);
+		VegaArray.push_back(res);
+	    }
 	}
+
+	wstring HeaderStr;
+	vector <wstring> Header;
+	HeaderStr = wformat(TEXT("%-12s %7s %11s "), TEXT("File_Name"), TEXT("   RedX"), TEXT("       Mz"));
+	for (int i = 0; i < BandCount; i++)
+	{
+	    wstring hB = wformat(TEXT(" %10s "), BandArray[i].Name.c_str());
+	    HeaderStr.append(hB);
+	}
+	HeaderStr += wformat(_T("%s "), _T("          AB          AR          AV          AW          LB          LR          LV           LW"));
+
+	Header.push_back(HeaderStr);
+	for (size_t j = 0; j < FileList.ExtintFile.size(); j++) {
+	    CMyTeBand Extint;
+	    Extint.LoadFromFile(FileList.ExtintFile.at(j));
+	    vector <wstring> FileNames;
+	    VectorArray OutData;
+	    wstring OutFile = FileList.OutFile;
+	    size_t p = OutFile.find_last_of(_T("\\"));
+	    OutFile.erase(p + 1);
+	    OutFile.append(Extint.Name);
+	    OutFile.append(_T("_out.txt"));
+
+	    OutData.clear();
+	    FileNames.clear();
+	    for (size_t i = 0; i < FileList.Files.size(); i++) {
+		DocDataType Data;		
+		Data.LoadFromFile(FileList.Files[i].c_str());
+
+		CMyTeMath::Ai(Data, BandArray, Redden, Extint, VegaArray, OutData);
+		for (size_t k = FileNames.size(); k < OutData.size(); k++) {
+		    wstring s = Data.FileName;
+		    size_t t = s.find_last_of(_T('.'));
+		    s.erase(t);
+		    FileNames.push_back(s);
+		}
+	    }
+	    WriteDataHead(OutFile, FileNames, OutData, Header, _T(" %10.5lf "));
+	}
+	/*
+	if (CMyTeMath::WriteResult1(FileList.OutFile.c_str(), RString, true) == 0) {
+	    bool b = FileList.Over;
+	    for (size_t i = 0; i < FileList.Files.size(); i++)
+	    {
+		m_nWnd->m_wndStatusBar.SetPaneText(0, FileList.Files[i].c_str(), TRUE);
+		DocDataType Data;
+		Data.LoadFromFile(FileList.Files[i].c_str());
+		CString outfname(FileList.Files[i].c_str());
+
+		int pos = outfname.ReverseFind('.');
+		outfname.Truncate(pos); 
+		pos = outfname.ReverseFind('\\');
+		CString ResultString = NULL;
+		CString ResultStringZip = NULL;
+		ResultString.AppendFormat(_T("%-10s"), outfname.Right(outfname.GetLength() - pos - 1));
+		ResultStringZip = ResultString;
+		CString midName = outfname.Right(outfname.GetLength() - pos - 1);//-pos-1
+		for (int jj = 0; jj < Nred; jj++) {
+		    if (jj == 0) {
+			X = 0.0;
+		    }
+		    else {
+			X = CMyTeMath::RANDisex() * 4.0;
+		    }
+		    ResultString.Empty();
+		    ResultString = ResultStringZip;
+		    ResultString.AppendFormat(_T(" %10.3lf "), X);
+
+
+		    for (UINT ij = 0; ij < 6; ij++) {//Mz
+
+			ResultString.Empty();//.Append(_T("\n"));
+			ResultString = ResultStringZip;
+			ResultString.AppendFormat(_T(" %10.3lf "), X);
+			
+			if (ij == 0) Mz = 0.0;
+			else {
+			    Mz = 1.0 + CMyTeMath::RANDisex() * 2.2;
+			}
+			ResultString.AppendFormat(_T(" %10.4lf "), Mz);
+			
+			for (UINT j = 0; j < BandCount; j++) {//BandCount
+			    ResultString.AppendFormat(_T(" %10.4lf "),
+				CMyTeMath::SBand_4(&Data, &BandArray[j], VegaArray[j], &Redden, X, Mz, &EXTIN));
+			}
+			for (UINT j = 0; j < BandCount; j++) {//BandCount
+			    ResultString.AppendFormat(_T(" %10.4lf "),
+				CMyTeMath::SBand_3(&Data, &BandArray[j], 0, &Redden, X, Mz, &EXTIN));//-VegaXArray[j]);
+				//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
+			}
+			for (UINT j = 0; j < BandCount; j++) {//BandCount
+			    ResultString.AppendFormat(_T(" %10.4lf "),
+				1.086 * (CMyTeMath::SBand_L(&Data, &BandArray[j], 0, &Redden, X, Mz, &EXTIN) -
+				    CMyTeMath::SBand_L(&Data, &BandArray[j], 0, &Redden, X, 0.0, &EXTIN)));//-VegaXArray[j]);
+			}
+			//for(UINT j=0;j<BandCount;j++){//BandCount
+			//ResultString.AppendFormat(_T(" %10.4lf "),
+			//	CMyTeMath::SBand_L2(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN)-CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,0.0,&EXTIN));//-VegaXArray[j]);
+			//	//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
+			//}
+			ResultString.Append(_T("\n"));
+			if (CMyTeMath::WriteResult1(FileList.OutFile.c_str(), ResultString, false) != 0) break;
+		    }
+		}
+
+		b = false;
+		this->PumpMessage();
+	    }
+	    m_nWnd->m_wndStatusBar.SetPaneText(0, _T("Подсчет закончен."), TRUE);
+
+	}
+	else
+	{
+	    m_nWnd->m_wndStatusBar.SetPaneText(0, _T("Ошибка записи в файл."), TRUE);
+	}
+	*/
+    }
 }
-
-
-
-
-
-
-
 
 #ifdef EMOE
 
@@ -1246,7 +1208,7 @@ double RX=0;
 		if(CMyTeMath::WriteResult1(FileList.OutFile.c_str(),RString,true)==0)
 		{
 			bool b=FileList.Over;	
-			for(ULONG32 i=0;i<FileList.Count;i++)//FileList.Count
+			for(ULONG32 i=0;i<FileList.Files.size();i++)//FileList.Count
 			{	
 				m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
 				CMyTeDoc* Doc;
@@ -1609,7 +1571,7 @@ void CMyTeApp::OnRemoveMinus()
 	if (calcdlg.DoModal()==IDOK)
 	{
 		bool b=FileList.Over;
-		for(ULONG32 i=0;i<FileList.Count;i++)
+		for(ULONG32 i=0;i<FileList.Files.size();i++)
 		{	
 			m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
 			CMyTeDoc* Doc;
@@ -2713,7 +2675,7 @@ void CMyTeApp::OnActionAid1()// много прозрачностей
 		{
 
 			bool b=FileList.Over;	
-			for(ULONG32 i=0;i<FileList.Count;i++)//FileList.Count
+			for(ULONG32 i=0;i<FileList.Files.size();i++)//FileList.Count
 			{	
 				m_nWnd->m_wndStatusBar.SetPaneText(0,FileList.Files[i].c_str(), TRUE);
 				CMyTeDoc* Doc;

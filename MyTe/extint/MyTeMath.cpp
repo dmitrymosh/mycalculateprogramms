@@ -3058,7 +3058,7 @@ _fcloseall();
 //*************************************************************************
 #ifdef TVOE
 // опнцпюллю бшмеяемхъ гю юрлнятепс "SIRIUS" OH-8
-double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
+double CMyTeMath::PROBKA(vector <CMyTeBand> Band)		//CMyTeBand* Band
 {
 //#ifdef ETBOE
 	//CMyTeBand* Band;
@@ -8470,7 +8470,7 @@ _fcloseall();
 
 }
 // опнцпюллю бшмеяемхъ гю юрлнятепс "SIRIUS" OH-8
-double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
+double CMyTeMath::PROBKA(vector <CMyTeBand> Band)		//CMyTeBand* Band
 {
 //#ifdef ETBOE
 	//CMyTeBand* Band;

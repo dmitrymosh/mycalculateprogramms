@@ -34,11 +34,11 @@ char InLin[16384];
 //						14,15,16,17,18,19,20,21,22,23,
 //						24,25,26,27,28,29,30,31,32,33,99,-1} 
 //				  };	
-CMyTeMath::CMyTeMath(void)
+CMyTeMath::CMyTeMath(void) noexcept
 {
 }
 
-CMyTeMath::~CMyTeMath(void)
+CMyTeMath::~CMyTeMath(void) noexcept
 {
 }
 
@@ -78,37 +78,6 @@ double CMyTeMath::swscanfd(CString str)
 		
 	}
 	return d;
-}
-void de_allocate(char **data,UINT col)
-//$$+
-{
-	for (UINT i = 0; i < col;  i++)
-		delete[] data[i];                 // STEP 1: DELETE THE COLUMNS
-
-	delete[] data;                        // STEP 2: DELETE THE ROWS
-}
-void de_allocate(void **data,UINT col)
-//$$+
-{
-	for (UINT i = 0; i < col;  i++)
-		delete[] data[i];                 // STEP 1: DELETE THE COLUMNS
-
-	delete[] data;                        // STEP 2: DELETE THE ROWS
-}
-void de_allocate(double **data,UINT col)//,UINT col)
-{
-	for (UINT i = 0; i < col;  i++)
-		delete[] data[i];                 // STEP 1: DELETE THE COLUMNS
-
-	delete[] data;                        // STEP 2: DELETE THE ROWS
-}
-void de_allocate(bool **data,UINT col)
-//$$+
-{
-	for (UINT i = 0; i < col;  i++)
-		delete[] data[i];                 // STEP 1: DELETE THE COLUMNS
-
-	delete[] data;                        // STEP 2: DELETE THE ROWS
 }
 
 double CMyTeMath::MyTe_scanf(BYTE* buffer,ULONG size, ULONG& pos, ULONG& beg, ULONG& end)
@@ -1344,37 +1313,38 @@ double CMyTeMath::RANDisexN(double N)
 double CMyTeMath::Integral_1(DocDataType* data,CMyTeBand* Band,double lambdaBeg,double lambdaEnd)
 {
 	double Summa=0.0;
-	double BandFlux0=0.0;
-	double BandFlux1=0.0;
 	double a=0.0;
 	double b=0.0;
 	double la=0.0;
 	double lb=0.0;
 
 	Summa=0.0;
-	for(UINT i=0;i<data->Count-1;i++)
+	for (size_t i = 0; i < data->Count - 2; i++)
 	{
-		if((data->Lambda[i]<lambdaBeg) &&(data->Lambda[i+1]>lambdaEnd)){
-			la=lambdaBeg;
-			lb=data->Lambda[i+1];
-			b=data->Flux[i+1];
-			a=LinInt(data->Flux[i],b,data->Lambda[i],lb,la);
-		}else {
-			if(data->Lambda[i]>=lambdaBeg && data->Lambda[i+1]<lambdaEnd){
-				la=data->Lambda[i];
-				lb=data->Lambda[i+1];
-				a=data->Flux[i];
-				b=data->Flux[i+1];
-			}else{
-				if((data->Lambda[i]<lambdaEnd) && (data->Lambda[i+1]>=lambdaEnd)){
-					lb=lambdaEnd;
-					la=data->Lambda[i];
-					a=data->Flux[i];
-					b=LinInt(a,data->Flux[i+1],la,data->Lambda[i+1],lb);
-				}else continue;
+		if ((data->Lambda[i] < lambdaBeg) && (data->Lambda[i + 1] > lambdaEnd)) {
+			la = lambdaBeg;
+			lb = data->Lambda[i + 1];
+			b = data->Flux[i + 1];
+			a = LinInt(data->Flux[i], b, data->Lambda[i], lb, la);
+		}
+		else {
+			if (data->Lambda[i] >= lambdaBeg && data->Lambda[i + 1] < lambdaEnd) {
+				la = data->Lambda[i];
+				lb = data->Lambda[i + 1];
+				a = data->Flux[i];
+				b = data->Flux[i + 1];
+			}
+			else {
+				if ((data->Lambda[i] < lambdaEnd) && (data->Lambda[i + 1] >= lambdaEnd)) {
+					lb = lambdaEnd;
+					la = data->Lambda[i];
+					a = data->Flux[i];
+					b = LinInt(a, data->Flux[i + 1], la, data->Lambda[i + 1], lb);
+				}
+				else continue;
 			}
 		}
-		Summa+=(a+b)*(lb-la)/2.0;
+		Summa += (a + b) * (lb - la) / 2.0;
 	}
 	return (Summa);
 }
@@ -1396,392 +1366,165 @@ double CMyTeMath::SBand(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand*
 	return Res=-1.08573620*log(Res)-Vega;//(data->Lambda[data->Count-1]-data->Lambda[0]);
 }
 //Function To COUNT random redden
+// m = -2.5 * lg(integral(Lk, Ld)(El * Fl ^ (st)dL) + const1
 double CMyTeMath::SBand_2(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik)
 {
-	DocDataType* Subint= new DocDataType();
-	//DocDataType* Subint0= new DocDataType();
-	*Subint=*data;
-	//*Subint0=*data;
+	if (data == NULL) return -1.0;
+	DocDataType Subint = *data;
 
-	double Res=0.0;
-	double Res0=0.0;
+	long double Res=0.0;
 	double red=1.0;
 	double lambdaBeg=0.0;
 	double lambdaEnd=0.0;
 	bool Lbegin=false;
 	bool Lend=false;
 
-        //if(0){
-//	    ULONG32 K=0;ULONG32 IBeg=0;ULONG32 IEnd=0;
-//	    for(UINT i=0;i<data->Count-1;i++)
-//	    {
-//	        if (data->Flux[i]<=0.0)
-//	        {
-//		        //IBeg=
-//		        double summ=0;
-//		        for(ULONG32 j=i-5;j<5;j++){
-//			        summ+=data->Flux[j];
-//		        }
-//		        Subint[i]
-//	        } 
-//	        else
-//	        {
-//	        }
-//            }
-//        }
-////Band->FName[0]=='W';
-	for(UINT i=0;i<Band->Count-1;i++)
-	{
-		double BandFlux0=Band->Flux[i];
-		double BandFlux1=Band->Flux[i+1];
-		if ((!Lbegin)&&(BandFlux0==0) && (BandFlux1!=0))
-		{
-			lambdaBeg=Band->Lambda[i];
-			Lbegin=true;
+	lambdaBeg = Band->LBeg;
+	lambdaEnd = Band->LEnd;
+	for (UINT i = 0; i < data->Count - 1; i++) {
+		if (Redden != NULL) {
+			red = Redden->GetFlux(data->Lambda[i]);
+			red = pow(red, RedThik);
 		}
-		if ((!Lend)&&(BandFlux0!=0) && (BandFlux1==0))
-		{
-			lambdaEnd=Band->Lambda[i+1];
-			Lend=true;
-		}
-		if (i==data->Count-2)
-		{
-			i=data->Count-1;
-		}
-	}
-	for(UINT i=0;i<data->Count-1;i++)
-	{
-		if(Redden!=NULL)
-		{
-			red=Redden->GetFlux(data->Lambda[i]);
-			red=pow(red,RedThik);
-			//red*=-RedThik*0.3;//pow(red,
-			//red=exp(red);
-		}
-		double BandFlux=Band->GetFlux(data->Lambda[i]);
-		//Subint->Count=data->Count;
-		//Subint->Flux[i]*=red*BandFlux;
-		//Jy->W/cm2um
-		Subint->Flux[i]=data->Flux[i]*red*BandFlux;//*3e-16/(data->Lambda[i]*data->Lambda[i]);
-		//Subint0->Flux[i]=data->Flux[i]*BandFlux;//*3e-16/(data->Lambda[i]*data->Lambda[i]);
-		//Subint->Lambda[i]=data->Lambda[i];
+		double BandFlux = Band->GetFlux(data->Lambda[i]);
 		
+		//Jy->W/cm2um
+		Subint.Flux[i] = data->Flux[i] * red * BandFlux;		
 	}
-
-	Res=Integral_1(Subint,Band,lambdaBeg,lambdaEnd);
-	//Res0=Integral_1(Subint0,Band,lambdaBeg,lambdaEnd);
-	delete Subint;
-	//delete Subint0;
-return Res=-2.5*log10l((long double) Res)-Vega;///*/Res0*///return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
-//return Res=-2.5*log10l((long double) Res/*/Res0*/)-Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
+	Res=Integral_1(&Subint,Band,lambdaBeg,lambdaEnd);
+	
+	return Res=-2.5*log10l(Res)-Vega;
 }
-double CMyTeMath::SBand_3(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN)
+double CMyTeMath::SBand_3(DocDataType* data, CMyTeBand* Band, double Vega, CMyTeBand* Redden, double RedThik, double Mz, CMyTeBand* EXTIN)
 
 {
-	DocDataType* Subint= new DocDataType();
-	DocDataType* Subint0= new DocDataType();
-	*Subint=*data;
-	*Subint0=*data;
+	if (data == NULL) return -1.0;
+	DocDataType Subint = *data;
+	DocDataType Subint0 = *data;
 
-	double Res=0.0;
-	double Res0=0.0;
-	double red=1.0;
-	double lambdaBeg=0.0;
-	double lambdaEnd=0.0;
-	bool Lbegin=false;
-	bool Lend=false;
+	long double Res = 0.0;
+	long double Res0 = 0.0;
+	double red = 1.0;
+	double lambdaBeg = Band->LBeg;
+	double lambdaEnd = Band->LEnd;
 
-
-
-	for(UINT i=0;i<Band->Count-1;i++)
+	for (UINT i = 0; i < data->Count - 1; i++)
 	{
-		double BandFlux0=Band->Flux[i];
-		double BandFlux1=Band->Flux[i+1];
-		if ((!Lbegin)&&(BandFlux0==0) && (BandFlux1!=0))
-		{
-			lambdaBeg=Band->Lambda[i];
-			Lbegin=true;
+		if (Redden != NULL) {
+			red = Redden->GetFlux(data->Lambda[i]);
+			red = pow(red, RedThik);
 		}
-		if ((!Lend)&&(BandFlux0!=0) && (BandFlux1==0))
-		{
-			lambdaEnd=Band->Lambda[i+1];
-			Lend=true;
-		}
-		if (i==data->Count-2)
-		{
-			i=data->Count-1;
-		}
-	}
-	for(UINT i=0;i<data->Count-1;i++)
-	{
-		if(Redden!=NULL)
-		{
-			red=Redden->GetFlux(data->Lambda[i]);
-			red=pow(red,RedThik);
-			//red*=-RedThik*0.3;//pow(red,
-			//red=exp(red);
-		}
-		double BandFlux=Band->GetFlux(data->Lambda[i]);
-		double EXT	=EXTIN->GetFlux(data->Lambda[i]);
-		//Subint->Count=data->Count;
-		//Subint->Flux[i]*=red*BandFlux;
-		//Jy->W/cm2um
-		EXT=pow(EXT,Mz);
-		Subint->Flux[i]=data->Flux[i]*red*BandFlux*EXT;//*3e-16/(data->Lambda[i]*data->Lambda[i]);
-		Subint0->Flux[i]=data->Flux[i]*red*BandFlux;//*3e-16/(data->Lambda[i]*data->Lambda[i]);
-		//Subint->Lambda[i]=data->Lambda[i];
-		
+		const double BandFlux = Band->GetFlux(data->Lambda[i]);
+		double EXT = EXTIN->GetFlux(data->Lambda[i]);
+
+		EXT = pow(EXT, Mz);
+		Subint.Flux[i] = data->Flux[i] * red * BandFlux * EXT;
+		Subint0.Flux[i] = data->Flux[i] * red * BandFlux;
 	}
 
-	Res=Integral_1(Subint,Band,lambdaBeg,lambdaEnd);
-	Res0=Integral_1(Subint0,Band,lambdaBeg,lambdaEnd);
-	delete Subint;
-	delete Subint0;
-//return Res=-2.5*log10l((long double) Res/Res0)-Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
-return Res=2.5*log10l((long double) Res/Res0);//+Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
-//return Res0=-2.5*log10l((long double) Res0)-Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
+	Res = Integral_1(&Subint, Band, lambdaBeg, lambdaEnd);
+	Res0 = Integral_1(&Subint0, Band, lambdaBeg, lambdaEnd);
+	Res = 2.5 * log10l(Res / Res0);
+
+	return Res;
 }
-double CMyTeMath::SBand_4(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN)
+double CMyTeMath::SBand_4(DocDataType* data, CMyTeBand* Band, double Vega, CMyTeBand* Redden, double RedThik, double Mz, CMyTeBand* EXTIN)
 
 {
-	DocDataType* Subint= new DocDataType();
-	DocDataType* Subint0= new DocDataType();
-	*Subint=*data;
-	*Subint0=*data;
+	if (data == NULL) return -1.0;
+	if (Band == NULL) return -1.0;
+	DocDataType Subint = *data;
+	DocDataType Subint0 = *data;
 
-	double Res=0.0;
-	double Res0=0.0;
-	double red=1.0;
-	double lambdaBeg=0.0;
-	double lambdaEnd=0.0;
-	bool Lbegin=false;
-	bool Lend=false;
+	long double Res = 0.0;
+	double red = 1.0;
+	const double lambdaBeg = Band->LBeg;
+	const double lambdaEnd = Band->LEnd;
 
+	for (UINT i = 0; i < data->Count - 1; i++) {
+		if (Redden != NULL) {
+			red = Redden->GetFlux(data->Lambda[i]);
+			red = pow(red, RedThik);
+		}
+		const double BandFlux = Band->GetFlux(data->Lambda[i]);
+		double EXT = EXTIN->GetFlux(data->Lambda[i]);
 
-
-	for(UINT i=0;i<Band->Count-1;i++)
-	{
-		double BandFlux0=Band->Flux[i];
-		double BandFlux1=Band->Flux[i+1];
-		if ((!Lbegin)&&(BandFlux0==0) && (BandFlux1!=0))
-		{
-			lambdaBeg=Band->Lambda[i];
-			Lbegin=true;
-		}
-		if ((!Lend)&&(BandFlux0!=0) && (BandFlux1==0))
-		{
-			lambdaEnd=Band->Lambda[i+1];
-			Lend=true;
-		}
-		if (i==data->Count-2)
-		{
-			i=data->Count-1;
-		}
-	}
-	for(UINT i=0;i<data->Count-1;i++)
-	{
-		if(Redden!=NULL)
-		{
-			red=Redden->GetFlux(data->Lambda[i]);
-			red=pow(red,RedThik);
-			//red*=-RedThik*0.3;//pow(red,
-			//red=exp(red);
-		}
-		double BandFlux=Band->GetFlux(data->Lambda[i]);
-		double EXT	=EXTIN->GetFlux(data->Lambda[i]);
-		//Subint->Count=data->Count;
-		//Subint->Flux[i]*=red*BandFlux;
-		//Jy->W/cm2um
-		EXT=pow(EXT,Mz);
-		Subint->Flux[i]=data->Flux[i]*red*BandFlux*EXT;//*3e-16/(data->Lambda[i]*data->Lambda[i]);
-//		Subint0->Flux[i]=data->Flux[i]*red*BandFlux;//*3e-16/(data->Lambda[i]*data->Lambda[i]);
-		//Subint->Lambda[i]=data->Lambda[i];
-		
+		EXT = pow(EXT, Mz);
+		Subint.Flux[i] = data->Flux[i] * red * BandFlux * EXT;
 	}
 
-	Res=Integral_1(Subint,Band,lambdaBeg,lambdaEnd);
-//	Res0=Integral_1(Subint0,Band,lambdaBeg,lambdaEnd);
-	delete Subint;
-	delete Subint0;
-return Res=-2.5*log10l((long double) Res)-Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
-//return Res=-2.5*log10l((long double) Res/Res0);//+Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
-//return Res0=-2.5*log10l((long double) Res0)-Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
+	Res = Integral_1(&Subint, Band, lambdaBeg, lambdaEnd);
+	Res = -2.5 * log10l(Res) - Vega;
+	return Res;
 }
-double CMyTeMath::SBand_L(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN)
+double CMyTeMath::SBand_L(DocDataType* data, CMyTeBand* Band, double Vega, CMyTeBand* Redden, double RedThik, double Mz, CMyTeBand* EXTIN)
 
 {
-	DocDataType* Subint= new DocDataType();
-	DocDataType* Subint0= new DocDataType();
-	*Subint=*data;
-	*Subint0=*data;
+	if (data == NULL) return -1.0;
+	if (Band == NULL) return -1.0;
+	DocDataType Subint = *data;
+	DocDataType Subint0 = *data;
 
-	double Res=0.0;
-	double Res0=0.0;
-	double red=1.0;
-	double lambdaBeg=0.0;
-	double lambdaEnd=0.0;
-	bool Lbegin=false;
-	bool Lend=false;
+	long double Res = 0.0;
+	long double Res0 = 0.0;
+	double red = 1.0;
+	const double lambdaBeg = Band->LBeg;
+	const double lambdaEnd = Band->LEnd;
 
-
-
-	for(UINT i=0;i<Band->Count-1;i++)
+	for (UINT i = 0; i < data->Count - 1; i++)
 	{
-		double BandFlux0=Band->Flux[i];
-		double BandFlux1=Band->Flux[i+1];
-		if ((!Lbegin)&&(BandFlux0==0) && (BandFlux1!=0))
+		if (Redden != NULL)
 		{
-			lambdaBeg=Band->Lambda[i];
-			Lbegin=true;
+			red = Redden->GetFlux(data->Lambda[i]);
+			red = pow(red, RedThik);
 		}
-		if ((!Lend)&&(BandFlux0!=0) && (BandFlux1==0))
-		{
-			lambdaEnd=Band->Lambda[i+1];
-			Lend=true;
-		}
-		if (i==data->Count-2)
-		{
-			i=data->Count-1;
-		}
-	}
-	for(UINT i=0;i<data->Count-1;i++)
-	{
-		if(Redden!=NULL)
-		{
-			red=Redden->GetFlux(data->Lambda[i]);
-			red=pow(red,RedThik);
-			//red*=-RedThik*0.3;//pow(red,
-			//red=exp(red);
-		}
-		double BandFlux=Band->GetFlux(data->Lambda[i]);
-		double EXT	=EXTIN->GetFlux(data->Lambda[i]);
-		//Subint->Count=data->Count;
-		//Subint->Flux[i]*=red*BandFlux;
-		//Jy->W/cm2um
-		EXT=pow(EXT,Mz);
-		Subint->Flux[i]=data->Flux[i]*data->Lambda[i]*red*BandFlux*EXT;//*3e-16/(data->Lambda[i]*data->Lambda[i]);
-		Subint0->Flux[i]=data->Flux[i]*red*BandFlux*EXT;//*3e-16/(data->Lambda[i]*data->Lambda[i]);
-		//Subint->Lambda[i]=data->Lambda[i];
-		
+		const double BandFlux = Band->GetFlux(data->Lambda[i]);
+		double EXT = EXTIN->GetFlux(data->Lambda[i]);
+		EXT = pow(EXT, Mz);
+		Subint.Flux[i] = data->Flux[i] * data->Lambda[i] * red * BandFlux * EXT;
+		Subint0.Flux[i] = data->Flux[i] * red * BandFlux * EXT;
 	}
 
-	Res=Integral_1(Subint,Band,lambdaBeg,lambdaEnd);
-	Res0=Integral_1(Subint0,Band,lambdaBeg,lambdaEnd);
-	delete Subint;
-	delete Subint0;
-//return Res=-2.5*log10l((long double) Res/Res0)-Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
-return Res=/*2.5*log10l*/((long double) Res/Res0);//+Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
-//return Res0=-2.5*log10l((long double) Res0)-Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
+	Res = Integral_1(&Subint, Band, lambdaBeg, lambdaEnd);
+	Res0 = Integral_1(&Subint0, Band, lambdaBeg, lambdaEnd);
+	Res =/*2.5*log10l*/(Res / Res0);
+
+	return Res;
 }
-double CMyTeMath::GetFlux(double lambda,double* Lambda,double* Flux, ULONG32 Count)
-{
-	//исключаем значения вне кривой
-	if(lambda<Lambda[0])
-	{
-		return Flux[0];
-	}
-	if(lambda>Lambda[Count-1])
-	{
-		return Flux[Count-1];
-	}
-	for(ULONG32 i=0;i<Count-1;i++)
-	{
-		if((lambda>=Lambda[i])&&(lambda<Lambda[i+1]))
-			//if((Lambda[i]<=lambda)&&(Lambda[i+1]>=lambda))
-		{
-			return CMyTeMath::LinInt(Flux[i],Flux[i+1],Lambda[i],Lambda[i+1],lambda);
-		}
-	}
-	return 0;
-}
-double CMyTeMath::SBand_L2(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN)
+
+double CMyTeMath::SBand_L2(DocDataType* data, CMyTeBand* Band, double Vega, CMyTeBand* Redden, double RedThik, double Mz, CMyTeBand* EXTIN)
 
 {
-	DocDataType* Subint= new DocDataType();
-	DocDataType* Subint0= new DocDataType();
-	*Subint=*data;
-	*Subint0=*data;
+    if (data == NULL) return -1.0;
+    if (Band == NULL) return -1.0;
+    DocDataType Subint = *data;
+    DocDataType Subint0 = *data;
 
-	double Res=0.0;
-	double Res0=0.0;
-	double red=1.0;
-	double lambdaBeg=0.0;
-	double lambdaEnd=0.0;
-	bool Lbegin=false;
-	bool Lend=false;
+    long double Res = 0.0;
+    long double Res0 = 0.0;
+    double red = 1.0;
+    const double lambdaBeg = Band->LBeg;
+    const double lambdaEnd = Band->LEnd;
 
-
-
-	for(UINT i=0;i<Band->Count-1;i++)
-	{
-		double BandFlux0=Band->Flux[i];
-		double BandFlux1=Band->Flux[i+1];
-		if ((!Lbegin)&&(BandFlux0==0) && (BandFlux1!=0))
-		{
-			lambdaBeg=Band->Lambda[i];
-			Lbegin=true;
-		}
-		if ((!Lend)&&(BandFlux0!=0) && (BandFlux1==0))
-		{
-			lambdaEnd=Band->Lambda[i+1];
-			Lend=true;
-		}
-		if (i==data->Count-2)
-		{
-			i=data->Count-1;
-		}
+    for (UINT i = 0; i < data->Count - 1; i++) {
+	if (Redden != NULL) {
+	    red = Redden->GetFlux(data->Lambda[i]);
+	    red = pow(red, RedThik);
 	}
-	for(UINT i=0;i<data->Count-1;i++)
-	{
-		if(Redden!=NULL)
-		{
-			red=Redden->GetFlux(data->Lambda[i]);
-			red=pow(red,RedThik);
-			//red*=-RedThik*0.3;//pow(red,
-			//red=exp(red);
-		}
-		double BandFlux=Band->GetFlux(data->Lambda[i]);
-		double EXT	=EXTIN->GetFlux(data->Lambda[i]);
-		//Subint->Count=data->Count;
-		//Subint->Flux[i]*=red*BandFlux;
-		//Jy->W/cm2um
-		EXT=pow(EXT,Mz);
-		Subint->Flux[i]=data->Flux[i]*data->Lambda[i]*data->Lambda[i]*red*BandFlux*EXT;//*3e-16/(data->Lambda[i]*data->Lambda[i]);
-		Subint0->Flux[i]=data->Flux[i]*red*BandFlux*EXT;//*3e-16/(data->Lambda[i]*data->Lambda[i]);
-		//Subint->Lambda[i]=data->Lambda[i];
-		
-	}
+	const double BandFlux = Band->GetFlux(data->Lambda[i]);
+	double EXT = EXTIN->GetFlux(data->Lambda[i]);
+	EXT = pow(EXT, Mz);
+	Subint.Flux[i] = data->Flux[i] * data->Lambda[i] * data->Lambda[i] * red * BandFlux * EXT;
+	Subint0.Flux[i] = data->Flux[i] * red * BandFlux * EXT;
+    }
 
-	Res=Integral_1(Subint,Band,lambdaBeg,lambdaEnd);
-	Res0=Integral_1(Subint0,Band,lambdaBeg,lambdaEnd);
-	delete Subint;
-	delete Subint0;
-//return Res=-2.5*log10l((long double) Res/Res0)-Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
-return Res=2.5*log10l((long double) Res/Res0);//+Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
-//return Res0=-2.5*log10l((long double) Res0)-Vega;//return 0;	//(data->Lambda[data->Count-1]-data->Lambda[0]);-1.08573620	
+    Res = Integral_1(&Subint, Band, lambdaBeg, lambdaEnd);
+    Res0 = Integral_1(&Subint0, Band, lambdaBeg, lambdaEnd);
+    Res = 2.5 * log10l(Res / Res0);
+
+    return Res;
 }
-//double CMyTeMath::GetFlux(double lambda,double* Lambda,double* Flux, ULONG32 Count)
-//{
-//	//исключаем значения вне кривой
-//	if(lambda<Lambda[0])
-//	{
-//		return Flux[0];
-//	}
-//	if(lambda>Lambda[Count-1])
-//	{
-//		return Flux[Count-1];
-//	}
-//	for(ULONG32 i=0;i<Count-1;i++)
-//	{
-//		if((lambda>=Lambda[i])&&(lambda<Lambda[i+1]))
-//			//if((Lambda[i]<=lambda)&&(Lambda[i+1]>=lambda))
-//		{
-//			return CMyTeMath::LinInt(Flux[i],Flux[i+1],Lambda[i],Lambda[i+1],lambda);
-//		}
-//	}
-//	return 0;
-//}
-//#if defined BLOCK_OFF_LINE
+
 #ifdef EMOE
 void CMyTeMath::ProcessCatalog(CString CatInFName, CString CatOutFName, CString AdvDataFName, SData_option option , CMyTeBand Bands)
 {	
@@ -3051,7 +2794,7 @@ _fcloseall();
 //*************************************************************************
 #ifdef TVOE
 // ПРОГРАММА ВЫНЕСЕНИЯ ЗА АТМОСФЕРУ "SIRIUS" OH-8
-double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
+double CMyTeMath::PROBKA(vector <CMyTeBand> Band)		//CMyTeBand* Band
 {
 //#ifdef ETBOE
 	//CMyTeBand* Band;
@@ -4185,148 +3928,162 @@ double CMyTeMath::Integral_M(double* Flux,double* Lambda,UINT Count,double lambd
 	return (Summa);
 }
 //double CMyTeMath::Aid()
-int CMyTeMath::StrPtr(char* Str,char c,char** pt){
-	//$$+
-	//static N=0;
-	for(UINT j=0,i=0,N=0;;j++,i++){
-		for(;;i++){
-			if(Str[i]=='\0' || Str[i]=='\n')return N;
-			if(i!=0){
-				if((Str[i]!=c && Str[i]!='\t')){
-					if((Str[i-1]==c || Str[i-1]=='\t')){
-						pt[j]=&Str[i];
-						N++;
-						break;
-					}else continue;
-				}else continue;
-			}else {
-				if(Str[i]!=c && Str[i]!='\t'){
-					pt[j]=&Str[i];
-					N++;
-					break;
-				}else continue;
-			}
+int CMyTeMath::StrPtr(char* Str, char c, char** pt) {
+    //$$+
+    //static N=0;
+    if (Str == NULL) return -1;
+    for (UINT j = 0, i = 0, N = 0;; j++, i++) {
+	for (;; i++) {
+	    if (Str[i] == '\0' || Str[i] == '\n')return N;
+	    if (i != 0) {
+		if ((Str[i] != c && Str[i] != '\t')) {
+		    if ((Str[i - 1] == c || Str[i - 1] == '\t')) {
+			pt[j] = &Str[i];
+			N++;
+			break;
+		    }
+		    else continue;
 		}
+		else continue;
+	    }
+	    else {
+		if (Str[i] != c && Str[i] != '\t') {
+		    pt[j] = &Str[i];
+		    N++;
+		    break;
+		}
+		else continue;
+	    }
 	}
+    }
 }
-int CMyTeMath::StrPtrP(char* Str,char c,char** pt){
-	//$$+
-	//static N=0;
-	for(UINT j=0,i=0,N=0;;j++,i++){
-		for(;;i++){
-			if(Str[i]=='\0' || Str[i]=='\n')return N;
-			if(i!=0){
-				if(Str[i]!=c && Str[i]!=' '){		//\t
-					if((Str[i-1]==c || Str[i-1]==' ')){//\t
-						pt[j]=&Str[i];
-						N++;
-						break;
-					}else continue;
-				}else continue;
-			}else {
-				if(Str[i]!=c && Str[i]!=' '){//\t
-					pt[j]=&Str[i];
-					N++;
-					break;
-				}else continue;
-			}
+int CMyTeMath::StrPtrP(char* Str, char c, char** pt) {
+    //$$+
+    //static N=0;
+    if (Str == NULL) return -1;
+    for (UINT j = 0, i = 0, N = 0;; j++, i++) {
+	for (;; i++) {
+	    if (Str[i] == '\0' || Str[i] == '\n')return N;
+	    if (i != 0) {
+		if (Str[i] != c && Str[i] != ' ') {		//\t
+		    if ((Str[i - 1] == c || Str[i - 1] == ' ')) {//\t
+			pt[j] = &Str[i];
+			N++;
+			break;
+		    }
+		    else continue;
 		}
+		else continue;
+	    }
+	    else {
+		if (Str[i] != c && Str[i] != ' ') {//\t
+		    pt[j] = &Str[i];
+		    N++;
+		    break;
+		}
+		else continue;
+	    }
 	}
+    }
 }
 //Порядковый номер дня от 0 января 1950 года
 int CMyTeMath::JDm1950(int year, int data)
 {
-//     year - год полностью (1995)                         *
-//     data - ММДД
-	year-=1948;
-	if((data-=300)<=0) {
-		data+=1200;
-		--year;
-	}
-	return (year/4 + data -((data/100)*347+3357)/5+365*year);
+    //     year - год полностью (1995)                         *
+    //     data - ММДД
+    year -= 1948;
+    if ((data -= 300) <= 0) {
+	data += 1200;
+	--year;
+    }
+    return (year / 4 + data - ((data / 100) * 347 + 3357) / 5 + 365 * year);
 }
 //*************************************************************************
-double CMyTeMath::SpSearch_d(char *SPEC)
+double CMyTeMath::SpSearch_d(char* SPEC)
 {//$$+
-	UINT c;	
-	UINT cc;	
-	//char SPEC[1];
-	//char Scl[1];
-	//char Sbr[1];
-	//memcpy(SPEC,Sp[0],1);
-	//memcpy(Scl,Sp[1],1);
-	//memcpy(Sbr,Sp[2],1);
-	//double cc;	
-	sscanf_s(&SPEC[1],"%1d%1d",&c,&cc);//(const char*)
-	//sscanf_s(&Sbr,"%lf",&cc);//(const char*)
-	if(cc==0) return 380;
-	switch(SPEC[0]){
-		case 'O': return 10.+(double)c+100*(double)cc;
-		case 'B': return 20.+(double)c+100*(double)cc;
-		case 'A': return 30.+(double)c+100*(double)cc;
-		case 'F': return 40.+(double)c+100*(double)cc;
-		case 'G': return 50.+(double)c+100*(double)cc;
-		case 'K': return 60.+(double)c+100*(double)cc;
-		case 'M': return 70.+(double)c+100*(double)cc;
-		default : return 99.0;
-	}
+    UINT c;
+    UINT cc;
+    //char SPEC[1];
+    //char Scl[1];
+    //char Sbr[1];
+    //memcpy(SPEC,Sp[0],1);
+    //memcpy(Scl,Sp[1],1);
+    //memcpy(Sbr,Sp[2],1);
+    //double cc;	
+    sscanf_s(&SPEC[1], "%1d%1d", &c, &cc);//(const char*)
+    //sscanf_s(&Sbr,"%lf",&cc);//(const char*)
+    if (cc == 0) return 380;
+    switch (SPEC[0]) {
+    case 'O': return 10. + (double)c + 100 * (double)cc;
+    case 'B': return 20. + (double)c + 100 * (double)cc;
+    case 'A': return 30. + (double)c + 100 * (double)cc;
+    case 'F': return 40. + (double)c + 100 * (double)cc;
+    case 'G': return 50. + (double)c + 100 * (double)cc;
+    case 'K': return 60. + (double)c + 100 * (double)cc;
+    case 'M': return 70. + (double)c + 100 * (double)cc;
+    default: return 99.0;
+    }
 }
-int CMyTeMath::CountDataFile(FILE *inpf){
-	int Count_str=0;
-	if (inpf) {
-		while (!feof(inpf)){
-			if ( fgets(InLin,len,inpf)==0 ){
-				//AfxMessageBox(_T("End Reading data_total File"));
-				break;
-			}
-			if (InLin[0]=='*'){ continue;
-			}else{
-				Count_str++;
-			}
-		}
+int CMyTeMath::CountDataFile(FILE* inpf) {
+    int Count_str = 0;
+    if (inpf) {
+	while (!feof(inpf)) {
+	    if (fgets(InLin, len, inpf) == 0) {
+		//AfxMessageBox(_T("End Reading data_total File"));
+		break;
+	    }
+	    if (InLin[0] == '*') {
+		continue;
+	    }
+	    else {
+		Count_str++;
+	    }
 	}
-	 fseek(inpf, 0L, SEEK_SET);
-	 return Count_str;
+    }
+    fseek(inpf, 0L, SEEK_SET);
+    return Count_str;
 }
-void CMyTeMath::InpData(char** data,FILE *inpf, int Count_str,const char* Message){ 
-	 ///*char** */data = new char*[Count_str];        // STEP 1: SET UP THE ROWS.
-	 for (UINT i=0; i<Count_str; ){
-		try {                      // TEST FOR EXCEPTIONS.
-   			if ( fgets(InLin,len,inpf)==0 ) break;
-			if (InLin[0]=='*'){ continue;
-			}else{
-    			data[i] = new char[len];  // STEP 2: SET UP THE COLUMNS
- 				memset(data[i],0,len);
-	   			data[i][0]=0;
-    			memcpy(data[i],InLin,strlen(InLin));
-				i++;
-			}// 	
-	   }
-	   catch (std::bad_alloc) {  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
-		  // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
-		  //Application->MessageBox("Could not allocate. Bye ...",
-			   //"Error...", MB_ICONERROR);
-			//AfxMessageBox(Message);//_T("Error Reading File")
-			exit(-1);
-	   }
+void CMyTeMath::InpData(char** data, FILE* inpf, int Count_str, const char* Message) {
+    ///*char** */data = new char*[Count_str];        // STEP 1: SET UP THE ROWS.
+    for (UINT i = 0; i < Count_str; ) {
+	try {                      // TEST FOR EXCEPTIONS.
+	    if (fgets(InLin, len, inpf) == 0) break;
+	    if (InLin[0] == '*') {
+		continue;
+	    }
+	    else {
+		data[i] = new char[len];  // STEP 2: SET UP THE COLUMNS
+		memset(data[i], 0, len);
+		data[i][0] = 0;
+		memcpy(data[i], InLin, strlen(InLin));
+		i++;
+	    }// 	
 	}
-	//fclose(inpf);
+	catch (std::bad_alloc) {  // ENTER THIS BLOCK ONLY IF bad_alloc IS THROWN.
+	       // YOU COULD REQUEST OTHER ACTIONS BEFORE TERMINATING
+	       //Application->MessageBox("Could not allocate. Bye ...",
+			//"Error...", MB_ICONERROR);
+		     //AfxMessageBox(Message);//_T("Error Reading File")
+	    exit(-1);
+	}
+    }
+    //fclose(inpf);
 }
 
-UINT CMyTeMath::SpSearch(char N ,char P)
+UINT CMyTeMath::SpSearch(char N, char P)
 {//$$+
-	UINT c;	
-	sscanf_s(&P,"%d",&c);//(const char*)
-	switch(N){
-		case 'O': return 10+c;
-		case 'B': return 20+c;
-		case 'A': return 30+c;
-		case 'F': return 40+c;
-		case 'G': return 50+c;
-		case 'K': return 60+c;
-		case 'M': return 70+c;
-		default : return 99;
-	}
+    UINT c;
+    sscanf_s(&P, "%d", &c);//(const char*)
+    switch (N) {
+    case 'O': return 10 + c;
+    case 'B': return 20 + c;
+    case 'A': return 30 + c;
+    case 'F': return 40 + c;
+    case 'G': return 50 + c;
+    case 'K': return 60 + c;
+    case 'M': return 70 + c;
+    default: return 99;
+    }
 }
 void CMyTeMath::Search_Band(CMyTeBand* Band,double* lambdaBeg,double* lambdaEnd)
 {
@@ -4350,14 +4107,14 @@ bool Lend=false;
 }
 /*  Вычисление среднего звездного гринвичского времени в радианах на 0 часов UT
 jd50 - число суток от 0 января 1950 г.  (см. п/п JDm1950) */
-double CMyTeMath::Stims(int jd50){
-double k,l;
-double s;
-  jd50-=13048;
-  k=jd50/365;
-  l=jd50-k*365;
-  s=-3.202388e-03-4.166396e-3*k+1.7202792e-02*l;
-  return((s<0.0) ? s+6.2831853 : s); 
+double CMyTeMath::Stims(int jd50) {
+    double k, l;
+    double s;
+    jd50 -= 13048;
+    k = jd50 / 365;
+    l = jd50 - k * 365;
+    s = -3.202388e-03 - 4.166396e-3 * k + 1.7202792e-02 * l;
+    return((s < 0.0) ? s + 6.2831853 : s);
 }
 //double CMyTeMath::Z(double t, double Sinfi, double Cosfi, double d)
 //{
@@ -4367,16 +4124,16 @@ double s;
 //}	
 double CMyTeMath::Mz(double t, double Sinfi, double Cosfi, double d, short zz)
 {
-	double SCZ;
-	switch(zz){
-		case 0: return(acos(Sinfi * sin(d) + Cosfi * cos(d) * cos(t)) );
-		case 1:	SCZ=1.0/(Sinfi * sin(d) + Cosfi * cos(d) * cos(t));
-			return(SCZ-0.0018167*(SCZ-1)\
-			-0.002875*(SCZ-1)*(SCZ-1)\
-			-0.0008083*(SCZ-1)*(SCZ-1)*(SCZ-1));
-		case 2: return (asin(sin(t)*Cosfi/cos(d)));
-		default: return -1;
-	}
+    double SCZ;
+    switch (zz) {
+    case 0: return(acos(Sinfi * sin(d) + Cosfi * cos(d) * cos(t)));
+    case 1:	SCZ = 1.0 / (Sinfi * sin(d) + Cosfi * cos(d) * cos(t));
+	return(SCZ - 0.0018167 * (SCZ - 1)\
+	    - 0.002875 * (SCZ - 1) * (SCZ - 1)\
+	    - 0.0008083 * (SCZ - 1) * (SCZ - 1) * (SCZ - 1));
+    case 2: return (asin(sin(t) * Cosfi / cos(d)));
+    default: return -1;
+    }
 }
 //#endif
 double CMyTeMath::Aid(CMyTeBand* Band,CMyTeBand* Extint,double Mz){
@@ -4385,85 +4142,86 @@ double CMyTeMath::Aid(CMyTeBand* Band,CMyTeBand* Extint,double Mz){
 }
 void SolverLSQ::Init()
 {
-	for(int i=0;i<N;i++){
-		d[i]=0;
-		for(int j=0;j<N;j++) R[i][j]=0;
-  }
+    for (int i = 0; i < N; i++) {
+	d[i] = 0;
+	for (int j = 0; j < N; j++) R[i][j] = 0;
+    }
 }
-void SolverLSQ::Accumulate (/*const*/ double A[], double b)
+void SolverLSQ::Accumulate(/*const*/ double A[], double b)
 {
-//
-// Variables
-//
-//UINT      i,j;
-long double   c,s,h;
-double*  a = new double[N];
+    //
+    // Variables
+    //
+    //UINT      i,j;
+    long double   c, s, h;
+    double* a = new double[N];
 
 
-	for (UINT i=0;i<N;i++) a[i]=A[i];   // Copy A
+    for (UINT i = 0; i < N; i++) a[i] = A[i];   // Copy A
 
 // Construct and apply Givens plane rotation.
-	for (UINT i=0; i<N; i++)
-	{
-// Construct the rotation and apply it to
-// eliminate the i-th element of a.
-		if ( R[i][i]==0.0 &&  a[i]==0.0 ) {
-			c = 1.0; s = 0.0; R[i][i] = 0.0;
-		}else {
-			h = sqrt ( R[i][i]*R[i][i] + a[i]*a[i] );
-			if (R[i][i]<0.0) h=-h;
-			c = R[i][i]/h;
-			s = a[i]/h;
-			R[i][i] = h;
-		}
-
-		a[i] = 0.0;
-
-    // Apply the rotation to the remaining elements of a
-		for (UINT j=i+1; j<N; j++) {
-			h       = +c*R[i][j]+s*a[j];
-			a[j]    = -s*R[i][j]+c*a[j];
-			R[i][j] = h;
-	    }
-
-    // Apply the rotation to the i-th element of d
-		h    = +c*d[i]+s*b;
-		b    = -s*d[i]+c*b;
-		d[i] = h;
+    for (UINT i = 0; i < N; i++)
+    {
+	// Construct the rotation and apply it to
+	// eliminate the i-th element of a.
+	if (R[i][i] == 0.0 && a[i] == 0.0) {
+	    c = 1.0; s = 0.0; R[i][i] = 0.0;
+	}
+	else {
+	    h = sqrt(R[i][i] * R[i][i] + a[i] * a[i]);
+	    if (R[i][i] < 0.0) h = -h;
+	    c = R[i][i] / h;
+	    s = a[i] / h;
+	    R[i][i] = h;
 	}
 
-	delete[] a;
+	a[i] = 0.0;
+
+	// Apply the rotation to the remaining elements of a
+	for (UINT j = i + 1; j < N; j++) {
+	    h = +c * R[i][j] + s * a[j];
+	    a[j] = -s * R[i][j] + c * a[j];
+	    R[i][j] = h;
+	}
+
+	// Apply the rotation to the i-th element of d
+	h = +c * d[i] + s * b;
+	b = -s * d[i] + c * b;
+	d[i] = h;
+    }
+
+    delete[] a;
 }
 
 
 //
 // Solve the LSQ problem for vector x[] by backsubstitution
 //
-void SolverLSQ::Solve (double x[])
+void SolverLSQ::Solve(double x[])
 {
-  //
-  // Variables
-  //
-  //UINT i,j; i=j=0;
-  //double Sum=0.0;
+    //
+    // Variables
+    //
+    //UINT i,j; i=j=0;
+    //double Sum=0.0;
 
 
-  // Check for singular matrix
-  for (UINT i=0;i<N;i++)
-	if ( R[i][i] == 0.0 ) {
- 		AfxMessageBox(_T("ERROR: Singular matrix R in SolverLSQ::Solve()"),MB_RETRYCANCEL | MB_ICONSTOP);//0U);
-     //      cerr << " ERROR: Singular matrix R in SolverLSQ::Solve()" << endl;
-		exit(1);
-    }
-
-  //  Solve Rx=d for x_n,...,x_1 by backsubstitution
-	x[N-1] = d[N-1] / R[N-1][N-1];
-	for (int i=N-2;i>=0;i--) {//UINT 
-		double Sum = 0.0;
-		for (UINT j=i+1;j<N;j++) 
-			Sum += R[i][j]*x[j];
-		x[i] = ( d[i] - Sum ) / R[i][i];
+    // Check for singular matrix
+    for (UINT i = 0; i < N; i++)
+	if (R[i][i] == 0.0) {
+	    AfxMessageBox(_T("ERROR: Singular matrix R in SolverLSQ::Solve()"), MB_RETRYCANCEL | MB_ICONSTOP);//0U);
+ //      cerr << " ERROR: Singular matrix R in SolverLSQ::Solve()" << endl;
+	    exit(1);
 	}
+
+    //  Solve Rx=d for x_n,...,x_1 by backsubstitution
+    x[N - 1] = d[N - 1] / R[N - 1][N - 1];
+    for (int i = N - 2; i >= 0; i--) {//UINT 
+	double Sum = 0.0;
+	for (UINT j = i + 1; j < N; j++)
+	    Sum += R[i][j] * x[j];
+	x[i] = (d[i] - Sum) / R[i][i];
+    }
 }
 #ifdef MATERVASH
 //#endif
@@ -8095,58 +7853,60 @@ void CMyTeMath::TESTING()
 	exit(1);
 }
 #endif
-char* CMyTeMath::_AWAY(char*NameStr){
-char Outstr[16384];
-//int NStr_len=0;
-int NStr_len=strlen(NameStr);
-int j=0;
-for (int i=0;i<NStr_len;i++){
-	if(NameStr[i]==' '||NameStr[i]=='*' ) continue;
+char* CMyTeMath::_AWAY(char* NameStr) {
+    char Outstr[16384];
+    //int NStr_len=0;
+    int NStr_len = strlen(NameStr);
+    int j = 0;
+    for (int i = 0; i < NStr_len; i++) {
+	if (NameStr[i] == ' ' || NameStr[i] == '*') continue;
 	else {
-		Outstr[j]=NameStr[i];
-		j++;
+	    Outstr[j] = NameStr[i];
+	    j++;
 	}
+    }
+    Outstr[j] = 0;
+    return Outstr;
 }
-Outstr[j]=0;
-return Outstr;
-}
-double CMyTeMath:: CorrColorSp(double Sp,UINT NRC,UINT NCln,UINT NOut,double InColor, double ** RedCol/*,bool Flg0*/){
-	double X=0;
-	double ColOut=0;
-	for (UINT i=0;i<NRC;)//i++
-	{
-		double dSp1=Sp-RedCol[i][0];
-		double dSp2=Sp-RedCol[i+10][0];
-		if (dSp1>100.0){
-			i+=10;
-			continue;
-		}else{
-			if(dSp1>10 && dSp2>10){
-				i+=10;
-				continue;
-			}else{
-				if(dSp1>=0 && dSp2<10){}
-			}
-
-		}
-		// && dSp1>10.0
-		//while (dSp1>100.0){
-		//	dSp1=Sp-RedCol[i][0];
-		//	i+=10;
-		//}
-		//}else( 
-		if(dSp1<=10.0 && dSp1>=1.0){
-			for (int r=0;r<10;r++)	{
-				if(InColor>RedCol[i+r][NCln] && InColor>RedCol[i+r+1][NCln] )continue;
-				if(InColor>=RedCol[i+r][NCln] && InColor<RedCol[i+r+1][NCln] ){
-					X=LinInt(0.1*r,0.1*(r+1),RedCol[i+r][NCln],RedCol[i+r+1][NCln],InColor);
-					ColOut=LinInt(RedCol[i+r][NOut],RedCol[i+r+1][NOut],0.1*r,0.1*(r+1),X);
-				}
-			}
-
-		}
+double CMyTeMath::CorrColorSp(double Sp, UINT NRC, UINT NCln, UINT NOut, double InColor, double** RedCol/*,bool Flg0*/) {
+    double X = 0;
+    double ColOut = 0;
+    for (UINT i = 0; i < NRC;)//i++
+    {
+	double dSp1 = Sp - RedCol[i][0];
+	double dSp2 = Sp - RedCol[i + 10][0];
+	if (dSp1 > 100.0) {
+	    i += 10;
+	    continue;
 	}
-	return ColOut;
+	else {
+	    if (dSp1 > 10 && dSp2 > 10) {
+		i += 10;
+		continue;
+	    }
+	    else {
+		if (dSp1 >= 0 && dSp2 < 10) {}
+	    }
+
+	}
+	// && dSp1>10.0
+	//while (dSp1>100.0){
+	//	dSp1=Sp-RedCol[i][0];
+	//	i+=10;
+	//}
+	//}else( 
+	if (dSp1 <= 10.0 && dSp1 >= 1.0) {
+	    for (int r = 0; r < 10; r++) {
+		if (InColor > RedCol[i + r][NCln] && InColor > RedCol[i + r + 1][NCln])continue;
+		if (InColor >= RedCol[i + r][NCln] && InColor < RedCol[i + r + 1][NCln]) {
+		    X = LinInt(0.1 * r, 0.1 * (r + 1), RedCol[i + r][NCln], RedCol[i + r + 1][NCln], InColor);
+		    ColOut = LinInt(RedCol[i + r][NOut], RedCol[i + r + 1][NOut], 0.1 * r, 0.1 * (r + 1), X);
+		}
+	    }
+
+	}
+    }
+    return ColOut;
 }
 #ifdef MAZAFAKA
 void CMyTeMath::TESTING()
@@ -8404,65 +8164,65 @@ void CMyTeMath::TESTING()
 
 	}
 #endif
-void CMyTeMath::TESTING()
-{	//Транспонирование матрицы T=>T(-1)
-	FILE *inpf,*outf;	
-//	char FileSpect[]="
-//	char FileInput[]="D:\\MOSH\\SOURCE\\Sp_Pickles220517.txt";//
-	char OutFile[]="D:\\MOSH\\SOURCE\\Sp_Pickles_T.txt";//
+	void CMyTeMath::TESTING()
+	{	//Транспонирование матрицы T=>T(-1)
+	    FILE* inpf, * outf;
+	    //	char FileSpect[]="
+	    //	char FileInput[]="D:\\MOSH\\SOURCE\\Sp_Pickles220517.txt";//
+	    char OutFile[] = "D:\\MOSH\\SOURCE\\Sp_Pickles_T.txt";//
 
-	char** ptr=new char* [200];//131 Pickles
-	//#define LLEN 100000
-	//	 char INLIN[LLEN];
+	    char** ptr = new char* [200];//131 Pickles
+	    //#define LLEN 100000
+	    //	 char INLIN[LLEN];
 #ifdef EMOE
 	// ВВод файла исходных величин
-	if (fopen_s(&inpf, FileInput, "r") !=0 ){
+	    if (fopen_s(&inpf, FileInput, "r") != 0) {
 		AfxMessageBox(_T("Error Opening CAT File"));
 		//      return;
-	}
-	UINT Count_str=CountDataFile(inpf);//131 строк по 4772 числа
-	char** Data0 = new char*[Count_str];        // Входная матрица ||O5V| 123.23|132.33|..| ||
-	InpData(Data0,inpf, Count_str, NULL); 
-	fclose(inpf);
-	UINT Count_column=StrPtr(Data0[0],'|',ptr);// 4772 колонок 
-	double **SubDat = new double* [Count_column]; //n Sp 131  Выходная матрица  ||O5V___|B01___|...||
-	for(UINT i=0;i<Count_column;i++){ //N lambda //4772						 ||123.23|112.33|...||
-		SubDat[i] = new double [Count_str]; 
-	}
-	char **SDatName=new char* [Count_str]; // 
-	for(UINT i=0;i<Count_str;i++){ //4772					
-		SDatName[i] = new char[7]; 
-	}
-	for(UINT i=0;i<Count_str;i++){//131
-		if(StrPtr(Data0[i],'|',ptr)!=0){
-			memcpy(&SDatName[i],ptr[0],6);
-			SDatName[i][6]=0;
-			for(UINT j=1;j<Count_column-1;j++){//4772
-				sscanf_s(ptr[j], "%lf",&SubDat[i][j]);//4772
-			}
+	    }
+	    UINT Count_str = CountDataFile(inpf);//131 строк по 4772 числа
+	    char** Data0 = new char* [Count_str];        // Входная матрица ||O5V| 123.23|132.33|..| ||
+	    InpData(Data0, inpf, Count_str, NULL);
+	    fclose(inpf);
+	    UINT Count_column = StrPtr(Data0[0], '|', ptr);// 4772 колонок 
+	    double** SubDat = new double* [Count_column]; //n Sp 131  Выходная матрица  ||O5V___|B01___|...||
+	    for (UINT i = 0; i < Count_column; i++) { //N lambda //4772						 ||123.23|112.33|...||
+		SubDat[i] = new double[Count_str];
+	    }
+	    char** SDatName = new char* [Count_str]; // 
+	    for (UINT i = 0; i < Count_str; i++) { //4772					
+		SDatName[i] = new char[7];
+	    }
+	    for (UINT i = 0; i < Count_str; i++) {//131
+		if (StrPtr(Data0[i], '|', ptr) != 0) {
+		    memcpy(&SDatName[i], ptr[0], 6);
+		    SDatName[i][6] = 0;
+		    for (UINT j = 1; j < Count_column - 1; j++) {//4772
+			sscanf_s(ptr[j], "%lf", &SubDat[i][j]);//4772
+		    }
 		}
-	}
-	for(UINT i=0;i<Count_str;i++){//131
-		fprintf(outf,"%11s|",SDatName[i]);
-		fputs("\n",outf);
-	}
+	    }
+	    for (UINT i = 0; i < Count_str; i++) {//131
+		fprintf(outf, "%11s|", SDatName[i]);
+		fputs("\n", outf);
+	    }
 #endif
-	if (fopen_s(&outf, OutFile, "w") !=0 ){
-		AfxMessageBox(_T("Error Opening Out File")); 
+	    if (fopen_s(&outf, OutFile, "w") != 0) {
+		AfxMessageBox(_T("Error Opening Out File"));
 		//      return;
-	}
-	for(UINT j=0;j<4772;j++){//4772
-//		for(UINT i=0;i<Count_str;i++)//131
-			fprintf(outf,"a%d|",j);
-	}
-	fputs("\n",outf);
-	fclose(outf);
+	    }
+	    for (UINT j = 0; j < 4772; j++) {//4772
+    //		for(UINT i=0;i<Count_str;i++)//131
+		fprintf(outf, "a%d|", j);
+	    }
+	    fputs("\n", outf);
+	    fclose(outf);
 
-_fcloseall();
+	    _fcloseall();
 
-}
+	}
 // ПРОГРАММА ВЫНЕСЕНИЯ ЗА АТМОСФЕРУ "SIRIUS" OH-8
-double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
+double CMyTeMath::PROBKA(vector <CMyTeBand> Band)		//CMyTeBand* Band
 {
 //#ifdef ETBOE
 	//CMyTeBand* Band;
@@ -8719,7 +8479,7 @@ double CMyTeMath::PROBKA(CMyTeBand* Band)		//CMyTeBand* Band
 // Упорядочивание кривых реакции WBVR
 	int WBVR[MaxBand];
 	for(UINT i=0;i<MaxBand;i++){
-		wchar_t NC = Band[i].Name;
+		wchar_t NC = Band[i].Name.at(0);
 		switch(NC){
 			case _T('W'):
 			case _T('w'):
@@ -8966,27 +8726,27 @@ double **Subint = new double* [MaxBand];
 		SubintP[k] = new double [DLRSP];
 		Subint[k] = new double [DLRSP];
 	}
-	for(UINT i=0;i<N_Part;i++){		
-		for(UINT k=0;k<MaxBand;k++){
-			for(UINT j=0;j<DLRSP;j++){
-				double a=DS1[i].SpED[j];
-				double b=Band[WBVR[k]].GetFlux(SpLambd[j]);
-				double c=Extint.GetFlux(SpLambd[j]);
-				double cc=pow(c,DS1[i].Mz);//Extint.GetFlux(SpLambd[j])
-				SubintP[k][j] = a*b*cc;
-				Subint[k][j] = a*b;
-					//DS[i].SpED[j]*Band[WBVR[k]].GetFlux(SpLambd[j])*pow(Extint.GetFlux(SpLambd[j]),DS[i].Mz);// Sp*Band*p^Mz 		sscanf(InLin,"%lf%lf",&EXT_Lambd[i],&EXT_Flux[i]);
-			}
-			double d= Integral_M(SubintP[k],SpLambd,DLRSP,Band[WBVR[k]].LBeg,Band[WBVR[k]].LEnd);
-			double dd=Integral_M(Subint[k],SpLambd,DLRSP,Band[WBVR[k]].LBeg,Band[WBVR[k]].LEnd);
-			double ddd=	-2.5*log10(d/dd);		//double dd=
-
-			DS1[i].Ri[k]-=ddd; //-2.5*log10(Integral_M(Subint[k],SpLambd,DLRSP,Band[WBVR[k]].LBeg,Band[WBVR[k]].LEnd));
+	for (UINT i = 0; i < N_Part; i++) {
+	    for (UINT k = 0; k < MaxBand; k++) {
+		for (UINT j = 0; j < DLRSP; j++) {
+		    double a = DS1[i].SpED[j];
+		    double b = Band[WBVR[k]].GetFlux(SpLambd[j]);
+		    double c = Extint.GetFlux(SpLambd[j]);
+		    double cc = pow(c, DS1[i].Mz);//Extint.GetFlux(SpLambd[j])
+		    SubintP[k][j] = a * b * cc;
+		    Subint[k][j] = a * b;
+		    //DS[i].SpED[j]*Band[WBVR[k]].GetFlux(SpLambd[j])*pow(Extint.GetFlux(SpLambd[j]),DS[i].Mz);// Sp*Band*p^Mz 		sscanf(InLin,"%lf%lf",&EXT_Lambd[i],&EXT_Flux[i]);
 		}
-//		i=i;
+		double d = Integral_M(SubintP[k], SpLambd, DLRSP, Band[WBVR[k]].LBeg, Band[WBVR[k]].LEnd);
+		double dd = Integral_M(Subint[k], SpLambd, DLRSP, Band[WBVR[k]].LBeg, Band[WBVR[k]].LEnd);
+		double ddd = -2.5 * log10(d / dd);		//double dd=
+
+		DS1[i].Ri[k] -= ddd; //-2.5*log10(Integral_M(Subint[k],SpLambd,DLRSP,Band[WBVR[k]].LBeg,Band[WBVR[k]].LEnd));
+	    }
+	    //		i=i;
 	}	//Конец вычислений Ai по куску
-		de_allocate(SubintP,MaxBand);
-		de_allocate(Subint,MaxBand);
+		//de_allocate(SubintP,MaxBand);
+		//de_allocate(Subint,MaxBand);
 
 //#ifdef EMOE
 // контрольная печать в файл ПРОБКИ
@@ -9559,9 +9319,9 @@ for(UINT k=0;k<MaxBand;k++){//
 	//delete [] DJ;
 	delete [] WbvrO;
 	delete [] TYP;
-	de_allocate(Data0,Count_str);
-	de_allocate(Data1,Count_coord);
-	de_allocate(Data2,Count_WBVR);
+	//de_allocate(Data0,Count_str);
+	//de_allocate(Data1,Count_coord);
+	//de_allocate(Data2,Count_WBVR);
 
 _fcloseall();
 //#endif //endif
@@ -9586,7 +9346,7 @@ void Polinom(double *Coeff,/*double *RO,*/double W, double B,  double V, double 
 	double B_V=B-V;
 	double V_R=V-R;
 	double B_R=B-R;
-	double Member[20];
+	double Member[21];
 	double Ai;
 	//Member[0]=W_B;
 	Member[1]=W_B;
@@ -9629,73 +9389,73 @@ char *ptr[16384];
 FILE *inpf;
 		if (fopen_s(&inpf, FileInput, "r") !=0 ){
 		AfxMessageBox(_T("INPUT NOT FOUND"),MB_RETRYCANCEL | MB_ICONSTOP);
-		exit(1);//0U);
-		//AfxMessageBox(_T("Error Opening data_total File"));
- //      return;
+exit(1);//0U);
+//AfxMessageBox(_T("Error Opening data_total File"));
+//      return;
 	}
-	char** Data0 = new char*[500];        // STEP 1: SET UP THE ROWS.
-	double R=0.0;
-//	char* Coeff = new char[20];        // STEP 1: SET UP THE ROWS.
-	char *Coeff0[20]={"a0","a1","a2","a3","b1","b2","b3","b4","b5","b6","c1","c2","c3","c4","c5","c6","c7","c8","c9","c10"};
+	char** Data0 = new char* [500];        // STEP 1: SET UP THE ROWS.
+	double R = 0.0;
+	//	char* Coeff = new char[20];        // STEP 1: SET UP THE ROWS.
+	char* Coeff0[20] = { "a0","a1","a2","a3","b1","b2","b3","b4","b5","b6","c1","c2","c3","c4","c5","c6","c7","c8","c9","c10" };
 	double CoVal[20];
 
-UINT Count=CMyTeMath::CountDataFile(inpf);
-	 char** Data = new char*[Count];        // STEP 1: SET UP THE ROWS.
-	CMyTeMath::InpData(Data,inpf, Count, NULL); 
-	 fclose(inpf);
-	 typedef struct Pol
-	 {
-		 int Count;
-		 char Coeff[3];
-		 double CoVal;
-	 }DD;
-	 DD *Pol=new DD[Count];
-	 bool flag=false;
-	 double* Coeff = new double[20];
-		for(UINT j=1;j<Count-1;j++){
-			CMyTeMath::StrPtr(Data[j],'\t',ptr);
-			memcpy(ptr[0],Pol[j].Coeff,2);
-			sscanf(ptr[1],"%lf",&Pol[j].CoVal);
-		}
-	for(UINT i=0;i<20;i++){
-		//if ( fgets(InLin,len,inpf)==0 ) break;
-		//if(Data[0]=="C") continue;
-		//for(UINT j=0;j<20;j++){
-		//CMyTeMath::StrPtr(Data[i],'\t',ptr);
-		//char c[2];
-		//memcpy(ptr[0],c,2);
-		//c[2]=0;
-		bool flag=false;
-		for(UINT j=0;j<Count-2;j++){
-			if(strncmp(Pol[j].Coeff,Coeff0[i],2)==0) {
-				//sscanf(ptr[1],"%lf",&CoVal[j]);
-				Coeff[i]=Pol[j].CoVal;
-				flag=true;
-				break;
-			}
-			else continue;
-			//continue;
-		}
-		if(!flag)
-			Coeff[i]=0.0;
+	UINT Count = CMyTeMath::CountDataFile(inpf);
+	char** Data = new char* [Count];        // STEP 1: SET UP THE ROWS.
+	CMyTeMath::InpData(Data, inpf, Count, NULL);
+	fclose(inpf);
+	typedef struct Pol
+	{
+	    int Count;
+	    char Coeff[3];
+	    double CoVal;
+	}DD;
+	DD* Pol = new DD[Count];
+	bool flag = false;
+	double* Coeff = new double[20];
+	for (UINT j = 1; j < Count - 1; j++) {
+	    CMyTeMath::StrPtr(Data[j], '\t', ptr);
+	    memcpy(ptr[0], Pol[j].Coeff, 2);
+	    sscanf(ptr[1], "%lf", &Pol[j].CoVal);
 	}
-	for(UINT i=0;i<20;i++){
-		fprintf(outf,"%8.4lf ",Coeff[i]);
-		fputs("\n",outf);
+	for (UINT i = 0; i < 20; i++) {
+	    //if ( fgets(InLin,len,inpf)==0 ) break;
+	    //if(Data[0]=="C") continue;
+	    //for(UINT j=0;j<20;j++){
+	    //CMyTeMath::StrPtr(Data[i],'\t',ptr);
+	    //char c[2];
+	    //memcpy(ptr[0],c,2);
+	    //c[2]=0;
+	    bool flag = false;
+	    for (UINT j = 0; j < Count - 2; j++) {
+		if (strncmp(Pol[j].Coeff, Coeff0[i], 2) == 0) {
+		    //sscanf(ptr[1],"%lf",&CoVal[j]);
+		    Coeff[i] = Pol[j].CoVal;
+		    flag = true;
+		    break;
+		}
+		else continue;
+		//continue;
+	    }
+	    if (!flag)
+		Coeff[i] = 0.0;
 	}
-fcloseall();
+	for (UINT i = 0; i < 20; i++) {
+	    fprintf(outf, "%8.4lf ", Coeff[i]);
+	    fputs("\n", outf);
+	}
+	fcloseall();
 }
 
 
-	//	for(UINT j=i;j<20;){
-	//		if(strncmp(c,Coeff[j],2)==0){		
-	//		}
-	//		else {
+//	for(UINT j=i;j<20;){
+//		if(strncmp(c,Coeff[j],2)==0){		
+//		}
+//		else {
 
-	//		}
-	//}
-	//for(UINT i=0;i<20;i++){
-	//	R+=CoVal[i]
+//		}
+//}
+//for(UINT i=0;i<20;i++){
+//	R+=CoVal[i]
 
 
 //		a0=	-0.07456320327679613;
@@ -9724,3 +9484,54 @@ fcloseall();
 //}
 //if(strcmp(C[i],"a0")==0)
 //	C[i]=="a0";
+
+
+
+
+
+int CMyTeMath::Ai(DocDataType& Data,
+    vector <CMyTeBand>& BandArray,
+    CMyTeBand& Redden,
+    CMyTeBand& Extint,
+    vector <double>& VegaArray,
+    VectorArray& OutData)
+{
+    double RX = 0;
+    bool FlagYes = false;
+    double X = 0.0;
+    double Mz = 1.0;
+    int Nred = 6;//0;//0;//0;//5;//5;	//number of random i.s.ext. amount (thickness, depth) 
+    const size_t BandCount = BandArray.size();
+    
+    for (int jj = 0; jj < Nred; jj++) {
+
+	if (jj == 0) {
+	    X = 0.0;
+	}
+	else {
+	    X = CMyTeMath::RANDisex() * 4.0;
+	}
+
+	for (UINT ij = 0; ij < 6; ij++) {//Mz
+	    vector <double> Result;
+	    Result.push_back(X);
+	    if (ij == 0) Mz = 0.0;
+	    else {
+		Mz = 1.0 + CMyTeMath::RANDisex() * 2.2;
+	    }
+	    Result.push_back(Mz);
+	    for (UINT j = 0; j < BandCount; j++) {
+		Result.push_back(CMyTeMath::SBand_4(&Data, &BandArray[j], VegaArray[j], &Redden, X, Mz, &Extint));
+	    }
+	    for (UINT j = 0; j < BandCount; j++) {
+		Result.push_back(CMyTeMath::SBand_3(&Data, &BandArray[j], 0, &Redden, X, Mz, &Extint));
+	    }
+	    for (UINT j = 0; j < BandCount; j++) {
+		Result.push_back(1.086 * (CMyTeMath::SBand_L(&Data, &BandArray[j], 0, &Redden, X, Mz, &Extint) -
+			CMyTeMath::SBand_L(&Data, &BandArray[j], 0, &Redden, X, 0.0, &Extint)));
+	    }
+	    OutData.push_back(Result);
+	}
+    }
+    return 1;
+}

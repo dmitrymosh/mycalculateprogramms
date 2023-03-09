@@ -89,7 +89,6 @@ struct SData_option
 struct FileListType//список файлов для вычислений
 {
 	PathsArray Files;//список файлов для вычислений
-	UINT Count;
 	wstring VegaFile;//имя файла Веги
 	wstring OutFile;//имя файла для вывода отчета. может быть задана папка. тогда имя файла будет формироваться динамически
 	PathsArray ExtintFile; 

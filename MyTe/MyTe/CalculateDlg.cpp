@@ -41,7 +41,7 @@ void CCalculateDlg::DoDataExchange(CDataExchange* pDX)
 	{		
 		//получаем список файлов из диалога
 		int nItems =hListBox->SendMessage(LB_GETCOUNT, 0, 0); 	 
-		if(theApp.FileList.Count!=0) theApp.FileList.Files.clear();
+		if(theApp.FileList.Files.size()!=0) theApp.FileList.Files.clear();
 		for(int i=0;i<nItems;i++)
 		{
 			hListBox->SendMessage(LB_GETTEXT,i, (LPARAM) lpszFile); 	
@@ -56,15 +56,19 @@ void CCalculateDlg::DoDataExchange(CDataExchange* pDX)
 			theApp.FileList.ExtintFile.push_back(lpszFile);
 		}
 
-		theApp.FileList.Count=nItems;
 		//запоминаем настройку чекбоксов
 		theApp.FileList.Over=hRadioBtn1->SendMessage(BM_GETCHECK,0 , 0);
-			
+		CString OutFile;
+		CString Vega; 
+		DDX_Text(pDX, IDC_OUTPUT_FILE, OutFile);
+		DDX_Text(pDX, IDC_VEGA_FILE, Vega);
+	    theApp.FileList.OutFile = OutFile;
+		theApp.FileList.VegaFile = Vega;
 	}
 	else
 	{
 		//заполняем список файлов в диалоге
-		int count=theApp.FileList.Count;
+		int count = theApp.FileList.Files.size();
 		if(count!=0)
 		{
 			for(int i=0;i<count;i++)
@@ -85,11 +89,12 @@ void CCalculateDlg::DoDataExchange(CDataExchange* pDX)
 		//настройка чекбоксов
 		if(theApp.FileList.Over==1)	hRadioBtn1->SendMessage(BM_SETCHECK ,BST_CHECKED , 0); 
 		else hRadioBtn2->SendMessage(BM_SETCHECK ,BST_CHECKED , 0);
+		CString OutFile = theApp.FileList.OutFile.c_str();
+		CString Vega = theApp.FileList.VegaFile.c_str();
+		DDX_Text(pDX, IDC_OUTPUT_FILE, OutFile);
+		DDX_Text(pDX, IDC_VEGA_FILE, Vega);
 	}		
-	CString OutFile = theApp.FileList.OutFile.c_str();
-	CString Vega = theApp.FileList.VegaFile.c_str();
-	DDX_Text(pDX, IDC_OUTPUT_FILE, OutFile);
-	DDX_Text(pDX, IDC_VEGA_FILE, Vega);
+	
 }
 
 

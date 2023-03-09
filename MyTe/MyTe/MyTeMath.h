@@ -4,8 +4,8 @@
 class CMyTeMath
 {
 public:
-	CMyTeMath(void);
-	~CMyTeMath(void);
+	CMyTeMath(void) noexcept;
+	~CMyTeMath(void) noexcept;
 	static double RANDisex();
 	static double RANDisexN(double N);
 	static double swscanfd(CString str);
@@ -53,16 +53,16 @@ public:
 	static double SBand_L(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN);
 	static double SBand_L2(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN);
 	static int JDm1950(int year,int data);
-	static double PROBKA_1(CMyTeBand* Band);
-	static double PROBKA(CMyTeBand* Band);
+	static double PROBKA_1(vector <CMyTeBand> Band);
+	static double PROBKA(vector <CMyTeBand> Band);
 	//static double Z(double t, double Sinfi, double Cosfi, double d);
 	static double Mz(double t, double Sinfi, double Cosfi, double d, short zz);
 	static double Stims(int jd50);
 	//static double SBand(DocDataType* data, SData_option option,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik);
 	//static void ProcessCatalog(CString CatInFName, CString CatOutFName, CString AdvDataFName, SData_option option , CMyTeBand Bands);
-	static double GetFlux(double lambda,double* Lambda,double* Flux, ULONG32 Count);
 	static UINT SpSearch(char N ,char P);
 	static double SpSearch_d(char *SPEC);
+	static int Ai(DocDataType& Data, vector <CMyTeBand>& BandArray, CMyTeBand& Redden, CMyTeBand& Extint, vector <double>& VegaArray, VectorArray& OutData);
 	static double Aid(CMyTeBand* Band,CMyTeBand* Extint,double Mz);
 	static int StrPtr(char Str[],char c,char** pt);
 	static int StrPtrP(char Str[],char c,char** pt);

@@ -31,7 +31,7 @@ void CMyTeRespSelectDlg::DoDataExchange(CDataExchange* pDX)
 
 	//LPTSTR lpszFileToDelete; 
 	//int nSelItems; 
-	int nSelItemsInBuffer; 	    
+	UINT nSelItemsInBuffer; 	    
 	int nBuffer[8192]; 
 
 	if(pDX->m_bSaveAndValidate) 

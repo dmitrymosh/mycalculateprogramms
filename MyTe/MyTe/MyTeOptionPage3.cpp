@@ -22,56 +22,51 @@ CMyTeOptionPage3::~CMyTeOptionPage3()
 
 void CMyTeOptionPage3::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
-	CWnd* hListBox = GetDlgItem(IDC_BAND_FILES); 
-	
-	LPTSTR lpszFile;
-	TCHAR tchBuffer[MAX_PATH +1];
-	lpszFile = tchBuffer; 
-	if(pDX->m_bSaveAndValidate) 
-	{		
-		//получаем список файлов из диалога			 
-		if(theApp.BandCount!=0) 
-		{
-			//delete[] theApp.BandArray;
-			/*
-			for(int i=0;i<theApp.BandCount;i++)
-			{
-				theApp.BandArray[i].~CMyTeBand();
-			}*/
-		}
-		delete[] theApp.BandArray;	
-		theApp.BandCount = (ULONG32)hListBox->SendMessage(LB_GETCOUNT, 0, 0); 
-		theApp.BandArray=new CMyTeBand[theApp.BandCount];
-		for(ULONG32 i=0;i<theApp.BandCount;i++)
-		{
-			hListBox->SendMessage(LB_GETTEXT,i, (LPARAM) lpszFile); 	
-			theApp.BandArray[i].LoadFromFile(lpszFile);
-		}		
-	}
-	else
+    CPropertyPage::DoDataExchange(pDX);
+    CWnd* hListBox = GetDlgItem(IDC_BAND_FILES);
+
+    LPTSTR lpszFile;
+    TCHAR tchBuffer[MAX_PATH + 1];
+    lpszFile = tchBuffer;
+    if (pDX->m_bSaveAndValidate)
+    {
+	theApp.BandArray.clear();
+	theApp.BandCount = (ULONG32)hListBox->SendMessage(LB_GETCOUNT, 0, 0);
+	theApp.BandArray.resize(theApp.BandCount);
+	for (ULONG32 i = 0; i < theApp.BandCount; i++)
 	{
-		ULONG32 ccount = (ULONG32)hListBox->SendMessage(LB_GETCOUNT, 0, 0);
-		while (ccount > 0) {
-			ccount = (ULONG32)hListBox->SendMessage(LB_DELETESTRING, 0, 0);
-		}
-		
-		//заполняем список файлов в диалоге
-		int count=theApp.BandCount;
-		if(count!=0)
-		{
-			for(int i=0;i<count;i++)
-			{
-				int pos = (int)hListBox->SendMessage(LB_ADDSTRING, 0, (LPARAM) theApp.BandArray[i].FName.c_str()); 
-				hListBox->SendMessage(LB_SETITEMDATA, pos, (LPARAM) i); 
-			}
-		}		
+	    hListBox->SendMessage(LB_GETTEXT, i, (LPARAM)lpszFile);
+	    theApp.BandArray[i].LoadFromFile(lpszFile);
 	}
-	CString A = theApp.Redden.FName.c_str();
+	CString A;
 	DDX_Text(pDX, IDC_REDDEN, A);
-	theApp.Redden.LoadFromFile(theApp.Redden.FName);	
-	//theApp.Redden.ConvertLnToFlux();
-	//theApp.Redden.NormMax();
+	theApp.Redden.FilePath = A;
+	theApp.Redden.LoadFromFile(theApp.Redden.FilePath);
+    }
+    else
+    {
+	ULONG32 ccount = (ULONG32)hListBox->SendMessage(LB_GETCOUNT, 0, 0);
+	while (ccount > 0) {
+	    ccount = (ULONG32)hListBox->SendMessage(LB_DELETESTRING, 0, 0);
+	}
+
+	//заполняем список файлов в диалоге
+	int count = theApp.BandCount;
+	if (count != 0)
+	{
+	    for (int i = 0; i < count; i++)
+	    {
+		int pos = (int)hListBox->SendMessage(LB_ADDSTRING, 0, (LPARAM)theApp.BandArray[i].FilePath.c_str());
+		hListBox->SendMessage(LB_SETITEMDATA, pos, (LPARAM)i);
+	    }
+	}
+	CString A = theApp.Redden.FilePath.c_str();
+	DDX_Text(pDX, IDC_REDDEN, A);
+    }
+
+
+    //theApp.Redden.ConvertLnToFlux();
+    //theApp.Redden.NormMax();
 }
 
 
@@ -86,46 +81,46 @@ END_MESSAGE_MAP()
 
 void CMyTeOptionPage3::OnBnClickedAddBand()
 {
-	CFileDialog dlgFile(true, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_ALLOWMULTISELECT, NULL, NULL, 0);
-	//CFileDialog dlgFile(true);
-	CString strFilter;
-	CString strDefault;	
-	CString fileName;
-	//CString fileName;
-	// append the "*.*" all files filter
-	CString allFilter;
-	VERIFY(allFilter.LoadString(AFX_IDS_ALLFILTER));
-	strFilter += allFilter;
-	strFilter += (TCHAR)'\0';   // next string please
-	strFilter += _T("*.*");
-	strFilter += (TCHAR)'\0';   // last string
-	dlgFile.m_ofn.nMaxCustFilter++;
+    CFileDialog dlgFile(true, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_ALLOWMULTISELECT, NULL, NULL, 0);
+    //CFileDialog dlgFile(true);
+    CString strFilter;
+    CString strDefault;
+    CString fileName;
+    //CString fileName;
+    // append the "*.*" all files filter
+    CString allFilter;
+    VERIFY(allFilter.LoadString(AFX_IDS_ALLFILTER));
+    strFilter += allFilter;
+    strFilter += (TCHAR)'\0';   // next string please
+    strFilter += _T("*.*");
+    strFilter += (TCHAR)'\0';   // last string
+    dlgFile.m_ofn.nMaxCustFilter++;
 
-	dlgFile.m_ofn.lpstrFilter = strFilter;
+    dlgFile.m_ofn.lpstrFilter = strFilter;
 
-	//dlgFile.m_ofn.lpstrTitle = title;
-	dlgFile.m_ofn.lpstrFile = fileName.GetBuffer(MAX_PATH*5000);
+    //dlgFile.m_ofn.lpstrTitle = title;
+    dlgFile.m_ofn.lpstrFile = fileName.GetBuffer(MAX_PATH * 5000);
 
-	dlgFile.m_ofn.nMaxFile = MAX_PATH*5000;
-	INT_PTR nResult = dlgFile.DoModal();
-	if(nResult==IDOK)
+    dlgFile.m_ofn.nMaxFile = MAX_PATH * 5000;
+    INT_PTR nResult = dlgFile.DoModal();
+    if (nResult == IDOK)
+    {
+	POSITION fpos = dlgFile.GetStartPosition();
+
+	CWnd* hwndList = GetDlgItem(IDC_BAND_FILES);
+	CString data;
+	int i = 0;
+	do
 	{
-		POSITION fpos=dlgFile.GetStartPosition();	
-
-		CWnd* hwndList = GetDlgItem(IDC_BAND_FILES);  
-		CString data;
-		int i=0;
-		do
-		{		
-			data=dlgFile.GetNextPathName(fpos);
-			//data=dlgFile.GetFileName();
-			int pos = (int)hwndList->SendMessage(LB_ADDSTRING, 0, (LPARAM) data.GetString()); 
-			hwndList->SendMessage(LB_SETITEMDATA, pos, (LPARAM) i); 
-			i++;
-		} while (fpos!=NULL);
-		hwndList->SetFocus(); 
-	}
-	fileName.ReleaseBuffer();
+	    data = dlgFile.GetNextPathName(fpos);
+	    //data=dlgFile.GetFileName();
+	    int pos = (int)hwndList->SendMessage(LB_ADDSTRING, 0, (LPARAM)data.GetString());
+	    hwndList->SendMessage(LB_SETITEMDATA, pos, (LPARAM)i);
+	    i++;
+	} while (fpos != NULL);
+	hwndList->SetFocus();
+    }
+    fileName.ReleaseBuffer();
 }
 
 void CMyTeOptionPage3::OnBnClickedRemoveBand()
