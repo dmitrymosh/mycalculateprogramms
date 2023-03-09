@@ -9493,7 +9493,7 @@ int CMyTeMath::Ai(DocDataType& Data,
     vector <CMyTeBand>& BandArray,
     CMyTeBand& Redden,
     CMyTeBand& Extint,
-    vector <CMyTeBand>& AdvFilters,
+    vector <CMyTeBand>& AdvFilters, //фильтры для SBand_LG
     vector <double>& VegaArray,
     VectorArray& OutData)
 {
@@ -9531,8 +9531,51 @@ int CMyTeMath::Ai(DocDataType& Data,
 		Result.push_back(1.086 * (CMyTeMath::SBand_L(&Data, &BandArray[j], 0, &Redden, X, Mz, &Extint) -
 			CMyTeMath::SBand_L(&Data, &BandArray[j], 0, &Redden, X, 0.0, &Extint)));
 	    }
+	    for (UINT j = 0; j < BandCount; j++) {
+		try{
+		    Result.push_back(CMyTeMath::SBand_LG(&Data, &BandArray[j], &AdvFilters[j], 0.0, &Redden, X, Mz, &Extint));
+		} 
+		catch(...) {
+		    return 0;
+		}
+	    }
 	    OutData.push_back(Result);
 	}
     }
     return 1;
+}
+double CMyTeMath::SBand_LG(DocDataType* data, CMyTeBand* Band, CMyTeBand* LGBand,double Vega, CMyTeBand* Redden, double RedThik, double Mz, CMyTeBand* EXTIN)
+
+{
+	if (data == NULL) return -1.0;
+	if (Band == NULL) return -1.0;
+	DocDataType Subint = *data;
+	DocDataType Subint0 = *data;
+
+	long double Res = 0.0;
+	long double Res0 = 0.0;
+	double red = 1.0;
+	const double lambdaBeg = Band->LBeg;
+	const double lambdaEnd = Band->LEnd;
+
+	for (UINT i = 0; i < data->Count - 1; i++)
+	{
+		if (Redden != NULL)
+		{
+			red = Redden->GetFlux(data->Lambda[i]);
+			red = pow(red, RedThik);
+		}
+		const double BandFlux = Band->GetFlux(data->Lambda[i]);
+		double EXT = EXTIN->GetFlux(data->Lambda[i]);
+		double LGF = LGBand->GetFlux(data->Lambda[i]);
+		EXT = pow(EXT, Mz);
+		Subint.Flux[i] = data->Flux[i] * LGF * red * BandFlux * EXT;
+		Subint0.Flux[i] = data->Flux[i] * red * BandFlux * EXT;
+	}
+
+	Res = Integral_1(&Subint, Band, lambdaBeg, lambdaEnd);
+	Res0 = Integral_1(&Subint0, Band, lambdaBeg, lambdaEnd);
+	Res =/*2.5*log10l*/(Res / Res0);
+
+	return Res;
 }

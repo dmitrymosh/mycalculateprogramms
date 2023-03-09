@@ -110,13 +110,13 @@ std::string format(const char* fmt, ...)
 	std::vector<char> v(1024);
 	while (true)
 	{
-		va_list args2;
-		va_copy(args2, args);
-		const int res = vsnprintf(v.data(), v.size(), fmt, args2);
+		//va_list args2;
+		//va_copy(args2, args);
+		const int res = vsnprintf(v.data(), v.size(), fmt, args);
 		if ((res >= 0) && (res < static_cast<int>(v.size())))
 		{
 			va_end(args);
-			va_end(args2);
+			//va_end(args2);
 			return std::string(v.data());
 		}
 		size_t size;
@@ -126,7 +126,7 @@ std::string format(const char* fmt, ...)
 			size = static_cast<size_t>(res) + 1;
 		v.clear();
 		v.resize(size);
-		va_end(args2);
+		va_end(args);
 	}
 }
 std::wstring wformat(const wchar_t* fmt, ...)
@@ -136,16 +136,16 @@ std::wstring wformat(const wchar_t* fmt, ...)
 	std::vector<wchar_t> v(1024);
 	while (true)
 	{
-		va_list args2;
-		va_copy(args2, args);
-		int res = vswprintf(v.data(), v.size(), fmt, args2);
+		//va_list args2;
+		//va_copy(args2, args);
+		int res = vswprintf(v.data(), v.size(), fmt, args);
 		if ((res >= 0) && (res < 1024)) {
 			va_end(args);
-			va_end(args2);
+			//va_end(args2);
 			return std::wstring(v.data());
 		}
 		
-		va_end(args2);
+		va_end(args);
 	}
 }
 

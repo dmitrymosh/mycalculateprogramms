@@ -52,6 +52,7 @@ public:
 	static double SBand_4(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN);
 	static double SBand_L(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN);
 	static double SBand_L2(DocDataType* data,CMyTeBand* Band,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN);
+	static double SBand_LG(DocDataType* data,CMyTeBand* Band,CMyTeBand* LGBand,double Vega,CMyTeBand* Redden,double RedThik,double Mz,CMyTeBand*EXTIN);
 	static int JDm1950(int year,int data);
 	static double PROBKA_1(vector <CMyTeBand> Band);
 	static double PROBKA(vector <CMyTeBand> Band);

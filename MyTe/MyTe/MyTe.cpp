@@ -931,6 +931,7 @@ void CMyTeApp::OnActionAid()// много прозрачностей
 	    HeaderStr.append(hB);
 	}
 	HeaderStr += wformat(_T("%s "), _T("          AB          AR          AV          AW          LB          LR          LV           LW"));
+	//HeaderStr += wformat(_T("%s "), _T("          AB          AR          AV          AW          LB          LR          LV           LW"));
 
 	Header.push_back(HeaderStr);
 	for (size_t j = 0; j < FileList.ExtintFile.size(); j++) {
@@ -950,93 +951,18 @@ void CMyTeApp::OnActionAid()// много прозрачностей
 		DocDataType Data;		
 		Data.LoadFromFile(FileList.Files[i].c_str());
 
-		CMyTeMath::Ai(Data, BandArray, Redden, Extint, AdvFilters, VegaArray, OutData);
+		int res = CMyTeMath::Ai(Data, BandArray, Redden, Extint, AdvFilters, VegaArray, OutData);
+		if(res == 0) return;
 		for (size_t k = FileNames.size(); k < OutData.size(); k++) {
 		    wstring s = Data.FileName;
 		    size_t t = s.find_last_of(_T('.'));
 		    s.erase(t);
 		    FileNames.push_back(s);
+		    FileNames.push_back(_T("|"));
 		}
 	    }
-	    WriteDataHead(OutFile, FileNames, OutData, Header, _T(" %10.5lf "));
+	    WriteDataHead(OutFile, FileNames, OutData, Header, _T(" %10.5lf|"));
 	}
-	/*
-	if (CMyTeMath::WriteResult1(FileList.OutFile.c_str(), RString, true) == 0) {
-	    bool b = FileList.Over;
-	    for (size_t i = 0; i < FileList.Files.size(); i++)
-	    {
-		m_nWnd->m_wndStatusBar.SetPaneText(0, FileList.Files[i].c_str(), TRUE);
-		DocDataType Data;
-		Data.LoadFromFile(FileList.Files[i].c_str());
-		CString outfname(FileList.Files[i].c_str());
-
-		int pos = outfname.ReverseFind('.');
-		outfname.Truncate(pos); 
-		pos = outfname.ReverseFind('\\');
-		CString ResultString = NULL;
-		CString ResultStringZip = NULL;
-		ResultString.AppendFormat(_T("%-10s"), outfname.Right(outfname.GetLength() - pos - 1));
-		ResultStringZip = ResultString;
-		CString midName = outfname.Right(outfname.GetLength() - pos - 1);//-pos-1
-		for (int jj = 0; jj < Nred; jj++) {
-		    if (jj == 0) {
-			X = 0.0;
-		    }
-		    else {
-			X = CMyTeMath::RANDisex() * 4.0;
-		    }
-		    ResultString.Empty();
-		    ResultString = ResultStringZip;
-		    ResultString.AppendFormat(_T(" %10.3lf "), X);
-
-
-		    for (UINT ij = 0; ij < 6; ij++) {//Mz
-
-			ResultString.Empty();//.Append(_T("\n"));
-			ResultString = ResultStringZip;
-			ResultString.AppendFormat(_T(" %10.3lf "), X);
-			
-			if (ij == 0) Mz = 0.0;
-			else {
-			    Mz = 1.0 + CMyTeMath::RANDisex() * 2.2;
-			}
-			ResultString.AppendFormat(_T(" %10.4lf "), Mz);
-			
-			for (UINT j = 0; j < BandCount; j++) {//BandCount
-			    ResultString.AppendFormat(_T(" %10.4lf "),
-				CMyTeMath::SBand_4(&Data, &BandArray[j], VegaArray[j], &Redden, X, Mz, &EXTIN));
-			}
-			for (UINT j = 0; j < BandCount; j++) {//BandCount
-			    ResultString.AppendFormat(_T(" %10.4lf "),
-				CMyTeMath::SBand_3(&Data, &BandArray[j], 0, &Redden, X, Mz, &EXTIN));//-VegaXArray[j]);
-				//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
-			}
-			for (UINT j = 0; j < BandCount; j++) {//BandCount
-			    ResultString.AppendFormat(_T(" %10.4lf "),
-				1.086 * (CMyTeMath::SBand_L(&Data, &BandArray[j], 0, &Redden, X, Mz, &EXTIN) -
-				    CMyTeMath::SBand_L(&Data, &BandArray[j], 0, &Redden, X, 0.0, &EXTIN)));//-VegaXArray[j]);
-			}
-			//for(UINT j=0;j<BandCount;j++){//BandCount
-			//ResultString.AppendFormat(_T(" %10.4lf "),
-			//	CMyTeMath::SBand_L2(&Doc->Data,&BandArray[j],0,&Redden,X,Mz,&EXTIN)-CMyTeMath::SBand_L(&Doc->Data,&BandArray[j],0,&Redden,X,0.0,&EXTIN));//-VegaXArray[j]);
-			//	//CMyTeMath::SBand_3(&Doc->Data,&BandArray[j],VegaArray[j],&Redden,X,Mz,&EXTIN)-VegaXArray[j]);
-			//}
-			ResultString.Append(_T("\n"));
-			if (CMyTeMath::WriteResult1(FileList.OutFile.c_str(), ResultString, false) != 0) break;
-		    }
-		}
-
-		b = false;
-		this->PumpMessage();
-	    }
-	    m_nWnd->m_wndStatusBar.SetPaneText(0, _T("Подсчет закончен."), TRUE);
-
-	}
-	else
-	{
-	    m_nWnd->m_wndStatusBar.SetPaneText(0, _T("Ошибка записи в файл."), TRUE);
-	}
-	*/
     }
 }
 

@@ -100,7 +100,7 @@ void CCalculateDlg::DoDataExchange(CDataExchange* pDX)
 	{
 	    for (size_t i = 0; i < count; i++)
 	    {
-		int pos = (int)hListBox2->SendMessage(LB_ADDSTRING, 0, (LPARAM)theApp.FileList.AdvFilterFile[i].c_str());
+		int pos = (int)hListBox3->SendMessage(LB_ADDSTRING, 0, (LPARAM)theApp.FileList.AdvFilterFile[i].c_str());
 		hListBox3->SendMessage(LB_SETITEMDATA, pos, (LPARAM)i);
 	    }
 	}
